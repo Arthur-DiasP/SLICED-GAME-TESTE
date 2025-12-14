@@ -1,4 +1,4 @@
-// --- ARQUIVO: server2.js (Final: MP + Firebase Admin + WebSocket + Saque Seguro + Webhook Otimizado) ---
+// --- ARQUIVO: server2.js (Final com back_urls) ---
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -196,6 +196,12 @@ app.post('/api/deposit/create', async (req, res) => {
                 }
             },
             notification_url: `${BASE_URL}/api/webhook/mercadopago`,
+            // 💡 INTEGRAÇÃO DO VÍDEO: Redirecionamento após o pagamento (Fallback de UX)
+            back_urls: {
+                success: `${BASE_URL}/usuário/perfil/perfil.html?status=deposit_success`,
+                failure: `${BASE_URL}/usuário/perfil/perfil.html?status=deposit_failure`,
+                pending: `${BASE_URL}/usuário/perfil/perfil.html?status=deposit_pending`,
+            },
             metadata: {
                 user_id: userId // CRÍTICO: Usado para identificar quem deve receber o crédito
             }
@@ -252,7 +258,6 @@ app.post('/api/webhook/mercadopago', async (req, res) => {
     if (paymentId) paymentId = String(paymentId);
     
     if (!paymentId || topic !== 'payment') {
-        // Responde 200 para evitar que o MP tente reenviar a notificação inútil
         return res.status(200).send('OK - Notificação não processada (tópico diferente ou ID ausente)');
     }
     
@@ -277,7 +282,6 @@ app.post('/api/webhook/mercadopago', async (req, res) => {
         
     } catch (error) {
         console.error('❌ Erro Crítico ao processar webhook (Busca MP falhou, ID:', paymentId, '):', error.message);
-        // Responde 200 para o Mercado Pago não entrar em loop de erro
         res.status(200).send('OK - Falha na busca, veja logs.');
     }
 });
