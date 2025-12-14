@@ -6,11 +6,13 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // ======================================================================
-    // 🛠️ CONSTANTES DE URLS (API e WebSocket)
+    // 🛠️ CONSTANTES DE URLS (API e WebSocket) - ATUALIZADAS
     // ======================================================================
-    const RENDER_BASE_DOMAIN = 'https://sliced-game-teste.onrender.com';
-    const PRODUCTION_FRONTEND_DOMAIN = 'https://sliced-teste.onrender.com';
-
+    // 💡 NOVO BACKEND
+    const RENDER_BASE_DOMAIN = 'sliced-game-teste.onrender.com';
+    // 💡 NOVO FRONTEND (Para comparação de ambiente)
+    const PRODUCTION_FRONTEND_DOMAIN = 'sliced-teste.onrender.com'; 
+    
     // Configurações de URL
     const PRODUCTION_API_URL = `https://${RENDER_BASE_DOMAIN}/api`;
     const LOCAL_API_URL = 'http://localhost:3001/api';
@@ -42,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pixDetailsArea = document.getElementById('pix-details-area');
     const pixLoadingArea = document.getElementById('pix-loading-area');
     const pixExpirationTime = document.getElementById('pix-expiration-time');
-    const paymentSuccessArea = document.getElementById('payment-success-area'); // NOVA ÁREA
+    const paymentSuccessArea = document.getElementById('payment-success-area');
 
     // Variáveis do WebSocket
     let paymentWebSocket = null;
@@ -90,26 +92,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     // 1. Oculta PIX e mostra área de sucesso
                     pixDetailsArea.style.display = 'none';
                     pixLoadingArea.style.display = 'none';
+                    
+                    // Atualiza a mensagem antes de mostrar a área de sucesso
+                    const depositValue = data.valor ? parseFloat(data.valor).toFixed(2).replace('.', ',') : depositAmount.toFixed(2).replace('.', ',');
+                    document.getElementById('payment-success-area').querySelector('p').textContent = `Seu depósito de R$ ${depositValue} foi creditado com sucesso.`;
+                    
                     paymentSuccessArea.style.display = 'block';
 
                     // 2. Fecha o WebSocket (o backend também fará isso)
                     paymentWebSocket.close();
-
-                    // Nota: O redirecionamento agora é feito pelo botão na área de sucesso,
-                    // mas se quiser automático, descomente a linha abaixo:
-                    // setTimeout(() => { window.location.href = 'perfil.html'; }, 3000); 
-
+                    
                 } else if (data.status === 'rejected' || data.status === 'cancelled') {
                     // AÇÃO DE FALHA
                     alert('❌ Pagamento rejeitado ou cancelado. Tente novamente.');
-                    window.location.href = 'perfil.html';
+                    window.location.href = 'perfil.html?status=deposit_failure'; 
                 }
             }
         };
 
         paymentWebSocket.onerror = (error) => {
             console.error('❌ Erro no WebSocket:', error);
-            alert('A conexão em tempo real falhou. Verifique seu saldo no perfil em alguns minutos.');
+            // Alertamos o usuário, mas a atualização ainda deve ocorrer via Webhook
+            alert('A conexão em tempo real falhou. O pagamento será processado via Webhook.');
         };
 
         paymentWebSocket.onclose = () => {
@@ -128,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Usa o CPF e dados salvos na sessão, removendo a necessidade de input
             const cpfLimpo = loggedInUser.cpf.replace(/\D/g, '');
-
+            
             // Assume que o nome completo existe e tenta separá-lo
             const nomeCompleto = loggedInUser.nomeCompleto || loggedInUser.nome || 'SLICED User';
             const firstName = nomeCompleto.split(' ')[0];
@@ -161,13 +165,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!result.success) {
                 throw new Error(result.message || 'Erro ao gerar PIX');
             }
-
+            
             const { paymentId, pixCopiaECola, qrCodeBase64 } = result.data;
 
             // --- Exibição dos Dados ---
             document.getElementById('deposit-title').textContent = 'Pague o PIX para Continuar';
             document.getElementById('deposit-instructions').textContent = 'Seu pagamento de R$ ' + depositAmount.toFixed(2).replace('.', ',') + ' está pendente.';
-
+            
             pixQrCodeEl.src = qrCodeBase64;
             pixCopyPasteCodeEl.value = pixCopiaECola;
 
@@ -180,19 +184,19 @@ document.addEventListener('DOMContentLoaded', () => {
             pixDetailsArea.style.display = 'block';
 
             console.log('✅ PIX gerado com sucesso! Iniciando WebSocket.');
-
+            
             // 3. INICIAR CONEXÃO WEB SOCKET
             initWebSocket(paymentId);
 
         } catch (error) {
             console.error('❌ Erro Crítico no PIX:', error);
 
-            let errorMessage = error.message.includes('Failed to fetch')
-                ? `Não foi possível conectar ao servidor: ${API_BASE}.`
+            let errorMessage = error.message.includes('Failed to fetch') 
+                ? `Não foi possível conectar ao servidor: ${API_BASE}.` 
                 : error.message;
 
             alert(`Não foi possível gerar o PIX: ${errorMessage}`);
-
+            
             // Exibe erro no loading area
             pixLoadingArea.innerHTML = `
                 <p style="color: red; margin-bottom: 15px;">❌ Erro: ${errorMessage}</p>

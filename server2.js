@@ -1,4 +1,4 @@
-// --- ARQUIVO: server2.js (Final com back_urls) ---
+// --- ARQUIVO: server2.js (Final com NOVAS URLs) ---
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -20,8 +20,8 @@ const PORT = process.env.PORT || 3001;
 const HOST = process.env.HOST || 'localhost'; 
 const FRONTEND_LOCAL_URL = `http://${HOST}:${PORT}`;
 
-// URL base do Render (para Webhooks). Deve ser o domínio HTTPS/WSS público.
-const RENDER_BACKEND_URL = 'https://sliced-game-teste.onrender.com';
+// 💡 NOVO BACKEND: URL base do Render (para Webhooks/WS).
+const RENDER_BACKEND_URL = 'https://sliced-game-teste.onrender.com'; 
 const BASE_URL = process.env.USER_BASE_URL || RENDER_BACKEND_URL; 
 
 // ===== DADOS MERCADO PAGO (Via .env) =====
@@ -179,6 +179,9 @@ app.post('/api/deposit/create', async (req, res) => {
         });
     }
 
+    // 💡 NOVO DOMÍNIO DO FRONTEND: https://sliced-teste.onrender.com
+    const FRONTEND_URL = 'https://sliced-teste.onrender.com';
+
     try {
         const { amount, userId, email, firstName, lastName, payerCpf } = req.body;
         
@@ -196,11 +199,11 @@ app.post('/api/deposit/create', async (req, res) => {
                 }
             },
             notification_url: `${BASE_URL}/api/webhook/mercadopago`,
-            // 💡 INTEGRAÇÃO DO VÍDEO: Redirecionamento após o pagamento (Fallback de UX)
+            // 💡 BACK_URLS USANDO O NOVO DOMÍNIO DO FRONTEND
             back_urls: {
-                success: `${BASE_URL}/usuário/perfil/perfil.html?status=deposit_success`,
-                failure: `${BASE_URL}/usuário/perfil/perfil.html?status=deposit_failure`,
-                pending: `${BASE_URL}/usuário/perfil/perfil.html?status=deposit_pending`,
+                success: `${FRONTEND_URL}/usuário/perfil/perfil.html?status=deposit_success`,
+                failure: `${FRONTEND_URL}/usuário/perfil/perfil.html?status=deposit_failure`,
+                pending: `${FRONTEND_URL}/usuário/perfil/perfil.html?status=deposit_pending`,
             },
             metadata: {
                 user_id: userId // CRÍTICO: Usado para identificar quem deve receber o crédito
@@ -258,6 +261,7 @@ app.post('/api/webhook/mercadopago', async (req, res) => {
     if (paymentId) paymentId = String(paymentId);
     
     if (!paymentId || topic !== 'payment') {
+        // Responde 200 para evitar que o MP tente reenviar a notificação inútil
         return res.status(200).send('OK - Notificação não processada (tópico diferente ou ID ausente)');
     }
     
@@ -282,6 +286,7 @@ app.post('/api/webhook/mercadopago', async (req, res) => {
         
     } catch (error) {
         console.error('❌ Erro Crítico ao processar webhook (Busca MP falhou, ID:', paymentId, '):', error.message);
+        // Responde 200 para o Mercado Pago não entrar em loop de erro
         res.status(200).send('OK - Falha na busca, veja logs.');
     }
 });
