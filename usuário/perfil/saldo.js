@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ======================================================================
     // 🛠️ CONSTANTES DE URLS (API e WebSocket)
     // ======================================================================
-    const RENDER_BASE_DOMAIN = 'sliced-game-front-back-render.onrender.com';
-    const PRODUCTION_FRONTEND_DOMAIN = 'www.sliced.online';
+    const RENDER_BASE_DOMAIN = 'https://sliced-game-teste.onrender.com';
+    const PRODUCTION_FRONTEND_DOMAIN = 'https://sliced-teste.onrender.com';
 
     // Configurações de URL
     const PRODUCTION_API_URL = `https://${RENDER_BASE_DOMAIN}/api`;

@@ -21,7 +21,7 @@ const HOST = process.env.HOST || 'localhost';
 const FRONTEND_LOCAL_URL = `http://${HOST}:${PORT}`;
 
 // URL base do Render (para Webhooks). Deve ser o domínio HTTPS/WSS público.
-const RENDER_BACKEND_URL = 'https://sliced-game-front-back-render.onrender.com';
+const RENDER_BACKEND_URL = 'https://sliced-game-teste.onrender.com';
 const BASE_URL = process.env.USER_BASE_URL || RENDER_BACKEND_URL; 
 
 // ===== DADOS MERCADO PAGO (Via .env) =====

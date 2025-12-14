@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const successMessage = document.getElementById('successMessage'); // Selecionar o elemento de sucesso
 
     // Variáveis de Ambiente
-    const API_BASE = 'https://sliced-game-front-back-render.onrender.com/api';
+    const API_BASE = 'https://sliced-game-teste.onrender.com/api';
 
     // === Variável para armazenar dados do usuário e saldo ===
     let currentUser = null; 
