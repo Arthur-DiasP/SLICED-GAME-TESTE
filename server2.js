@@ -1,4 +1,4 @@
-// --- ARQUIVO: server2.js (Final com NOVAS URLs) ---
+// --- ARQUIVO: server2.js (Final: MP + Firebase Admin + WebSocket + Webhook Otimizado) ---
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -16,11 +16,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001; 
 
-// ===== CONFIGURAÇÃO DE URLS =====
+// ===== CONFIGURAÇÃO DE URLS (TESTE) =====
 const HOST = process.env.HOST || 'localhost'; 
 const FRONTEND_LOCAL_URL = `http://${HOST}:${PORT}`;
 
-// 💡 NOVO BACKEND: URL base do Render (para Webhooks/WS).
+// 💡 NOVO BACKEND: https://sliced-game-teste.onrender.com (Para Webhooks/WS)
 const RENDER_BACKEND_URL = 'https://sliced-game-teste.onrender.com'; 
 const BASE_URL = process.env.USER_BASE_URL || RENDER_BACKEND_URL; 
 
@@ -57,7 +57,7 @@ try {
 async function atualizarSaldoUsuario(userId, valor) {
     if (!firestore) return console.error('Firestore não inicializado.');
     
-    // 🎯 CHAVE: O saldo é atualizado NO DOCUMENTO DO USUÁRIO.
+    // O saldo é atualizado NO DOCUMENTO DO USUÁRIO em SLICED/data/Usuários/{uid}
     const userRef = firestore.collection('SLICED').doc('data').collection('Usuários').doc(userId);
     
     try {
@@ -199,12 +199,7 @@ app.post('/api/deposit/create', async (req, res) => {
                 }
             },
             notification_url: `${BASE_URL}/api/webhook/mercadopago`,
-            // 💡 BACK_URLS USANDO O NOVO DOMÍNIO DO FRONTEND
-            back_urls: {
-                success: `${FRONTEND_URL}/usuário/perfil/perfil.html?status=deposit_success`,
-                failure: `${FRONTEND_URL}/usuário/perfil/perfil.html?status=deposit_failure`,
-                pending: `${FRONTEND_URL}/usuário/perfil/perfil.html?status=deposit_pending`,
-            },
+            // 💡 back_urls FOI REMOVIDO para evitar o erro de API.
             metadata: {
                 user_id: userId // CRÍTICO: Usado para identificar quem deve receber o crédito
             }
@@ -247,7 +242,7 @@ app.post('/api/deposit/create', async (req, res) => {
 // ROTA WEBHOOK (MERCADO PAGO) - OTIMIZADA PARA O FORMATO CONFIRMADO
 // ==================================================================
 app.post('/api/webhook/mercadopago', async (req, res) => {
-    // 1. Tenta obter o ID do pagamento do CORPO (Formato JSON confirmado: req.body.data.id)
+    // 1. Tenta obter o ID do pagamento do CORPO (Formato JSON: req.body.data.id)
     let paymentId = req.body.data ? req.body.data.id : null;
     let topic = req.body.type || req.body.topic || null;
 
