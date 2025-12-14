@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Quiz - SLICED</title>
+    <link rel="icon" href="/imgs/LOGO-SLICED.png" type="image/png">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <!-- Link para CSS externo se houver, ou estilos abaixo -->
+    <link rel="stylesheet" href="dashboard-inicio.css"> 
+    <style>
+        /* =========================================
+           ESTILOS DO DASHBOARD
+           ========================================= */
+        :root {
+            --spfc-red: #e30613;
+            --bg-card: rgba(20, 20, 20, 0.95);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-secondary: #b3b3b3;
+        }
+
+        body {
+            background-color: #000;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            display: flex;
+        }
+
+        /* Fundo Animado (Opcional) */
+        .animated-background {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: linear-gradient(45deg, #1a0000, #000000);
+        }
+
+        /* Layout Sidebar/Main */
+        .sidebar {
+            width: 250px;
+            background: #111;
+            height: 100vh;
+            padding: 2rem;
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+            width: calc(100% - 250px);
+        }
+
+        .section-title {
+            color: var(--spfc-red);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .crud-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Formulários */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.9rem; font-weight: 600; }
+        
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            outline: none;
+        }
+        .form-control:focus { border-color: var(--spfc-red); }
+
+        .full-width { grid-column: span 2; }
+
+        /* Botões */
+        .btn {
+            padding: 12px 24px; border-radius: 8px; border: none; font-weight: 700;
+            cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px;
+            font-family: 'Outfit', sans-serif;
+        }
+        .btn-primary { background: var(--spfc-red); color: white; }
+        .btn-primary:hover { background: #c20510; }
+        .btn-secondary { background: rgba(255, 255, 255, 0.1); color: white; }
+
+        /* Tabela */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .data-table th, .data-table td { padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .data-table th { color: var(--spfc-red); text-transform: uppercase; font-size: 0.8rem; }
+        
+        /* Botões de Ação (Table) */
+        .btn-mini {
+            width: 30px; height: 30px; border-radius: 5px; border: none; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center; margin-right: 5px;
+        }
+        .btn-edit { background: #4facfe; color: white; }
+        .btn-delete { background: #ff4757; color: white; }
+
+        /* Card de Partida Agendada */
+        .match-list-item {
+            background: rgba(255,255,255,0.03);
+            border-left: 4px solid var(--spfc-red);
+            padding: 1rem;
+            margin-bottom: 10px;
+            border-radius: 0 8px 8px 0;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* Toast */
+        #toast-container {
+            position: fixed; top: 20px; right: 20px; z-index: 9999;
+            display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+        }
+        .toast {
+            background: #141414; border-left: 4px solid; padding: 1rem 1.5rem;
+            border-radius: 8px; color: white; min-width: 300px;
+            transform: translateX(120%); transition: transform 0.3s ease; pointer-events: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.success { border-color: #38ef7d; }
+        .toast.error { border-color: #ff4757; }
+
+        /* ===== NAVBAR INFERIOR (DOCK) ===== */
+.bottom-navbar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    z-index: 9999;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 
+                0 0 20px rgba(0, 255, 136, 0.05);
+    transition: all 0.3s ease;
+}
+
+.nav-dock-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #666;
+    position: relative;
+    padding: 8px 12px;
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-dock-item .material-icons {
+    font-size: 28px;
+    margin-bottom: 2px;
+    transition: transform 0.3s ease;
+}
+
+.nav-dock-item .nav-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    height: 0;
+    overflow: hidden;
+}
+
+/* Estado Hover */
+.nav-dock-item:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-dock-item:hover .material-icons {
+    transform: translateY(-2px);
+}
+
+/* Estado Ativo (Página Atual) */
+.nav-dock-item.active {
+    color: #00ff88; /* Verde Neon */
+    background: rgba(0, 255, 136, 0.1);
+}
+
+.nav-dock-item.active .material-icons {
+    transform: translateY(0);
+}
+
+/* Ponto de luz indicador */
+.nav-dock-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    width: 4px;
+    height: 4px;
+    background: #00ff88;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #00ff88;
+}
+
+/* Responsividade para telas muito pequenas */
+@media (max-width: 480px) {
+    .bottom-navbar {
+        width: 95%;
+        bottom: 15px;
+        padding: 10px 20px;
+    }
+}
+
+    </style>
+</head>
+
+<body>
+    <div class="animated-background"></div>
+
+    <div id="toast-container"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div style="margin-bottom: 2rem;">
+            <h1 style="margin: 0;">SLICED</h1>
+            <p style="margin: 0; color: var(--spfc-red); font-size: 0.8rem; font-weight: bold;">ADMIN QUIZ</p>
+        </div>
+        <nav>
+            <a href="dashboard-inicio.html" style="color: white; text-decoration: none; display: block; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                📊 Voltar ao Início
+            </a>
+        </nav>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="main-content">
+        
+        <header style="margin-bottom: 2rem;">
+            <h1>Gerenciador de Partidas</h1>
+            <p style="color: #aaa;">Crie perguntas e agende os jogos para hoje.</p>
+        </header>
+
+        <!-- ========================================== -->
+        <!-- SEÇÃO 1: BANCO DE PERGUNTAS (CRUD)         -->
+        <!-- ========================================== -->
+        <section class="crud-card">
+            <h2 class="section-title">📚 Criar/Editar Pergunta</h2>
+
+            <form id="questionForm">
+                <input type="hidden" id="questionId"> <!-- ID oculto para edição -->
+
+                <div class="form-group full-width">
+                    <label>Texto da Pergunta</label>
+                    <input type="text" id="qText" class="form-control" placeholder="Ex: Qual ano o SLICED foi fundado?" required>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group"><label>Opção A</label><input type="text" id="optA" class="form-control" required></div>
+                    <div class="form-group"><label>Opção B</label><input type="text" id="optB" class="form-control" required></div>
+                    <div class="form-group"><label>Opção C</label><input type="text" id="optC" class="form-control" required></div>
+                    <div class="form-group"><label>Opção D</label><input type="text" id="optD" class="form-control" required></div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Resposta Correta</label>
+                        <select id="correctOpt" class="form-control" required>
+                            <option value="" disabled selected>Selecione...</option>
+                            <option value="A">Opção A</option>
+                            <option value="B">Opção B</option>
+                            <option value="C">Opção C</option>
+                            <option value="D">Opção D</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tempo para responder (segundos)</label>
+                        <input type="number" id="qDuration" class="form-control" value="15" min="5" required>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" id="btnSaveQuestion" class="btn btn-primary" style="flex: 1; justify-content: center;">
+                        💾 Salvar Pergunta
+                    </button>
+                    <button type="button" id="btnCancelEdit" class="btn btn-secondary" style="display: none;">
+                        Cancelar Edição
+                    </button>
+                </div>
+            </form>
+
+            <!-- Tabela de Perguntas -->
+            <div style="overflow-x: auto; margin-top: 2rem;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th width="50%">Pergunta</th>
+                            <th width="30%">Resposta</th>
+                            <th width="20%">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="questionsTableBody">
+                        <tr><td colspan="3" style="text-align:center; padding: 20px;">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- SEÇÃO 2: AGENDAMENTO (HORÁRIO DE HOJE)     -->
+        <!-- ========================================== -->
+        <section class="crud-card" style="border-top: 4px solid #38ef7d;">
+            <h2 class="section-title">📅 Agendar Jogo Oficial</h2>
+            <p style="margin-bottom: 20px; color: #aaa; font-size: 0.9rem;">
+                O jogo será considerado para a data de <strong>HOJE</strong>.
+            </p>
+
+            <form id="scheduleForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Horário (Hoje)</label>
+                        <!-- AQUI: INPUT TYPE TIME APENAS -->
+                        <input type="time" id="matchTime" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Pergunta do Quiz</label>
+                        <select id="selectQuestion" class="form-control" required>
+                            <option value="" disabled selected>Selecione uma pergunta...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prêmio do Jogo</label>
+                        <input type="text" id="matchPrize" class="form-control" placeholder="Ex: 1000 Moedas" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Número de Vencedores</label>
+                        <input type="number" id="matchWinners" class="form-control" value="1" min="1" required>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Valor de Entrada (Opcional)</label>
+                        <input type="number" id="matchEntryFee" class="form-control" placeholder="Ex: 50 (deixe 0 para grátis)" value="0" min="0">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    ✅ Agendar Jogo
+                </button>
+            </form>
+
+            <div style="margin-top: 2rem;">
+                <h3 style="color: white; margin-bottom: 1rem;">Jogos Agendados</h3>
+                <div id="scheduledMatchesList">
+                    <!-- Lista injetada via JS -->
+                </div>
+            </div>
+        </section>
+
+        <nav class="bottom-navbar">
+    <a href="dashboard-inicio.html" class="nav-dock-item">
+        <span class="material-icons">dashboard</span>
+    </a>
+    
+    <!-- Item Ativo -->
+    <a href="dashboard-quiz.html" class="nav-dock-item active">
+        <span class="material-icons">sports_esports</span>
+    </a>
+    
+    <a href="dashboard-suporte.html" class="nav-dock-item">
+        <span class="material-icons">support_agent</span>
+    </a>
+</nav>
+
+    </main>
+
+    <!-- SCRIPTS -->
+    <script type="module">
+        import { db } from '../controle-dados/firebase-config.js';
+        import { 
+            collection, addDoc, updateDoc, deleteDoc, doc, 
+            query, where, onSnapshot, Timestamp 
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // ===== REFERÊNCIAS =====
+        // Caminho do Firestore: SLICED -> data -> quiz
+        const quizCollectionRef = collection(db, 'SLICED', 'data', 'quiz');
+
+        // Elementos DOM - Perguntas
+        const questionForm = document.getElementById('questionForm');
+        const qTableBody = document.getElementById('questionsTableBody');
+        
+        // Elementos DOM - Agendamento
+        const scheduleForm = document.getElementById('scheduleForm');
+        const selectQuestion = document.getElementById('selectQuestion');
+        const matchesList = document.getElementById('scheduledMatchesList');
+
+        let allQuestions = [];
+
+        // ========================================================
+        // 1. CARREGAR E LISTAR PERGUNTAS
+        // ========================================================
+        const qQuery = query(quizCollectionRef, where('type', '==', 'question'));
+
+        onSnapshot(qQuery, (snapshot) => {
+            qTableBody.innerHTML = '';
+            selectQuestion.innerHTML = '<option value="" disabled selected>Selecione uma pergunta...</option>';
+            allQuestions = [];
+
+            if (snapshot.empty) {
+                qTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#777;">Nenhuma pergunta cadastrada.</td></tr>';
+                return;
+            }
+
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const id = docSnap.id;
+                allQuestions.push({ id, ...data });
+
+                // Adiciona na tabela
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="color:#fff;">${data.text}</td>
+                    <td><span style="color:#38ef7d; font-weight:bold;">${data.correct}</span></td>
+                    <td>
+                        <button class="btn-mini btn-edit" onclick="window.editQuestion('${id}')">✏️</button>
+                        <button class="btn-mini btn-delete" onclick="window.deleteItem('${id}')">🗑️</button>
+                    </td>
+                `;
+                qTableBody.appendChild(tr);
+
+                // Adiciona no Select do Agendamento
+                const opt = document.createElement('option');
+                opt.value = id;
+                opt.innerText = data.text.length > 50 ? data.text.substring(0,50)+'...' : data.text;
+                selectQuestion.appendChild(opt);
+            });
+        });
+
+        // ========================================================
+        // 2. SALVAR PERGUNTA (ADD ou EDIT)
+        // ========================================================
+        questionForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSaveQuestion');
+            btn.innerText = 'Salvando...';
+
+            const id = document.getElementById('questionId').value;
+            
+            const payload = {
+                type: 'question',
+                text: document.getElementById('qText').value,
+                options: {
+                    A: document.getElementById('optA').value,
+                    B: document.getElementById('optB').value,
+                    C: document.getElementById('optC').value,
+                    D: document.getElementById('optD').value
+                },
+                correct: document.getElementById('correctOpt').value,
+                duration: parseInt(document.getElementById('qDuration').value),
+                updatedAt: Timestamp.now()
+            };
+
+            try {
+                if (id) {
+                    await updateDoc(doc(db, 'SLICED', 'data', 'quiz', id), payload);
+                    showToast('Atualizado', 'Pergunta editada com sucesso.', 'success');
+                } else {
+                    payload.createdAt = Timestamp.now();
+                    await addDoc(quizCollectionRef, payload);
+                    showToast('Sucesso', 'Nova pergunta criada.', 'success');
+                }
+                resetQuestionForm();
+            } catch (err) {
+                console.error(err);
+                showToast('Erro', err.message, 'error');
+            } finally {
+                btn.innerText = '💾 Salvar Pergunta';
+            }
+        });
+
+        // ========================================================
+        // 3. AGENDAR PARTIDA (SALVANDO APENAS HORA:MINUTO)
+        // ========================================================
+        scheduleForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const qId = selectQuestion.value;
+            const qData = allQuestions.find(q => q.id === qId);
+
+            if (!qData) return showToast('Erro', 'Selecione uma pergunta válida.', 'error');
+
+            // Pegando o valor do input time (Ex: "22:15")
+            const timeString = document.getElementById('matchTime').value;
+
+            if (!timeString) return showToast('Erro', 'Defina um horário.', 'error');
+
+            const entryFee = parseFloat(document.getElementById('matchEntryFee').value) || 0;
+
+            const matchData = {
+                type: 'match',
+                status: 'pending',
+                horario: timeString, // Salva string "HH:mm"
+                questionId: qId,
+                questionData: qData, // Salva cópia da pergunta para evitar leituras extras
+                prize: document.getElementById('matchPrize').value,
+                winnersCount: parseInt(document.getElementById('matchWinners').value),
+                entryFee: entryFee,
+                createdAt: Timestamp.now()
+            };
+
+            try {
+                await addDoc(quizCollectionRef, matchData);
+                scheduleForm.reset();
+                showToast('Agendado', `Jogo marcado para hoje às ${timeString}`, 'success');
+            } catch (err) {
+                showToast('Erro', err.message, 'error');
+            }
+        });
+
+        // ========================================================
+        // 4. LISTAR JOGOS AGENDADOS
+        // ========================================================
+        const mQuery = query(quizCollectionRef, where('type', '==', 'match'));
+
+        onSnapshot(mQuery, (snapshot) => {
+            matchesList.innerHTML = '';
+            if (snapshot.empty) {
+                matchesList.innerHTML = '<small style="color:#777">Nenhum jogo agendado.</small>';
+                return;
+            }
+
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                const feeDisplay = data.entryFee > 0 ? `R$ ${parseFloat(data.entryFee).toFixed(2)}` : 'Grátis';
+                
+                const div = document.createElement('div');
+                div.className = 'match-list-item';
+                div.innerHTML = `
+                    <div>
+                        <div style="font-size: 1.1rem; font-weight: bold; color: white;">
+                            Hoje às ${data.horario}
+                        </div>
+                        <div style="color: #ccc; font-size: 0.9rem;">Prêmio: ${data.prize}</div>
+                        <div style="color: #38ef7d; font-size: 0.9rem;">Entrada: ${feeDisplay}</div>
+                        <div style="color: var(--spfc-red); font-size: 0.8rem;">
+                            Pergunta: ${data.questionData ? data.questionData.text : '?'}
+                        </div>
+                    </div>
+                    <button class="btn-mini btn-delete" onclick="window.deleteItem('${docSnap.id}')">X</button>
+                `;
+                matchesList.appendChild(div);
+            });
+        });
+
+        // ========================================================
+        // FUNÇÕES GLOBAIS (EDITAR/DELETAR/RESET)
+        // ========================================================
+        window.deleteItem = async (id) => {
+            if(confirm("Tem certeza que deseja excluir este item?")) {
+                try {
+                    await deleteDoc(doc(db, 'SLICED', 'data', 'quiz', id));
+                    showToast('Removido', 'Item excluído.', 'success');
+                } catch(e) { showToast('Erro', e.message, 'error'); }
+            }
+        };
+
+        window.editQuestion = (id) => {
+            const q = allQuestions.find(i => i.id === id);
+            if(!q) return;
+
+            document.getElementById('questionId').value = q.id;
+            document.getElementById('qText').value = q.text;
+            document.getElementById('optA').value = q.options.A;
+            document.getElementById('optB').value = q.options.B;
+            document.getElementById('optC').value = q.options.C;
+            document.getElementById('optD').value = q.options.D;
+            document.getElementById('correctOpt').value = q.correct;
+            document.getElementById('qDuration').value = q.duration;
+
+            document.getElementById('btnSaveQuestion').innerText = '🔄 Atualizar';
+            document.getElementById('btnCancelEdit').style.display = 'block';
+            
+            // Scroll para o form
+            document.querySelector('.crud-card').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        document.getElementById('btnCancelEdit').onclick = resetQuestionForm;
+
+        function resetQuestionForm() {
+            questionForm.reset();
+            document.getElementById('questionId').value = '';
+            document.getElementById('btnSaveQuestion').innerText = '💾 Salvar Pergunta';
+            document.getElementById('btnCancelEdit').style.display = 'none';
+        }
+
+        function showToast(title, msg, type) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<strong>${title}</strong><br>${msg}`;
+            container.appendChild(toast);
+            
+            // Animação entrada
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Remoção automática
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+    </script>
+</body>
+
+</html>

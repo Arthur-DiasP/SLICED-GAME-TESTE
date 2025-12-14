@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SLICED</title>
+    <link rel="icon" href="/imgs/LOGO-SLICED.png" type="image/png">
+    <meta name="description" content="Faça login ou cadastre-se na plataforma oficial do São Paulo Futebol Clube">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <!-- Partículas de fundo -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Container Principal -->
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Logo -->
+            <div class="logo-section">
+                <img src="/imgs/LOGO-SLICED.png" alt="SLICED Logo" class="logo-img">
+                <h1 class="logo-title">SLICED</h1>
+                <p class="logo-subtitle">PLATAFORMA DE APOSTAS</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-button active" data-tab="login">Login</button>
+                <button class="tab-button" data-tab="cadastro">Cadastro</button>
+            </div>
+
+            <!-- Mensagem de erro/sucesso -->
+            <div id="message" class="message"></div>
+
+            <!-- Formulário de Login -->
+            <div id="login-form" class="form-container active">
+                <form id="formLogin">
+                    <div class="form-group">
+                        <label for="login-email" class="form-label">E-mail</label>
+                        <input 
+                            type="email" 
+                            id="login-email" 
+                            class="form-input" 
+                            placeholder="seu@email.com"
+                            required
+                            autocomplete="email"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-senha" class="form-label">Senha</label>
+                        <input 
+                            type="password" 
+                            id="login-senha" 
+                            class="form-input" 
+                            placeholder="••••••••"
+                            required
+                            autocomplete="current-password"
+                        >
+                    </div>
+
+                    <div class="forgot-password">
+                        <a href="#" id="forgot-password-link">Esqueceu sua senha?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="btn-login">
+                        Entrar
+                    </button>
+                </form>
+            </div>
+
+            <!-- Formulário de Cadastro -->
+            <div id="cadastro-form" class="form-container">
+                <form id="formCadastro">
+                    <div class="form-group">
+                        <label for="cadastro-nome" class="form-label">Nome Completo</label>
+                        <input 
+                            type="text" 
+                            id="cadastro-nome" 
+                            class="form-input" 
+                            placeholder="Seu nome completo"
+                            required
+                            autocomplete="name"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cadastro-email" class="form-label">E-mail</label>
+                        <input 
+                            type="email" 
+                            id="cadastro-email" 
+                            class="form-input" 
+                            placeholder="seu@email.com"
+                            required
+                            autocomplete="email"
+                        >
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cadastro-cpf" class="form-label">CPF</label>
+                            <input 
+                                type="text" 
+                                id="cadastro-cpf" 
+                                class="form-input" 
+                                placeholder="000.000.000-00"
+                                required
+                                maxlength="14"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cadastro-data" class="form-label">Data de Nascimento</label>
+                            <input 
+                                type="date" 
+                                id="cadastro-data" 
+                                class="form-input" 
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cadastro-telefone" class="form-label">Telefone</label>
+                        <input 
+                            type="tel" 
+                            id="cadastro-telefone" 
+                            class="form-input" 
+                            placeholder="(00) 00000-0000"
+                            required
+                            maxlength="15"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cadastro-senha" class="form-label">Senha</label>
+                        <input 
+                            type="password" 
+                            id="cadastro-senha" 
+                            class="form-input" 
+                            placeholder="Mínimo 6 caracteres"
+                            required
+                            minlength="6"
+                            autocomplete="new-password"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cadastro-confirmar-senha" class="form-label">Confirmar Senha</label>
+                        <input 
+                            type="password" 
+                            id="cadastro-confirmar-senha" 
+                            class="form-input" 
+                            placeholder="Digite a senha novamente"
+                            required
+                            minlength="6"
+                            autocomplete="new-password"
+                        >
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="btn-cadastro">
+                        Criar Conta
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { 
+            cadastrarUsuario, 
+            fazerLogin, 
+            verificarAutenticacao,
+            validarCPF,
+            formatarCPF,
+            formatarTelefone
+        } from '../controle-dados/auth.js';
+
+        // Criar partículas
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 50;
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 8 + 's';
+            particle.style.animationDuration = (Math.random() * 5 + 5) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Elementos do DOM
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const loginForm = document.getElementById('login-form');
+        const cadastroForm = document.getElementById('cadastro-form');
+        const messageDiv = document.getElementById('message');
+        const formLogin = document.getElementById('formLogin');
+        const formCadastro = document.getElementById('formCadastro');
+        const btnLogin = document.getElementById('btn-login');
+        const btnCadastro = document.getElementById('btn-cadastro');
+        // Campos do formulário de cadastro
+        const cpfInput = document.getElementById('cadastro-cpf');
+        const telefoneInput = document.getElementById('cadastro-telefone');
+
+        // Verificar se usuário já está logado
+        verificarAutenticacao((user) => {
+            if (user) {
+                // window.location.href = '../usuário/inicio/inicio.html';
+                console.log('Usuário já autenticado:', user);
+            }
+        });
+
+        // Alternar entre tabs
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tab = button.dataset.tab;
+                
+                // Atualizar botões
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Atualizar formulários
+                if (tab === 'login') {
+                    loginForm.classList.add('active');
+                    cadastroForm.classList.remove('active');
+                } else {
+                    loginForm.classList.remove('active');
+                    cadastroForm.classList.add('active');
+                }
+                
+                // Limpar mensagem
+                hideMessage();
+            });
+        });
+
+        // Formatação automática de CPF com máscara progressiva
+        cpfInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            
+            if (value.length > 11) value = value.slice(0, 11);
+            
+            // Máscara: 000.000.000-00
+            if (value.length > 9) {
+                value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+            } else if (value.length > 6) {
+                value = value.replace(/^(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+            } else if (value.length > 3) {
+                value = value.replace(/^(\d{3})(\d{0,3})/, '$1.$2');
+            }
+            
+            e.target.value = value;
+        });
+
+        // Formatação automática de telefone com máscara progressiva
+        telefoneInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            
+            if (value.length > 11) value = value.slice(0, 11);
+            
+            // Máscara: (00) 00000-0000
+            if (value.length > 10) {
+                value = value.replace(/^(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            } else if (value.length > 6) {
+                value = value.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+            } else if (value.length > 2) {
+                value = value.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+            } else if (value.length > 0) {
+                value = value.replace(/^(\d{0,2})/, '($1');
+            }
+            
+            e.target.value = value;
+        });
+
+        // Função para mostrar mensagem
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = `message message-${type} show`;
+        }
+
+        // Função para esconder mensagem
+        function hideMessage() {
+            messageDiv.className = 'message';
+        }
+
+        // Função para adicionar spinner ao botão
+        function addSpinner(button) {
+            const spinner = document.createElement('span');
+            spinner.className = 'spinner';
+            button.appendChild(spinner);
+            button.disabled = true;
+        }
+
+        // Função para remover spinner do botão
+        function removeSpinner(button) {
+            const spinner = button.querySelector('.spinner');
+            if (spinner) {
+                spinner.remove();
+            }
+            button.disabled = false;
+        }
+
+        // Formulário de Login
+        formLogin.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMessage();
+
+            const email = document.getElementById('login-email').value.trim();
+            const senha = document.getElementById('login-senha').value;
+
+            // Validação básica
+            if (!email || !senha) {
+                showMessage('Por favor, preencha todos os campos.', 'error');
+                return;
+            }
+
+            addSpinner(btnLogin);
+
+            // Verificar credenciais específicas para acesso ao dashboard
+            if (email === 'sliced@gmail.com' && senha === '185520') {
+                showMessage('Login realizado com sucesso! Redirecionando para o dashboard...', 'success');
+                setTimeout(() => {
+                    window.location.href = '../dashboard/dashboard-inicio.html';
+                }, 1500);
+                return;
+            }
+
+            // Caso contrário, usar autenticação Firebase normal
+            try {
+                const resultado = await fazerLogin(email, senha);
+
+                if (resultado.success) {
+                    showMessage('Login realizado com sucesso! Redirecionando...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '../usuário/inicio/inicio.html';
+                    }, 1500);
+                } else {
+                    showMessage(resultado.error, 'error');
+                    removeSpinner(btnLogin);
+                }
+            } catch (error) {
+                showMessage('Erro ao fazer login. Tente novamente.', 'error');
+                removeSpinner(btnLogin);
+            }
+        });
+
+        // Formulário de Cadastro
+        formCadastro.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMessage();
+
+            const nomeCompleto = document.getElementById('cadastro-nome').value.trim();
+            const email = document.getElementById('cadastro-email').value.trim();
+            const cpf = document.getElementById('cadastro-cpf').value.trim();
+            const dataNascimento = document.getElementById('cadastro-data').value;
+            const telefone = document.getElementById('cadastro-telefone').value.trim();
+            const senha = document.getElementById('cadastro-senha').value;
+            const confirmarSenha = document.getElementById('cadastro-confirmar-senha').value;
+
+            // Validações
+            if (!nomeCompleto || !email || !cpf || !dataNascimento || !telefone || !senha || !confirmarSenha) {
+                showMessage('Por favor, preencha todos os campos.', 'error');
+                return;
+            }
+
+            if (senha !== confirmarSenha) {
+                showMessage('As senhas não coincidem.', 'error');
+                return;
+            }
+
+            if (senha.length < 6) {
+                showMessage('A senha deve ter pelo menos 6 caracteres.', 'error');
+                return;
+            }
+
+            if (!validarCPF(cpf)) {
+                showMessage('CPF inválido.', 'error');
+                return;
+            }
+
+            // Validar idade mínima (18 anos)
+            const hoje = new Date();
+            const dataNasc = new Date(dataNascimento);
+            let idade = hoje.getFullYear() - dataNasc.getFullYear();
+            const mesAtual = hoje.getMonth();
+            const mesNascimento = dataNasc.getMonth();
+            
+            // Ajustar idade se ainda não fez aniversário este ano
+            if (mesAtual < mesNascimento || (mesAtual === mesNascimento && hoje.getDate() < dataNasc.getDate())) {
+                idade--;
+            }
+            
+            if (idade < 18) {
+                showMessage('Você deve ter pelo menos 18 anos para se cadastrar.', 'error');
+                return;
+            }
+
+            addSpinner(btnCadastro);
+
+            try {
+                const dadosUsuario = {
+                    nomeCompleto,
+                    email,
+                    cpf,
+                    dataNascimento,
+                    telefone,
+                    senha
+                };
+
+                const resultado = await cadastrarUsuario(dadosUsuario);
+
+                if (resultado.success) {
+                    showMessage('Cadastro realizado com sucesso! Redirecionando...', 'success');
+                    formCadastro.reset();
+                    setTimeout(() => {
+                        window.location.href = '../usuário/inicio/inicio.html';
+                    }, 1500);
+                } else {
+                    showMessage(resultado.error, 'error');
+                    removeSpinner(btnCadastro);
+                }
+            } catch (error) {
+                showMessage('Erro ao criar conta. Tente novamente.', 'error');
+                removeSpinner(btnCadastro);
+            }
+        });
+
+        // Link de esqueci senha (placeholder)
+        document.getElementById('forgot-password-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            showMessage('Funcionalidade em desenvolvimento. Entre em contato com o suporte.', 'error');
+        });
+    </script>
+</body>
+</html>

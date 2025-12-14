@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Início - SLICED</title>
+    <link rel="icon" href="/imgs/LOGO-SLICED.png" type="image/png">
+    <meta name="description" content="Área do torcedor - SLICED">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #00ff88;
+            --primary-color-escuro: #00cc6e;
+            --dark-bg: #000000;
+            --text-primary: #FFFFFF;
+            --gradient-primary: linear-gradient(135deg, #000000 0%, #1a0000 25%, #00cc6e 50%, #1a0000 75%, #000000 100%);
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gradient-primary);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            color: var(--text-primary);
+            padding-bottom: 100px;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-logo img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 136, 0.6));
+        }
+
+        .header-logo h1 {
+            font-size: 1.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ffffff 0%, #00ff88 50%, #ffffff 100%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .user-email {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .btn-logout {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+            border: none;
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        /* Container Principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-section h2 {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 16px;
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+        }
+
+        .welcome-section p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 300;
+        }
+
+        /* Banner */
+        .banner-container {
+            width: 100%;
+            margin-bottom: 40px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 1s ease;
+        }
+
+        .banner-anuncios {
+            background: linear-gradient(90deg, #000000 0%, #00ff88 100%);
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .banner-anuncios::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            opacity: 0.2;
+        }
+
+        .banner-anuncios h2 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+        }
+
+        .banner-anuncios p {
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-banner {
+            padding: 12px 30px;
+            background: #fff;
+            color: #00ff88;
+            border: none;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-banner:hover {
+            transform: scale(1.05);
+        }
+
+        /* Section Titles */
+        .section-title {
+            margin: 40px 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-title h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fff;
+            border-left: 5px solid #00ff88;
+            padding-left: 15px;
+        }
+
+        /* Grids */
+        .games-grid,
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        /* Cards */
+        .game-card,
+        .product-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .product-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card:hover,
+        .product-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border-color: #00ff88;
+        }
+
+        .game-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #00ff88, #00cc6e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.5));
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover img {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .game-card h4,
+        .product-card h4 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .game-card p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 20px;
+        }
+
+        .product-card .price-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 5px;
+        }
+
+        .product-card .old-price {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: line-through;
+            font-weight: 400;
+        }
+
+        .product-card .current-price {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .exclusive-badge {
+            position: absolute;
+            top: 25px;
+            right: -35px;
+            background: linear-gradient(135deg, #FFD700 0%, #DAA520 50%, #B8860B 100%);
+            color: #000;
+            padding: 8px 40px;
+            transform: rotate(45deg);
+            font-size: 0.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            letter-spacing: 1px;
+            border-top: 1px solid #FFF8DC;
+            border-bottom: 1px solid #8B4500;
+        }
+
+        .exclusive-badge::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(rgba(255, 255, 255, 0.4), transparent);
+        }
+
+        .btn-game,
+        .btn-buy {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-game {
+            background: transparent;
+            border: 2px solid #fff;
+            color: #fff;
+        }
+
+        .btn-game:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .btn-buy {
+            background: #00ff88;
+            color: #fff;
+        }
+
+        .btn-buy:hover {
+            background: #b3002d;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        /* Bottom Navbar */
+        .bottom-navbar {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 15px 30px;
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(100px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 10px 15px;
+            border-radius: 15px;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .nav-item:hover {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            transform: translateY(-5px);
+        }
+
+        .nav-item.active {
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .nav-item .material-icons {
+            font-size: 28px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover .material-icons {
+            transform: scale(1.2);
+        }
+
+        .nav-item span {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 100px 20px;
+        }
+
+        .spinner-large {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header {
+                padding: 16px 20px;
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .header-user {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .user-info {
+                text-align: center;
+            }
+
+            .container {
+                padding: 40px 20px;
+            }
+
+            .welcome-section h2 {
+                font-size: 2rem;
+            }
+
+            .games-grid,
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bottom-navbar {
+                gap: 20px;
+                padding: 12px 20px;
+                width: 95%;
+                max-width: 500px;
+            }
+
+            .nav-item {
+                padding: 8px 10px;
+                gap: 3px;
+            }
+
+            .nav-item .material-icons {
+                font-size: 24px;
+            }
+
+            .nav-item span {
+                font-size: 0.65rem;
+            }
+        }
+        /* =========================================
+   AJUSTES GERAIS PARA CELULAR (Max 600px)
+   Copie e cole no final do seu CSS
+   ========================================= */
+
+@media (max-width: 600px) {
+    
+    /* --- 1. HEADER (Menu Superior) COMPACTO --- */
+    .header {
+        flex-direction: row !important; /* Força ficar tudo na mesma linha */
+        padding: 5px 15px !important;   /* Pouco espaço nas bordas */
+        height: 55px;                   /* Altura fixa bem menor */
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    /* Logo: Mantém apenas a imagem pequena */
+    .header-logo {
+        gap: 0;
+    }
+    .header-logo img {
+        width: 32px;
+        height: 32px;
+    }
+    .header-logo h1 {
+        display: none !important; /* Esconde o texto 'SLICED' */
+    }
+
+    /* Área do Usuário: Força linha única */
+    .header-user {
+        width: auto !important;
+        flex-direction: row !important;
+        gap: 8px;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    /* Informações de Texto do Usuário */
+    .user-info {
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .user-email {
+        display: none !important; /* Esconde o Email */
+    }
+    .user-name {
+        font-size: 0.85rem;
+        margin-bottom: 0;
+        white-space: nowrap;      /* Impede quebra de linha */
+        max-width: 90px;          /* Limita largura para não estourar */
+        overflow: hidden;
+        text-overflow: ellipsis;  /* Coloca '...' se o nome for grande */
+    }
+
+    /* Botão Sair compacto */
+    .btn-logout {
+        padding: 5px 12px;
+        font-size: 0.75rem;
+        border-radius: 6px;
+    }
+
+
+    /* --- 2. NAVBAR (Menu Inferior) AJUSTADA --- */
+    .bottom-navbar {
+        width: 98%;              /* Ocupa quase toda a largura */
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 5px;             /* Cola no fundo */
+        padding: 6px 2px;        /* Padding mínimo */
+        gap: 2px;                /* Espaço mínimo entre itens */
+        border-radius: 16px;
+        justify-content: space-between;
+    }
+
+    .nav-item {
+        padding: 4px 0;
+        min-width: 0;            /* Permite encolher o quanto precisar */
+        flex: 1;                 /* Divide o espaço igualmente por 6 */
+        border-radius: 8px;
+    }
+
+    /* Ícone menor */
+    .nav-item .material-icons {
+        font-size: 20px !important;
+        margin-bottom: 2px;
+    }
+
+    /* Texto minúsculo para caber */
+    .nav-item span {
+        font-size: 8px !important;
+        letter-spacing: 0;
+        display: block;
+        white-space: nowrap;
+    }
+    
+    /* Ajuste do hover para não pular */
+    .nav-item:hover {
+        transform: translateY(-2px);
+    }
+}
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-logo">
+            <img src="/imgs/LOGO-SLICED.png" alt="SLICED Logo">
+            <h1>SLICED</h1>
+        </div>
+        <div class="header-user">
+            <div class="user-info">
+                <div class="user-name" id="userName">Carregando...</div>
+                <div class="user-email" id="userEmail"></div>
+            </div>
+            <button class="btn-logout" id="btnLogout">Sair</button>
+        </div>
+    </header>
+
+    <!-- Container Principal -->
+    <div class="container">
+        <div id="loadingSection" class="loading">
+            <div class="spinner-large"></div>
+            <p>Carregando seus dados...</p>
+        </div>
+
+        <div id="contentSection" style="display: none;">
+            <div class="welcome-section">
+                <h2>Bem-vindo, <span id="welcomeName">Torcedor</span>!</h2>
+                <p>Você está na área exclusiva do jogador</p>
+            </div>
+
+            <!-- Banner Anúncios -->
+            <div class="banner-container">
+                <div class="banner-anuncios">
+                    <h2>ANUNCIE AQUI!</h2>
+                    <p>Divulgue seu produto, projeto ou empresa. Pelo menor preço e tendo muitos cliques</p>
+                    <button class="btn-banner">Saiba Mais</button>
+                </div>
+            </div>
+
+            <!-- Área de Jogos -->
+            <div class="section-title">
+                <h3>🎮 Área de Jogos</h3>
+            </div>
+            <div class="games-grid">
+                <div class="game-card">
+                    <div class="game-icon">❓</div>
+                    <h4>Quiz Tricolor</h4>
+                    <p>Teste seus conhecimentos sobre a história do SLICED</p>
+                    <button class="btn-game" onclick="window.location.href='jogos/quiz/abertura.html'">
+                        Jogar Agora
+                    </button>
+                </div>
+                <div class="game-card">
+                    <div class="game-icon">❌⭕</div>
+                    <h4>Jogo da Velha</h4>
+                    <p>Desafie seus amigos em uma partida clássica</p>
+                    <button class="btn-game" onclick="window.location.href='jogos/jogo-da-velha.html'">
+                        Jogar Agora
+                    </button>
+                </div>
+            </div>
+
+            <!-- Produtos -->
+            <div class="section-title">
+                <h3>👕 Produtos Oficiais</h3>
+            </div>
+            <div class="products-grid">
+                <!-- Card 1 -->
+                <div class="product-card">
+                    <img src="../../imgs/CAMISA-SLICED-BRANCA.png" alt="Camisa SLICED Branca">
+                    <h4>Camisa I - Branca</h4>
+                    <div class="price-container">
+                        <span class="old-price">de R$ 499,90</span>
+                        <span class="current-price">por R$ 349,90</span>
+                    </div>
+                    <button class="btn-buy">Comprar</button>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="product-card">
+                    <img src="../../imgs/CAMISA-SLICED-PRETA.png" alt="Camisa SLICED Preta">
+                    <h4>Camisa II - Listrada</h4>
+                    <div class="price-container">
+                        <span class="old-price">de R$ 499,90</span>
+                        <span class="current-price">por R$ 349,90</span>
+                    </div>
+                    <button class="btn-buy">Comprar</button>
+                </div>
+
+                <!-- Card 3 (Com Faixa Exclusiva) -->
+                <div class="product-card">
+                    <div class="exclusive-badge">Parceria Exclusiva</div>
+                    <img src="../../imgs/NIKE-TN.png" alt="Nike TN SLICED">
+                    <h4>Tênis Nike TN - Edição SLICED</h4>
+                    <div class="price-container">
+                        <span class="old-price">de R$ 1.299,90</span>
+                        <span class="current-price">por R$ 899,90</span>
+                    </div>
+                    <button class="btn-buy">Comprar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navbar -->
+    <nav class="bottom-navbar">
+        <a href="inicio.html" class="nav-item active">
+            <i class="material-icons">home</i>
+            <span>Início</span>
+        </a>
+        <a href="../termos/termos.html" class="nav-item">
+            <i class="material-icons">description</i>
+            <span>Termos</span>
+        </a>
+        <a href="../afiliados/afiliados.html" class="nav-item">
+            <i class="material-icons">group_add</i>
+            <span>Afiliados</span>
+        </a>
+       <a href="/usuário/vakinha/vakinha.html" class="nav-item">
+            <i class="material-icons">favorite</i>
+            <span>Vakinha</span>
+        </a>
+        <a href="../anuncie/anuncie.html" class="nav-item">
+            <i class="material-icons">campaign</i>
+            <span>Anuncie</span>
+        </a>
+        <a href="../perfil/perfil.html" class="nav-item">
+            <i class="material-icons">person</i>
+            <span>Perfil</span>
+        </a>
+    </nav>
+
+    <script type="module">
+        import { verificarAutenticacao, obterDadosUsuario, fazerLogout } from '../../controle-dados/auth.js';
+        import { inicializarSistemaOnline } from '../../controle-dados/online-tracker.js';
+
+        const loadingSection = document.getElementById('loadingSection');
+        const contentSection = document.getElementById('contentSection');
+        const btnLogout = document.getElementById('btnLogout');
+
+        // Variável para armazenar função de parar rastreamento
+        let pararRastreamento = null;
+
+        // Verificar autenticação
+        verificarAutenticacao(async (user) => {
+            if (!user) {
+                // Usuário não está logado, redirecionar para login
+                window.location.href = '../../login/login.html';
+                return;
+            }
+
+            // Usuário está logado, carregar dados
+            try {
+                const resultado = await obterDadosUsuario(user.uid);
+
+                if (resultado.success) {
+                    const dados = resultado.dados;
+
+                    // Atualizar header
+                    document.getElementById('userName').textContent = dados.nomeCompleto;
+                    document.getElementById('userEmail').textContent = dados.email;
+
+                    // Atualizar seção de boas-vindas
+                    const primeiroNome = dados.nomeCompleto.split(' ')[0];
+                    document.getElementById('welcomeName').textContent = primeiroNome;
+
+                    // Conteúdo carregado
+                    console.log('Dados do usuário carregados com sucesso');
+
+                    // ===== REGISTRAR USUÁRIO COMO ONLINE =====
+                    console.log('👤 Registrando usuário como online...');
+                    pararRastreamento = await inicializarSistemaOnline(user.uid, {
+                        nomeCompleto: dados.nomeCompleto,
+                        email: dados.email
+                    });
+                    console.log('✅ Usuário registrado como online no dashboard!');
+                    // =========================================
+
+                    // Mostrar conteúdo
+                    loadingSection.style.display = 'none';
+                    contentSection.style.display = 'block';
+                } else {
+                    console.error('Erro ao carregar dados:', resultado.error);
+                    alert('Erro ao carregar seus dados. Tente novamente.');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar dados do usuário:', error);
+                alert('Erro ao carregar seus dados. Tente novamente.');
+            }
+        });
+
+        // Logout
+        btnLogout.addEventListener('click', async () => {
+            if (confirm('Deseja realmente sair?')) {
+                // Parar rastreamento online antes de fazer logout
+                if (pararRastreamento) {
+                    pararRastreamento();
+                    console.log('🔴 Usuário removido da lista de online');
+                }
+
+                const resultado = await fazerLogout();
+                if (resultado.success) {
+                    window.location.href = '../../login/login.html';
+                } else {
+                    alert('Erro ao fazer logout. Tente novamente.');
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz SLICED - Ao Vivo</title>
+    <link rel="icon" href="/imgs/LOGO-SLICED.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a0000 100%);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bg-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.1) 0%, transparent 50%);
+            z-index: 0;
+            animation: pulse-bg 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-bg {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+
+        .game-container {
+            width: 95%;
+            max-width: 900px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-header {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(0, 255, 136, 0.5);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Timer estilo placar digital */
+        .timer-display {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: #4facfe;
+            font-family: 'Orbitron', monospace;
+            text-shadow: 0 0 30px rgba(79, 172, 254, 0.8), 0 0 60px rgba(79, 172, 254, 0.4);
+            letter-spacing: 0.1em;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            border: 2px solid rgba(79, 172, 254, 0.3);
+        }
+
+        .timer-display.warning {
+            color: #ffa500;
+            text-shadow: 0 0 30px rgba(255, 165, 0, 0.8), 0 0 60px rgba(255, 165, 0, 0.4);
+            border-color: rgba(255, 165, 0, 0.3);
+            animation: pulse-timer 1s ease-in-out infinite;
+        }
+
+        .timer-display.danger {
+            color: #ff4757;
+            text-shadow: 0 0 30px rgba(255, 71, 87, 0.8), 0 0 60px rgba(255, 71, 87, 0.4);
+            border-color: rgba(255, 71, 87, 0.3);
+            animation: pulse-timer 0.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-timer {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .prize-info {
+            text-align: right;
+        }
+
+        .prize-label {
+            font-size: 0.9rem;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .prize-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #38ef7d;
+            margin-top: 0.3rem;
+        }
+
+        .game-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .countdown-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        .countdown-number {
+            font-size: 10rem;
+            font-weight: 900;
+            color: #00ff88;
+            text-shadow: 0 0 40px rgba(0, 255, 136, 0.8);
+            animation: countdown-pulse 1s ease-in-out;
+        }
+
+        @keyframes countdown-pulse {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .countdown-text {
+            font-size: 1.5rem;
+            color: #aaa;
+            margin-top: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .question-text {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 2.5rem;
+            line-height: 1.4;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-btn {
+            padding: 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            font-size: 1.1rem;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: rgba(0, 255, 136, 0.6);
+            border-color: #00ff88;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.4);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .option-btn.selected {
+            background: rgba(79, 172, 254, 0.3);
+            border-color: #4facfe;
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+        }
+
+        .option-btn.correct {
+            background: rgba(56, 239, 125, 0.3) !important;
+            border-color: #38ef7d !important;
+            animation: correct-flash 0.5s ease;
+        }
+
+        .option-btn.wrong {
+            background: rgba(255, 71, 87, 0.3) !important;
+            border-color: #ff4757 !important;
+            animation: wrong-shake 0.5s ease;
+        }
+
+        @keyframes correct-flash {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes wrong-shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1f3a 0%, #0a0e27 100%);
+            border: 2px solid rgba(0, 255, 136, 0.5);
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #00ff88;
+            margin-bottom: 1rem;
+        }
+
+        .modal-text {
+            font-size: 1.2rem;
+            color: #fff;
+            margin-bottom: 2rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, #38ef7d 0%, #11998e 100%);
+            color: #000;
+        }
+
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(56, 239, 125, 0.4);
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .floating-chat {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 300px;
+            max-height: 500px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            border-radius: 16px;
+            padding: 1rem;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #00ff88;
+            margin-bottom: 1rem;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .chat-message {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid #4facfe;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .chat-message.correct {
+            border-left-color: #38ef7d;
+        }
+
+        .chat-message.wrong {
+            border-left-color: #ff4757;
+        }
+
+        .chat-player {
+            font-weight: 700;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .chat-answer {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-top: 0.3rem;
+        }
+
+        .results-screen {
+            text-align: center;
+        }
+
+        .results-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #38ef7d;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+        }
+
+        .winners-list {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .winner-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: rgba(56, 239, 125, 0.1);
+            border-left: 4px solid #38ef7d;
+            border-radius: 8px;
+        }
+
+        .winner-rank {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #FFD700;
+            width: 50px;
+        }
+
+        .winner-name {
+            flex: 1;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .winner-time {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .redirect-message {
+            font-size: 1.2rem;
+            color: #aaa;
+            margin-top: 2rem;
+        }
+
+        .loader {
+            margin: 0 auto;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #00ff88;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+                height: auto;
+                padding: 1rem;
+                overflow-y: auto;
+            }
+
+            .game-container {
+                width: 100%;
+                margin-bottom: 2rem;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .floating-chat {
+                position: static;
+                transform: none;
+                width: 100%;
+                max-height: 300px;
+                margin-top: 2rem;
+                display: block !important; /* Force display on mobile if JS enabled it */
+            }
+
+            .timer-display {
+                font-size: 2rem;
+            }
+
+            .question-text {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-overlay"></div>
+
+    <div class="game-container">
+        <div class="game-header" id="gameHeader">
+            <div class="timer-display" id="timerDisplay">00:10</div>
+            <div class="prize-info">
+                <div class="prize-label">🏆 Prêmio</div>
+                <div class="prize-value" id="prizeDisplay">-</div>
+            </div>
+        </div>
+
+        <div class="game-card" id="gameCard">
+            <div class="loader"></div>
+            <p style="margin-top: 1rem; color: #aaa;">Carregando partida...</p>
+        </div>
+    </div>
+
+    <div class="floating-chat" id="floatingChat" style="display: none;">
+        <div class="chat-title">📊 Respostas ao Vivo</div>
+        <div id="chatMessages"></div>
+    </div>
+
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-title">⚠️ Confirmar Resposta</div>
+            <div class="modal-text" id="modalText">Você selecionou a opção <strong>A</strong>. Deseja confirmar?</div>
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="cancelAnswer()">Cancelar</button>
+                <button class="btn btn-confirm" onclick="confirmAnswer()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db } from '../../../../controle-dados/firebase-config.js';
+        import { doc, getDoc, updateDoc, arrayUnion, onSnapshot, Timestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { obterUsuarioAtual } from '../../../../controle-dados/auth.js';
+
+        let matchId, matchData, currentUser;
+        let gameTimer;
+        let selectedOption = null;
+        let hasAnswered = false;
+        let matchStartTime;
+
+        const gameCard = document.getElementById('gameCard');
+        const gameHeader = document.getElementById('gameHeader');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const prizeDisplay = document.getElementById('prizeDisplay');
+        const confirmModal = document.getElementById('confirmModal');
+        const modalText = document.getElementById('modalText');
+        const floatingChat = document.getElementById('floatingChat');
+        const chatMessages = document.getElementById('chatMessages');
+
+        init();
+
+        async function init() {
+            console.log("🎮 Iniciando Quiz...");
+
+            currentUser = obterUsuarioAtual();
+            if (!currentUser) {
+                gameCard.innerHTML = '<h3>❌ Você precisa estar logado para jogar!</h3><p style="margin-top: 1rem;"><a href="/login/login.html" style="color: #4facfe;">Fazer Login</a></p>';
+                return;
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            matchId = urlParams.get('matchId');
+
+            if (!matchId) {
+                gameCard.innerHTML = '<h3>❌ Partida não identificada!</h3>';
+                return;
+            }
+
+            await loadMatch();
+        }
+
+        async function loadMatch() {
+            try {
+                const docRef = doc(db, "SLICED", "data", "quiz", matchId);
+                const docSnap = await getDoc(docRef);
+
+                if (!docSnap.exists()) {
+                    gameCard.innerHTML = '<h3>❌ Partida não encontrada!</h3>';
+                    return;
+                }
+
+                matchData = docSnap.data();
+                console.log("✅ Partida carregada:", matchData);
+
+                const [hours, minutes] = matchData.horario.split(':').map(Number);
+                const today = new Date();
+                const scheduledTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes, 0, 0);
+                
+                matchStartTime = scheduledTime.getTime();
+
+                console.log("⏰ Horário agendado:", matchData.horario);
+                console.log("📅 Timestamp de início:", new Date(matchStartTime));
+
+                prizeDisplay.textContent = matchData.prize;
+
+                startSyncedTimer();
+                listenToAnswers();
+
+            } catch (error) {
+                console.error("❌ Erro ao carregar partida:", error);
+                gameCard.innerHTML = '<h3>❌ Erro ao carregar partida!</h3>';
+            }
+        }
+
+        function startSyncedTimer() {
+            function updateDisplay() {
+                const now = Date.now();
+                const elapsed = now - matchStartTime;
+                
+                if (elapsed < 10000) {
+                    const remaining = Math.ceil((10000 - elapsed) / 1000);
+                    showCountdown(remaining);
+                    updateHeaderTimer(remaining, 'countdown');
+                }
+                else if (elapsed < 130000) {
+                    const gameElapsed = elapsed - 10000;
+                    const gameRemaining = 120000 - gameElapsed;
+                    
+                    if (gameElapsed < 100 && (!gameCard.querySelector('.question-text'))) {
+                        startGame();
+                    }
+                    
+                    updateGameTimer(gameRemaining);
+                }
+                else {
+                    endGame();
+                }
+            }
+
+            updateDisplay();
+            gameTimer = setInterval(updateDisplay, 100);
+        }
+
+        function updateHeaderTimer(seconds, type) {
+            if (type === 'countdown') {
+                timerDisplay.textContent = `00:${String(seconds).padStart(2, '0')}`;
+                timerDisplay.classList.remove('warning', 'danger');
+            }
+        }
+
+        function showCountdown(seconds) {
+            if (seconds <= 0) return;
+            
+            gameCard.innerHTML = `
+                <div class="countdown-screen">
+                    <div class="countdown-number" key="${seconds}">${seconds}</div>
+                    <div class="countdown-text">A partida começará em...</div>
+                </div>
+            `;
+        }
+
+        function startGame() {
+            console.log("🚀 Partida iniciada!");
+            
+            floatingChat.style.display = 'block';
+
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = matchData.questionData;
+            
+            gameCard.innerHTML = `
+                <h2 class="question-text">${q.text}</h2>
+                <div class="options-grid">
+                    <button class="option-btn" data-option="A" onclick="selectOption('A')">
+                        <strong>A)</strong> ${q.options.A}
+                    </button>
+                    <button class="option-btn" data-option="B" onclick="selectOption('B')">
+                        <strong>B)</strong> ${q.options.B}
+                    </button>
+                    <button class="option-btn" data-option="C" onclick="selectOption('C')">
+                        <strong>C)</strong> ${q.options.C}
+                    </button>
+                    <button class="option-btn" data-option="D" onclick="selectOption('D')">
+                        <strong>D)</strong> ${q.options.D}
+                    </button>
+                </div>
+                <div style="text-align: center; color: #aaa; font-size: 0.9rem;">
+                    👥 ${matchData.winnersCount} ${matchData.winnersCount === 1 ? 'ganhador' : 'ganhadores'} • 
+                    ⚡ Quem responder primeiro e correto ganha!
+                </div>
+            `;
+        }
+
+        function updateGameTimer(remainingMs) {
+            if (remainingMs <= 0) {
+                timerDisplay.textContent = "00:00";
+                return;
+            }
+
+            const totalSeconds = Math.ceil(remainingMs / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            
+            timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+            if (totalSeconds <= 10) {
+                timerDisplay.classList.add('danger');
+                timerDisplay.classList.remove('warning');
+            } else if (totalSeconds <= 30) {
+                timerDisplay.classList.add('warning');
+                timerDisplay.classList.remove('danger');
+                
+                if (totalSeconds === 30 && !timerDisplay.dataset.resultsShown) {
+                    timerDisplay.dataset.resultsShown = 'true';
+                    showResults();
+                }
+            } else {
+                timerDisplay.classList.remove('warning', 'danger');
+            }
+        }
+
+        window.selectOption = function(option) {
+            if (hasAnswered) return;
+
+            selectedOption = option;
+            
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelector(`[data-option="${option}"]`).classList.add('selected');
+
+            modalText.innerHTML = `Você selecionou a opção <strong>${option}</strong>. Deseja confirmar?`;
+            confirmModal.classList.add('show');
+        };
+
+        window.cancelAnswer = function() {
+            confirmModal.classList.remove('show');
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            selectedOption = null;
+        };
+
+        window.confirmAnswer = async function() {
+            if (!selectedOption || hasAnswered) return;
+
+            hasAnswered = true;
+            confirmModal.classList.remove('show');
+
+            const now = Date.now();
+            const gameStartTime = matchStartTime + 10000;
+            const responseTime = now - gameStartTime;
+            const isCorrect = selectedOption === matchData.questionData.correct;
+
+            try {
+                const docRef = doc(db, "SLICED", "data", "quiz", matchId);
+                await updateDoc(docRef, {
+                    answers: arrayUnion({
+                        userId: currentUser.uid,
+                        userName: currentUser.nomeCompleto,
+                        option: selectedOption,
+                        isCorrect: isCorrect,
+                        responseTime: responseTime,
+                        timestamp: Timestamp.now()
+                    })
+                });
+
+                console.log("✅ Resposta enviada! Tempo:", (responseTime / 1000).toFixed(2) + "s");
+
+                const selectedBtn = document.querySelector(`[data-option="${selectedOption}"]`);
+                if (isCorrect) {
+                    selectedBtn.classList.add('correct');
+                } else {
+                    selectedBtn.classList.add('wrong');
+                    document.querySelector(`[data-option="${matchData.questionData.correct}"]`).classList.add('correct');
+                }
+
+                document.querySelectorAll('.option-btn').forEach(btn => {
+                    btn.disabled = true;
+                });
+
+            } catch (error) {
+                console.error("❌ Erro ao enviar resposta:", error);
+            }
+        };
+
+        function listenToAnswers() {
+            const docRef = doc(db, "SLICED", "data", "quiz", matchId);
+            
+            onSnapshot(docRef, (doc) => {
+                if (doc.exists()) {
+                    const data = doc.data();
+                    if (data.answers && data.answers.length > 0) {
+                        updateChat(data.answers);
+                    }
+                }
+            });
+        }
+
+        function updateChat(answers) {
+            chatMessages.innerHTML = '';
+            
+            const sortedAnswers = [...answers].sort((a, b) => a.responseTime - b.responseTime);
+            
+            sortedAnswers.forEach((answer, index) => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chat-message ${answer.isCorrect ? 'correct' : 'wrong'}`;
+                messageDiv.innerHTML = `
+                    <div class="chat-player">${index + 1}º ${answer.userName}</div>
+                    <div class="chat-answer">
+                        ${answer.isCorrect ? '✅' : '❌'} Opção ${answer.option} • ${(answer.responseTime / 1000).toFixed(2)}s
+                    </div>
+                `;
+                chatMessages.appendChild(messageDiv);
+            });
+        }
+
+        async function showResults() {
+            try {
+                const docRef = doc(db, "SLICED", "data", "quiz", matchId);
+                const docSnap = await getDoc(docRef);
+                
+                if (!docSnap.exists()) return;
+                
+                const data = docSnap.data();
+                const answers = data.answers || [];
+                
+                const correctAnswers = answers
+                    .filter(a => a.isCorrect)
+                    .sort((a, b) => a.responseTime - b.responseTime)
+                    .slice(0, matchData.winnersCount);
+
+                if (correctAnswers.length === 0) {
+                    return;
+                }
+
+                let winnersHTML = '';
+                correctAnswers.forEach((winner, index) => {
+                    const medals = ['🥇', '🥈', '🥉'];
+                    const medal = medals[index] || '🏆';
+                    
+                    winnersHTML += `
+                        <div class="winner-item">
+                            <div class="winner-rank">${medal}</div>
+                            <div class="winner-name">${winner.userName}</div>
+                            <div class="winner-time">${(winner.responseTime / 1000).toFixed(2)}s</div>
+                        </div>
+                    `;
+                });
+
+                gameCard.innerHTML = `
+                    <div class="results-screen">
+                        <div class="results-title">🎉 Vencedores</div>
+                        <div class="winners-list">
+                            ${winnersHTML}
+                        </div>
+                        <div class="prize-value" style="font-size: 2rem; margin-bottom: 1rem;">
+                            🏆 ${matchData.prize}
+                        </div>
+                        <div style="color: #aaa;">A partida continua...</div>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error("❌ Erro ao mostrar resultados:", error);
+            }
+        }
+
+        function endGame() {
+            console.log("🏁 Partida encerrada!");
+            
+            clearInterval(gameTimer);
+            
+            gameCard.innerHTML = `
+                <div class="results-screen">
+                    <div class="results-title">🏁 Partida Encerrada</div>
+                    <div class="redirect-message">
+                        Redirecionando para o lobby em <span id="redirectCount">5</span> segundos...
+                    </div>
+                </div>
+            `;
+
+            let count = 5;
+            const redirectInterval = setInterval(() => {
+                count--;
+                const countEl = document.getElementById('redirectCount');
+                if (countEl) {
+                    countEl.textContent = count;
+                }
+
+                if (count <= 0) {
+                    clearInterval(redirectInterval);
+                    window.location.href = 'abertura.html';
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+
+</html>

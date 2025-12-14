@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Termos de Uso - SLICED</title>
+    <link rel="icon" href="/imgs/LOGO-SLICED.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="termos.css">
+</head>
+<body>
+    <!-- Partículas de fundo -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-logo">
+            <img src="/imgs/LOGO-SLICED.png" alt="SLICED Logo">
+            <h1>SLICED</h1>
+        </div>
+        <div class="header-user">
+            <div class="user-info">
+                <div class="user-name" id="userName">Carregando...</div>
+                <div class="user-email" id="userEmail"></div>
+            </div>
+            <button class="btn-logout" id="btnLogout">Sair</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="terms-card">
+            <h2 class="terms-title">Termos e Condições</h2>
+            
+            <div class="terms-content">
+                <h3>1. Introdução</h3>
+                <p>Bem-vindo à plataforma oficial do torcedor do São Paulo Futebol Clube. Ao acessar e utilizar este site, você concorda com estes termos e condições em sua totalidade. Se você não concordar com qualquer parte destes termos, não deverá utilizar nossa plataforma.</p>
+
+                <h3>2. Uso da Plataforma</h3>
+                <p>Esta plataforma destina-se ao uso pessoal e não comercial dos torcedores do SLICED. É proibido:</p>
+                <ul>
+                    <li>Utilizar a plataforma para fins ilegais ou não autorizados.</li>
+                    <li>Tentar acessar áreas restritas do sistema sem permissão.</li>
+                    <li>Compartilhar sua conta com terceiros.</li>
+                </ul>
+
+                <h3>3. Programa de Afiliados</h3>
+                <p>Ao participar do programa de afiliados, você concorda que:</p>
+                <ul>
+                    <li>As comissões e pontos serão creditados apenas para indicações válidas e confirmadas.</li>
+                    <li>O SLICED reserva-se o direito de cancelar contas que demonstrem atividade suspeita ou fraudulenta.</li>
+                    <li>Os pontos não podem ser trocados por dinheiro, apenas por produtos e experiências listadas na loja oficial.</li>
+                </ul>
+
+                <h3>4. Privacidade de Dados</h3>
+                <p>Respeitamos sua privacidade e protegemos seus dados pessoais de acordo com a Lei Geral de Proteção de Dados (LGPD). Suas informações serão utilizadas apenas para melhorar sua experiência na plataforma e comunicar novidades do clube.</p>
+
+                <h3>5. Alterações nos Termos</h3>
+                <p>O São Paulo Futebol Clube reserva-se o direito de alterar estes termos a qualquer momento. Recomendamos que você revise esta página periodicamente para estar ciente de quaisquer mudanças.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navbar -->
+    <nav class="bottom-navbar">
+        <a href="../inicio/inicio.html" class="nav-item">
+            <i class="material-icons">home</i>
+            <span>Início</span>
+        </a>
+        <a href="#" class="nav-item active">
+            <i class="material-icons">description</i>
+            <span>Termos</span>
+        </a>
+        <a href="../afiliados/afiliados.html" class="nav-item">
+            <i class="material-icons">group_add</i>
+            <span>Afiliados</span>
+        </a>
+        <a href="/usuário/vakinha/vakinha.html" class="nav-item">
+            <i class="material-icons">favorite</i>
+            <span>Vakinha</span>
+        </a>
+        <a href="../anuncie/anuncie.html" class="nav-item">
+            <i class="material-icons">campaign</i>
+            <span>Anuncie</span>
+        </a>
+        <a href="../perfil/perfil.html" class="nav-item">
+            <i class="material-icons">person</i>
+            <span>Perfil</span>
+        </a>
+    </nav>
+
+    <script type="module">
+        import { iniciarRastreamentoGlobal } from '../../controle-dados/tracker-config.js';
+
+        // Inicializar rastreamento e auth
+        iniciarRastreamentoGlobal({
+            onUserLoaded: (dados) => {
+                document.getElementById('userName').textContent = dados.nomeCompleto;
+                document.getElementById('userEmail').textContent = dados.email;
+            },
+            onLogout: () => {
+                window.location.href = '../../login/login.html';
+            }
+        });
+
+        // Partículas
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 8 + 's';
+            particle.style.animationDuration = (Math.random() * 5 + 5) + 's';
+            particlesContainer.appendChild(particle);
+        }
+    </script>
+</body>
+</html>

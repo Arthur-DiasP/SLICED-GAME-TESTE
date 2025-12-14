@@ -1,0 +1,28 @@
+<!-- 
+    Script para adicionar no final da página inicio.html
+    Este script registra o usuário como online quando ele acessa a página
+-->
+<script type="module">
+    import { obterUsuarioAtual } from '../../controle-dados/auth.js';
+    import { inicializarSistemaOnline } from '../../controle-dados/online-tracker.js';
+
+    // Verificar se usuário está logado e registrar como online
+    const usuario = obterUsuarioAtual();
+    
+    if (usuario) {
+        console.log('👤 Usuário detectado:', usuario.nomeCompleto);
+        
+        // Inicializar sistema de rastreamento online
+        const pararRastreamento = await inicializarSistemaOnline(usuario.uid, {
+            nomeCompleto: usuario.nomeCompleto,
+            email: usuario.email
+        });
+        
+        console.log('✅ Usuário registrado como online no dashboard');
+        
+        // Opcional: Parar rastreamento quando sair da página
+        // (já está configurado automaticamente no online-tracker.js)
+    } else {
+        console.log('⚠️ Nenhum usuário logado detectado');
+    }
+</script>

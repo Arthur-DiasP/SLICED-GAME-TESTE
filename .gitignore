@@ -1,0 +1,10 @@
+# Exclui a pasta de módulos
+node_modules/
+
+# Exclui arquivos de configuração sensíveis (incluindo o .env)
+.env
+
+# =========================================================
+# CHAVE DE SERVIÇO FIREBASE ADMIN (CRÍTICO: NÃO ENVIAR)
+# =========================================================
+sliced-4f1e3-firebase-adminsdk-fbsvc-3a6db902e2.json

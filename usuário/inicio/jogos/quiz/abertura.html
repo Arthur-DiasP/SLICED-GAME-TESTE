@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Próximas Partidas - SLICED</title>
+    <link rel="icon" href="/imgs/LOGO-SLICED.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="dashboard-inicio.css" />
+    <style>
+        :root {
+            --spfc-red: #e30613;
+            --bg-card: rgba(20, 20, 20, 0.95);
+            --text-secondary: #b3b3b3;
+        }
+
+        body {
+            background-color: #000;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .animated-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(45deg, #1a0000, #000000);
+        }
+
+        .current-time {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.2rem;
+            color: #fff;
+            background: rgba(0, 255, 136, 0.8);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            z-index: 100;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 2rem;
+        }
+
+        .logo {
+            font-size: 5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+
+        .logo span {
+            color: var(--spfc-red);
+        }
+
+        .matches-container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 65vh;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .match-card {
+            background: var(--bg-card);
+            border-left: 6px solid var(--spfc-red);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .match-time {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -1px;
+        }
+
+        /* Countdown Timer - Estilo Placar Digital */
+        .countdown {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #4facfe;
+            margin: 10px 0;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(79, 172, 254, 0.4);
+            border-radius: 12px;
+            text-align: center;
+            font-family: 'Orbitron', monospace;
+            text-shadow: 0 0 20px rgba(79, 172, 254, 0.8), 0 0 40px rgba(79, 172, 254, 0.4);
+            letter-spacing: 0.15em;
+        }
+
+        .match-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .match-prize {
+            color: #38ef7d;
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        .match-winners {
+            color: #ffa500;
+            font-weight: 600;
+            font-size: 1rem;
+            background: rgba(255, 165, 0, 0.1);
+            padding: 5px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 165, 0, 0.3);
+        }
+
+        .match-question {
+            color: #aaa;
+            font-size: 1.1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 10px;
+            padding-top: 10px;
+        }
+
+        .no-matches {
+            text-align: center;
+            color: #666;
+            font-size: 1.5rem;
+            margin-top: 30px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+        }
+
+        /* =========================================
+           RESPONSIVIDADE (MOBILE)
+           ========================================= */
+        @media (max-width: 768px) {
+            .logo { font-size: 3rem; margin-top: 60px; }
+            .match-time { font-size: 1.8rem; }
+            .countdown { font-size: 1.5rem; padding: 10px; }
+            .match-card { padding: 1rem; }
+            .match-prize { font-size: 1rem; }
+            .match-winners { font-size: 0.85rem; padding: 4px 8px; }
+            .match-question { font-size: 0.9rem; }
+            .container { padding: 1rem; justify-content: flex-start; }
+            .matches-container { max-height: 75vh; }
+            
+            /* Ajuste do botão voltar e relógio */
+            .current-time { font-size: 0.9rem; padding: 5px 10px; top: 10px; right: 10px; }
+            a[href="../../inicio.html"] { top: 10px; left: 10px; }
+            a[href="../../inicio.html"] button { padding: 8px 16px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-background"></div>
+    <div class="current-time" id="clockDisplay">--:--</div>
+
+    <a href="../../inicio.html" style="position: absolute; top: 20px; left: 20px; text-decoration: none; z-index: 100;">
+        <button style="
+            background: rgba(0, 255, 136, 0.8);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        " onmouseover="this.style.background='rgba(0, 255, 136, 1)'; this.style.transform='translateY(-2px)'" 
+           onmouseout="this.style.background='rgba(0, 255, 136, 0.8)'; this.style.transform='translateY(0)'">
+            ← Voltar
+        </button>
+    </a>
+
+    <div class="container">
+        <div class="logo">SLICED<span>.</span> Quiz</div>
+        <div class="matches-container" id="matchesList">
+            <div class="no-matches">Carregando agendamentos...</div>
+        </div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clockDisplay').innerText = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        }
+        setInterval(updateClock, 1000); updateClock();
+    </script>
+
+    <script type="module" src="./quiz-abertura.js"></script>
+</body>
+
+</html>

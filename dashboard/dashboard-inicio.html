@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SLICED</title>
+    <link rel="icon" href="/imgs/LOGO-SLICED.png" type="image/png">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <meta name="description" content="Dashboard administrativo da plataforma de jogos do São Paulo Futebol Clube">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard-inicio.css">
+</head>
+<body>
+    <!-- Background Animado -->
+    <div class="animated-background">
+        <div class="bg-gradient bg-gradient-1"></div>
+        <div class="bg-gradient bg-gradient-2"></div>
+        <div class="bg-gradient bg-gradient-3"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <img src="/imgs/LOGO-SLICED.png" alt="SLICED Logo" class="logo-img">
+                <div class="logo-text">
+                    <h1>SLICED</h1>
+                    <p>GAMING</p>
+                </div>
+            </div>
+        </div>
+
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active">
+                        <span class="nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">🎮</span>
+                        <span>Jogos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">👥</span>
+                        <span>Usuários</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">📈</span>
+                        <span>Estatísticas</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">🏆</span>
+                        <span>Conquistas</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">💬</span>
+                        <span>Mensagens</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">⚙️</span>
+                        <span>Configurações</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../login/login.html" class="nav-link">
+                        <span class="nav-icon">🚪</span>
+                        <span>Sair</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">AD</div>
+                <div class="user-info">
+                    <h4>Administrador</h4>
+                    <p>Admin SLICED</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-top">
+                <div class="header-title">
+                    <h1>Dashboard</h1>
+                    <p>Bem-vindo ao painel de controle da plataforma SLICED Gaming</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary">
+                        <span>📅</span>
+                        <span>Hoje</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Grid -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        👥
+                    </div>
+                    <div class="stat-trend up">
+                        <span>↑</span>
+                        <span>12.5%</span>
+                    </div>
+                </div>
+                <div class="stat-body">
+                    <h3>2,847</h3>
+                    <p>Usuários Ativos</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        🎮
+                    </div>
+                    <div class="stat-trend up">
+                        <span>↑</span>
+                        <span>8.2%</span>
+                    </div>
+                </div>
+                <div class="stat-body">
+                    <h3>15,234</h3>
+                    <p>Partidas Jogadas</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        ⏱️
+                    </div>
+                    <div class="stat-trend up">
+                        <span>↑</span>
+                        <span>15.8%</span>
+                    </div>
+                </div>
+                <div class="stat-body">
+                    <h3>4.2h</h3>
+                    <p>Tempo Médio Online</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        🏆
+                    </div>
+                    <div class="stat-trend down">
+                        <span>↓</span>
+                        <span>2.1%</span>
+                    </div>
+                </div>
+                <div class="stat-body">
+                    <h3>892</h3>
+                    <p>Conquistas Desbloqueadas</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Recent Activity -->
+            <div class="card recent-activity">
+                <div class="card-header">
+                    <h2 class="card-title">Atividades Recentes</h2>
+                    <a href="#" class="card-action">Ver todas →</a>
+                </div>
+                <ul class="activity-list">
+                    <li class="activity-item">
+                        <div class="activity-icon game">🎮</div>
+                        <div class="activity-content">
+                            <h4>Nova partida de Jogo da Velha</h4>
+                            <p>João Silva venceu Maria Santos</p>
+                        </div>
+                        <span class="activity-time">2 min atrás</span>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon achievement">🏆</div>
+                        <div class="activity-content">
+                            <h4>Conquista desbloqueada</h4>
+                            <p>Pedro Costa alcançou "Mestre dos Jogos"</p>
+                        </div>
+                        <span class="activity-time">15 min atrás</span>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon user">👤</div>
+                        <div class="activity-content">
+                            <h4>Novo usuário registrado</h4>
+                            <p>Ana Oliveira se juntou à plataforma</p>
+                        </div>
+                        <span class="activity-time">32 min atrás</span>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon game">🎮</div>
+                        <div class="activity-content">
+                            <h4>Quiz completado</h4>
+                            <p>Carlos Mendes acertou 9/10 questões</p>
+                        </div>
+                        <span class="activity-time">1h atrás</span>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon achievement">🏆</div>
+                        <div class="activity-content">
+                            <h4>Novo recorde estabelecido</h4>
+                            <p>Beatriz Lima bateu o recorde em Quiz SLICED</p>
+                        </div>
+                        <span class="activity-time">2h atrás</span>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon user">👤</div>
+                        <div class="activity-content">
+                            <h4>Perfil atualizado</h4>
+                            <p>Rafael Souza alterou sua foto de perfil</p>
+                        </div>
+                        <span class="activity-time">3h atrás</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Top Players -->
+            <div class="card top-players">
+                <div class="card-header">
+                    <h2 class="card-title">Top Jogadores</h2>
+                    <a href="#" class="card-action">Ranking →</a>
+                </div>
+                <ul class="player-list">
+                    <li class="player-item">
+                        <div class="player-rank">1</div>
+                        <div class="player-avatar">JS</div>
+                        <div class="player-info">
+                            <h4>João Silva</h4>
+                            <p>Nível 45</p>
+                        </div>
+                        <span class="player-score">8,542</span>
+                    </li>
+                    <li class="player-item">
+                        <div class="player-rank">2</div>
+                        <div class="player-avatar">MS</div>
+                        <div class="player-info">
+                            <h4>Maria Santos</h4>
+                            <p>Nível 42</p>
+                        </div>
+                        <span class="player-score">7,891</span>
+                    </li>
+                    <li class="player-item">
+                        <div class="player-rank">3</div>
+                        <div class="player-avatar">PC</div>
+                        <div class="player-info">
+                            <h4>Pedro Costa</h4>
+                            <p>Nível 40</p>
+                        </div>
+                        <span class="player-score">7,234</span>
+                    </li>
+                    <li class="player-item">
+                        <div class="player-rank">4</div>
+                        <div class="player-avatar">AO</div>
+                        <div class="player-info">
+                            <h4>Ana Oliveira</h4>
+                            <p>Nível 38</p>
+                        </div>
+                        <span class="player-score">6,789</span>
+                    </li>
+                    <li class="player-item">
+                        <div class="player-rank">5</div>
+                        <div class="player-avatar">CM</div>
+                        <div class="player-info">
+                            <h4>Carlos Mendes</h4>
+                            <p>Nível 36</p>
+                        </div>
+                        <span class="player-score">6,234</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Games Grid -->
+        <div class="content-grid">
+            <div class="card games-grid">
+                <div class="card-header">
+                    <h2 class="card-title">Jogos Disponíveis</h2>
+                    <a href="#" class="card-action">Ver todos →</a>
+                </div>
+                <div class="games-list">
+                    <div class="game-card">
+                        <div class="game-thumbnail">
+                            <span>❌⭕</span>
+                            <span class="game-status active">Ativo</span>
+                        </div>
+                        <div class="game-body">
+                            <h3>Jogo da Velha</h3>
+                            <p>Desafie outros jogadores no clássico jogo da velha em tempo real</p>
+                            <div class="game-stats">
+                                <div class="game-stat">
+                                    <span>Jogadores</span>
+                                    <strong>1,234</strong>
+                                </div>
+                                <div class="game-stat">
+                                    <span>Partidas</span>
+                                    <strong>5,678</strong>
+                                </div>
+                                <div class="game-stat">
+                                    <span>Online</span>
+                                    <strong>89</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="game-card">
+                        <div class="game-thumbnail" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <span>❓</span>
+                            <span class="game-status active">Ativo</span>
+                        </div>
+                        <div class="game-body">
+                            <h3>Quiz SLICED</h3>
+                            <p>Teste seus conhecimentos sobre a história do SLICED</p>
+                            <div class="game-stats">
+                                <div class="game-stat">
+                                    <span>Jogadores</span>
+                                    <strong>892</strong>
+                                </div>
+                                <div class="game-stat">
+                                    <span>Questões</span>
+                                    <strong>150</strong>
+                                </div>
+                                <div class="game-stat">
+                                    <span>Online</span>
+                                    <strong>45</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="bottom-navbar">
+    <!-- Item Ativo -->
+    <a href="dashboard-inicio.html" class="nav-dock-item active">
+        <span class="material-icons">dashboard</span>
+        <!-- <span class="nav-label">Início</span> (Opcional se quiser texto) -->
+    </a>
+    
+    <a href="dashboard-quiz.html" class="nav-dock-item">
+        <span class="material-icons">sports_esports</span>
+    </a>
+    
+    <a href="dashboard-suporte.html" class="nav-dock-item">
+        <span class="material-icons">support_agent</span>
+    </a>
+</nav>
+        
+        <!-- CARD AÇÕES RÁPIDAS REMOVIDO DAQUI -->
+
+    </main>
+
+    <script type="module">
+        import { 
+            inicializarDashboard,
+            escutarAtividades,
+            escutarUsuariosOnlineCount,
+            formatarTempoRelativo,
+            obterIniciais,
+            formatarNumero,
+            obterIconeAtividade,
+            obterClasseAtividade
+        } from './dashboard-data.js';
+
+        // ===== ELEMENTOS DO DOM =====
+        const statsElements = {
+            usuarios: document.querySelector('.stat-card:nth-child(1) .stat-body h3'),
+            partidas: document.querySelector('.stat-card:nth-child(2) .stat-body h3'),
+            tempoMedio: document.querySelector('.stat-card:nth-child(3) .stat-body h3'),
+            conquistas: document.querySelector('.stat-card:nth-child(4) .stat-body h3')
+        };
+
+        const atividadesContainer = document.querySelector('.activity-list');
+        const topJogadoresContainer = document.querySelector('.player-list');
+        const jogosContainer = document.querySelector('.games-list');
+
+        // ===== FUNÇÕES DE RENDERIZAÇÃO =====
+
+        /**
+         * Atualizar cards de estatísticas
+         */
+        function atualizarEstatisticas(stats) {
+            if (statsElements.usuarios) {
+                statsElements.usuarios.textContent = formatarNumero(stats.usuarios);
+            }
+            if (statsElements.partidas) {
+                statsElements.partidas.textContent = formatarNumero(stats.partidas);
+            }
+            if (statsElements.tempoMedio) {
+                statsElements.tempoMedio.textContent = `${stats.tempoMedio}h`;
+            }
+            if (statsElements.conquistas) {
+                statsElements.conquistas.textContent = formatarNumero(stats.conquistas);
+            }
+        }
+
+        /**
+         * Renderizar lista de atividades
+         */
+        function renderizarAtividades(atividades) {
+            if (!atividadesContainer) return;
+
+            if (atividades.length === 0) {
+                atividadesContainer.innerHTML = `
+                    <li class="activity-item">
+                        <div class="activity-icon game">📭</div>
+                        <div class="activity-content">
+                            <h4>Nenhuma atividade recente</h4>
+                            <p>As atividades aparecerão aqui quando os usuários interagirem com a plataforma</p>
+                        </div>
+                    </li>
+                `;
+                return;
+            }
+
+            atividadesContainer.innerHTML = atividades.map(atividade => `
+                <li class="activity-item">
+                    <div class="activity-icon ${obterClasseAtividade(atividade.tipo)}">
+                        ${obterIconeAtividade(atividade.tipo)}
+                    </div>
+                    <div class="activity-content">
+                        <h4>${atividade.titulo}</h4>
+                        <p>${atividade.descricao}</p>
+                    </div>
+                    <span class="activity-time">${formatarTempoRelativo(atividade.timestamp)}</span>
+                </li>
+            `).join('');
+        }
+
+        /**
+         * Renderizar top jogadores
+         */
+        function renderizarTopJogadores(jogadores) {
+            if (!topJogadoresContainer) return;
+
+            if (jogadores.length === 0) {
+                topJogadoresContainer.innerHTML = `
+                    <li class="player-item">
+                        <div class="player-icon">🏆</div>
+                        <div class="player-info">
+                            <h4>Nenhum jogador ainda</h4>
+                            <p>O ranking aparecerá quando houver jogadores</p>
+                        </div>
+                    </li>
+                `;
+                return;
+            }
+
+            topJogadoresContainer.innerHTML = jogadores.map((jogador, index) => `
+                <li class="player-item">
+                    <div class="player-rank">${index + 1}</div>
+                    <div class="player-avatar">${obterIniciais(jogador.nome)}</div>
+                    <div class="player-info">
+                        <h4>${jogador.nome}</h4>
+                        <p>Nível ${jogador.nivel || 1}</p>
+                    </div>
+                    <span class="player-score">${formatarNumero(jogador.pontuacao || 0)}</span>
+                </li>
+            `).join('');
+        }
+
+        /**
+         * Renderizar jogos disponíveis
+         */
+        function renderizarJogos(jogos) {
+            if (!jogosContainer) return;
+
+            // Jogos padrão (Jogos removidos do array default também)
+            const jogosDefault = [
+                {
+                    id: 'jogo-da-velha',
+                    nome: 'Jogo da Velha',
+                    descricao: 'Desafie outros jogadores no clássico jogo da velha em tempo real',
+                    icone: '❌⭕',
+                    status: 'ativo',
+                    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    jogadores: 0,
+                    partidas: 0,
+                    online: 0
+                },
+                {
+                    id: 'quiz-spfc',
+                    nome: 'Quiz SLICED',
+                    descricao: 'Teste seus conhecimentos sobre a história do SLICED',
+                    icone: '❓',
+                    status: 'ativo',
+                    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    jogadores: 0,
+                    partidas: 0,
+                    online: 0
+                }
+            ];
+
+            const jogosParaRenderizar = jogos.length > 0 ? jogos : jogosDefault;
+
+            jogosContainer.innerHTML = jogosParaRenderizar.map(jogo => {
+                const statusTexto = jogo.status === 'ativo' ? 'Ativo' : 'Em Breve';
+                const statusClasse = jogo.status === 'ativo' ? 'active' : 'coming-soon';
+                
+                return `
+                    <div class="game-card">
+                        <div class="game-thumbnail" style="background: ${jogo.gradient || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};">
+                            <span>${jogo.icone}</span>
+                            <span class="game-status ${statusClasse}">${statusTexto}</span>
+                        </div>
+                        <div class="game-body">
+                            <h3>${jogo.nome}</h3>
+                            <p>${jogo.descricao}</p>
+                            <div class="game-stats">
+                                <div class="game-stat">
+                                    <span>Jogadores</span>
+                                    <strong>${formatarNumero(jogo.jogadores || 0)}</strong>
+                                </div>
+                                <div class="game-stat">
+                                    <span>Partidas</span>
+                                    <strong>${formatarNumero(jogo.partidas || 0)}</strong>
+                                </div>
+                                <div class="game-stat">
+                                    <span>Online</span>
+                                    <strong>${formatarNumero(jogo.online || 0)}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ===== INICIALIZAÇÃO =====
+
+        /**
+         * Carregar dados iniciais do dashboard
+         */
+        async function carregarDashboard() {
+            try {
+                console.log('%c🔄 Carregando dados do Firebase...', 'color: #4facfe; font-size: 14px;');
+                
+                // Mostrar loading (opcional)
+                const dados = await inicializarDashboard();
+                
+                // Atualizar interface
+                atualizarEstatisticas(dados.stats);
+                renderizarAtividades(dados.atividades);
+                renderizarTopJogadores(dados.topJogadores);
+                renderizarJogos(dados.jogos);
+                
+                console.log('%c✅ Dashboard carregado com sucesso!', 'color: #38ef7d; font-size: 14px;');
+                console.log('Dados:', dados);
+                
+                // Configurar listener para atividades em tempo real
+                escutarAtividades((atividades) => {
+                    console.log('🔔 Novas atividades recebidas:', atividades.length);
+                    renderizarAtividades(atividades);
+                }, 6);
+                
+                // Configurar listener para usuários online em tempo real
+                escutarUsuariosOnlineCount((totalOnline) => {
+                    console.log('👥 Usuários online atualizados:', totalOnline);
+                    if (statsElements.usuarios) {
+                        statsElements.usuarios.textContent = formatarNumero(totalOnline);
+                    }
+                });
+                
+            } catch (error) {
+                console.error('%c❌ Erro ao carregar dashboard:', 'color: #f5576c; font-size: 14px;', error);
+                
+                // Mostrar mensagem de erro amigável
+                if (atividadesContainer) {
+                    atividadesContainer.innerHTML = `
+                        <li class="activity-item">
+                            <div class="activity-icon game">⚠️</div>
+                            <div class="activity-content">
+                                <h4>Erro ao carregar dados</h4>
+                                <p>Verifique sua conexão com o Firebase. Consulte o console para mais detalhes.</p>
+                            </div>
+                        </li>
+                    `;
+                }
+            }
+        }
+
+        // ===== UTILITÁRIOS =====
+
+        /**
+         * Atualizar hora em tempo real
+         */
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            const dateString = now.toLocaleDateString('pt-BR', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            console.log(`📅 ${dateString} - ${timeString}`);
+        }
+
+        // Atualizar a cada minuto
+        setInterval(updateTime, 60000);
+        updateTime();
+
+        // ===== ANIMAÇÕES =====
+
+        // Animação de entrada dos cards
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observar todos os cards
+        document.querySelectorAll('.stat-card, .card, .game-card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // ===== MOBILE =====
+
+        // Toggle sidebar em mobile
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+            });
+        }
+
+        // Fechar sidebar ao clicar fora (mobile)
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 1024) {
+                if (sidebar && !sidebar.contains(e.target) && !e.target.classList.contains('menu-toggle')) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
+        // ===== INICIAR APLICAÇÃO =====
+
+        // Log de boas-vindas
+        console.log('%c🎮 SLICED Gaming Dashboard ', 'background: #00ff88; color: white; font-size: 20px; padding: 10px;');
+        
+        // Carregar dados
+        carregarDashboard();
+    </script>
+</body>
+</html>

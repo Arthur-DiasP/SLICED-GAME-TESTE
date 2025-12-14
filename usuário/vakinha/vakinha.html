@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vakinha Solidária - SLICED</title>
+    <link rel="icon" href="/imgs/LOGO-SLICED.png" type="image/png">
+    <meta name="description" content="Apoie a manutenção da plataforma SLICED">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #00ff88;
+            --primary-color-escuro: #00cc6e;
+            --dark-bg: #000000;
+            --text-primary: #FFFFFF;
+            --gradient-primary: linear-gradient(135deg, #000000 0%, #1a0000 25%, #00cc6e 50%, #1a0000 75%, #000000 100%);
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gradient-primary);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            color: var(--text-primary);
+            padding-bottom: 100px;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Partículas */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(0, 255, 136, 0.3);
+            border-radius: 50%;
+            animation: floatUp linear infinite;
+            bottom: -10px;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-logo img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 136, 0.6));
+        }
+
+        .header-logo h1 {
+            font-size: 1.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ffffff 0%, #00ff88 50%, #ffffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .user-email {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .btn-logout {
+            padding: 8px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .vakinha-card {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vakinha-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+        }
+
+        .icon-header {
+            font-size: 64px;
+            color: #00ff88;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+        }
+
+        .card-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .card-description {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .pix-container {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin: 30px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .pix-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #00ff88;
+            font-weight: 700;
+        }
+
+        .pix-key-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 20px;
+            border-radius: 8px;
+            word-break: break-all;
+            width: 100%;
+        }
+
+        .btn-copy-pix {
+            background: #00ff88;
+            color: black;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+        }
+
+        .btn-copy-pix:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.6);
+            background: #00cc6e;
+        }
+
+        .btn-copy-pix:active {
+            transform: scale(0.98);
+        }
+
+        .disclaimer-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 165, 0, 0.1);
+            border-left: 3px solid #ffa500;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .disclaimer-title {
+            color: #ffa500;
+            font-weight: 700;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .disclaimer-text {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .goals-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .goal-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .goal-item i {
+            color: #00ff88;
+            font-size: 24px;
+        }
+
+        .goal-item span {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Bottom Navbar */
+        .bottom-navbar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 15px 30px;
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px 12px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(0, 255, 136, 0.15);
+            color: #00ff88;
+            transform: translateY(-5px);
+        }
+
+        .nav-item .material-icons {
+            font-size: 26px;
+        }
+
+        .nav-item span {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            .header-user {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .user-info {
+                text-align: left;
+            }
+            .card-title {
+                font-size: 1.8rem;
+            }
+            .goals-list {
+                grid-template-columns: 1fr;
+            }
+            .pix-key-display {
+                font-size: 0.9rem;
+            }
+            .bottom-navbar {
+                width: 90%;
+                gap: 15px;
+                padding: 10px 15px;
+            }
+        }
+
+        /* =========================================
+   AJUSTES GERAIS PARA CELULAR (Max 600px)
+   Copie e cole no final do seu CSS
+   ========================================= */
+
+@media (max-width: 600px) {
+    
+    /* --- 1. HEADER (Menu Superior) COMPACTO --- */
+    .header {
+        flex-direction: row !important; /* Força ficar tudo na mesma linha */
+        padding: 5px 15px !important;   /* Pouco espaço nas bordas */
+        height: 55px;                   /* Altura fixa bem menor */
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    /* Logo: Mantém apenas a imagem pequena */
+    .header-logo {
+        gap: 0;
+    }
+    .header-logo img {
+        width: 32px;
+        height: 32px;
+    }
+    .header-logo h1 {
+        display: none !important; /* Esconde o texto 'SLICED' */
+    }
+
+    /* Área do Usuário: Força linha única */
+    .header-user {
+        width: auto !important;
+        flex-direction: row !important;
+        gap: 8px;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    /* Informações de Texto do Usuário */
+    .user-info {
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .user-email {
+        display: none !important; /* Esconde o Email */
+    }
+    .user-name {
+        font-size: 0.85rem;
+        margin-bottom: 0;
+        white-space: nowrap;      /* Impede quebra de linha */
+        max-width: 90px;          /* Limita largura para não estourar */
+        overflow: hidden;
+        text-overflow: ellipsis;  /* Coloca '...' se o nome for grande */
+    }
+
+    /* Botão Sair compacto */
+    .btn-logout {
+        padding: 5px 12px;
+        font-size: 0.75rem;
+        border-radius: 6px;
+    }
+
+
+    /* --- 2. NAVBAR (Menu Inferior) AJUSTADA --- */
+    .bottom-navbar {
+        width: 98%;              /* Ocupa quase toda a largura */
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 5px;             /* Cola no fundo */
+        padding: 6px 2px;        /* Padding mínimo */
+        gap: 2px;                /* Espaço mínimo entre itens */
+        border-radius: 16px;
+        justify-content: space-between;
+    }
+
+    .nav-item {
+        padding: 4px 0;
+        min-width: 0;            /* Permite encolher o quanto precisar */
+        flex: 1;                 /* Divide o espaço igualmente por 6 */
+        border-radius: 8px;
+    }
+
+    /* Ícone menor */
+    .nav-item .material-icons {
+        font-size: 20px !important;
+        margin-bottom: 2px;
+    }
+
+    /* Texto minúsculo para caber */
+    .nav-item span {
+        font-size: 8px !important;
+        letter-spacing: 0;
+        display: block;
+        white-space: nowrap;
+    }
+    
+    /* Ajuste do hover para não pular */
+    .nav-item:hover {
+        transform: translateY(-2px);
+    }
+}
+    </style>
+</head>
+<body>
+    <!-- Partículas de fundo -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-logo">
+            <img src="/imgs/LOGO-SLICED.png" alt="SLICED Logo">
+            <h1>SLICED</h1>
+        </div>
+        <div class="header-user">
+            <div class="user-info">
+                <div class="user-name" id="userName">Carregando...</div>
+                <div class="user-email" id="userEmail"></div>
+            </div>
+            <button class="btn-logout" id="btnLogout">Sair</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="vakinha-card">
+            <i class="material-icons icon-header">volunteer_activism</i>
+            <h2 class="card-title">Vakinha Solidária</h2>
+            
+            <p class="card-description">
+                Ajude o <strong>SLICED</strong> a continuar no ar! Sua contribuição é fundamental para cobrirmos os custos de 
+                manutenção da plataforma, servidores de banco de dados, mão de obra da equipe técnica e investimentos em marketing para crescer nossa comunidade.
+            </p>
+
+            <div class="goals-list">
+                <div class="goal-item">
+                    <i class="material-icons">storage</i>
+                    <span>Servidores & Banco de Dados</span>
+                </div>
+                <div class="goal-item">
+                    <i class="material-icons">engineering</i>
+                    <span>Manutenção Técnica</span>
+                </div>
+                <div class="goal-item">
+                    <i class="material-icons">campaign</i>
+                    <span>Marketing & Expansão</span>
+                </div>
+            </div>
+
+            <div class="pix-container">
+                <span class="pix-label">Chave PIX (E-mail ou Aleatória)</span>
+                <!-- SUBSTITUA ABAIXO PELA SUA CHAVE REAL -->
+                <div class="pix-key-display" id="pixKeyText">a2e2049a-811a-4948-ba69-6e661432f029</div>
+                
+                <button class="btn-copy-pix" onclick="copyPixKey()">
+                    <i class="material-icons">content_copy</i>
+                    Copiar Chave PIX
+                </button>
+            </div>
+
+            <div class="disclaimer-box">
+                <div class="disclaimer-title">
+                    <i class="material-icons">info</i>
+                    Informação de Segurança
+                </div>
+                <p class="disclaimer-text">
+                    Ao realizar a transferência, certifique-se de que o destinatário apareça como <strong>grupodiasz</strong>. 
+                    Todos os valores arrecadados são reinvestidos integralmente no ecossistema SLICED.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navbar -->
+    <nav class="bottom-navbar">
+        <a href="../inicio/inicio.html" class="nav-item">
+            <i class="material-icons">home</i>
+            <span>Início</span>
+        </a>
+        <a href="../termos/termos.html" class="nav-item">
+            <i class="material-icons">description</i>
+            <span>Termos</span>
+        </a>
+        <a href="../afiliados/afiliados.html" class="nav-item">
+            <i class="material-icons">group_add</i>
+            <span>Afiliados</span>
+        </a>
+        <a href="#" class="nav-item active">
+            <i class="material-icons">favorite</i>
+            <span>Vakinha</span>
+        </a>
+        <a href="../anuncie/anuncie.html" class="nav-item">
+            <i class="material-icons">campaign</i>
+            <span>Anuncie</span>
+        </a>
+        <a href="../perfil/perfil.html" class="nav-item">
+            <i class="material-icons">person</i>
+            <span>Perfil</span>
+        </a>
+    </nav>
+
+    <script type="module">
+        import { iniciarRastreamentoGlobal } from '../../controle-dados/tracker-config.js';
+
+        // Inicializar rastreamento (Authentication Check)
+        iniciarRastreamentoGlobal({
+            onUserLoaded: (dados) => {
+                document.getElementById('userName').textContent = dados.nomeCompleto;
+                document.getElementById('userEmail').textContent = dados.email;
+            },
+            onLogout: () => {
+                window.location.href = '../../login/login.html';
+            }
+        });
+
+        // Efeito de Partículas
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 40; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 8 + 's';
+            particle.style.animationDuration = (Math.random() * 5 + 5) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Função para Copiar PIX
+        window.copyPixKey = function() {
+            const pixText = document.getElementById('pixKeyText').innerText;
+            
+            navigator.clipboard.writeText(pixText).then(() => {
+                const btn = document.querySelector('.btn-copy-pix');
+                const originalHTML = btn.innerHTML;
+                
+                btn.innerHTML = '<i class="material-icons">check_circle</i> Chave Copiada!';
+                btn.style.background = '#ffffff';
+                btn.style.color = '#000000';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.style.background = '#00ff88';
+                    btn.style.color = '#000000';
+                }, 2500);
+            }).catch(err => {
+                console.error('Erro ao copiar: ', err);
+                alert('Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.');
+            });
+        }
+    </script>
+</body>
+</html>

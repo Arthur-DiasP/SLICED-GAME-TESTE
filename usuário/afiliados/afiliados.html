@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Afiliados - SLICED</title>
+    <link rel="icon" href="/imgs/LOGO-SLICED.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="afiliados.css">
+</head>
+<body>
+    <!-- Partículas de fundo -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-logo">
+            <img src="/imgs/LOGO-SLICED.png" alt="SLICED Logo">
+            <h1>SLICED</h1>
+        </div>
+        <div class="header-user">
+            <div class="user-info">
+                <div class="user-name" id="userName">Carregando...</div>
+                <div class="user-email" id="userEmail"></div>
+            </div>
+            <button class="btn-logout" id="btnLogout">Sair</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="affiliates-hero">
+            <h2 class="hero-title">Programa de Afiliados Tricolor</h2>
+            <p class="hero-text">
+                Convide amigos para fazer parte do Clube da Fé e ganhe benefícios exclusivos. 
+                A cada novo sócio indicado, você acumula pontos que podem ser trocados por ingressos e produtos oficiais.
+            </p>
+
+            <div class="referral-box">
+                <label class="referral-label">Seu Link Exclusivo</label>
+                <div class="referral-input-group">
+                    <input type="text" class="referral-input" value="spfc.com.br/convite/torcedor123" readonly id="referralLink">
+                    <button class="btn-copy" onclick="copyLink()">Copiar Link</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">0</div>
+                <div class="stat-label">Indicações</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">R$ 0,00</div>
+                <div class="stat-label">Ganhos Totais</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">0</div>
+                <div class="stat-label">Pontos Acumulados</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navbar -->
+    <nav class="bottom-navbar">
+        <a href="../inicio/inicio.html" class="nav-item">
+            <i class="material-icons">home</i>
+            <span>Início</span>
+        </a>
+        <a href="../termos/termos.html" class="nav-item">
+            <i class="material-icons">description</i>
+            <span>Termos</span>
+        </a>
+        <a href="#" class="nav-item active">
+            <i class="material-icons">group_add</i>
+            <span>Afiliados</span>
+        </a>
+        <a href="/usuário/vakinha/vakinha.html" class="nav-item">
+            <i class="material-icons">favorite</i>
+            <span>Vakinha</span>
+        </a>
+        <a href="../anuncie/anuncie.html" class="nav-item">
+            <i class="material-icons">campaign</i>
+            <span>Anuncie</span>
+        </a>
+        <a href="../perfil/perfil.html" class="nav-item">
+            <i class="material-icons">person</i>
+            <span>Perfil</span>
+        </a>
+    </nav>
+
+    <script type="module">
+        import { iniciarRastreamentoGlobal } from '../../controle-dados/tracker-config.js';
+
+        // Inicializar rastreamento
+        iniciarRastreamentoGlobal({
+            onUserLoaded: (dados) => {
+                // Atualizar dados na tela
+                document.getElementById('userName').textContent = dados.nomeCompleto;
+                document.getElementById('userEmail').textContent = dados.email;
+                
+                // Gerar link de afiliado baseado no ID (dados.uid vem do Firestore)
+                const userIdShort = dados.uid.substring(0, 8);
+                document.getElementById('referralLink').value = `spfc.com.br/convite/${userIdShort}`;
+            },
+            onLogout: () => {
+                window.location.href = '../../login/login.html';
+            }
+        });
+
+        // Partículas
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 8 + 's';
+            particle.style.animationDuration = (Math.random() * 5 + 5) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Copy Link Function
+        window.copyLink = function() {
+            const copyText = document.getElementById("referralLink");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); 
+            navigator.clipboard.writeText(copyText.value);
+            
+            const btn = document.querySelector('.btn-copy');
+            const originalText = btn.innerText;
+            btn.innerText = 'Copiado!';
+            btn.style.background = '#4CAF50';
+            
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.background = '';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

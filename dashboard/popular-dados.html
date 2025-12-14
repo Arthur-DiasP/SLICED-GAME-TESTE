@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popular Dados - SLICED</title>
+    <link rel="icon" href="/imgs/LOGO-SLICED.png" type="image/png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #151b3d 100%);
+            color: white;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #00ff88 0%, #ff4757 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .description {
+            color: #b8c1ec;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ff88 0%, #ff4757 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #status {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        #status p {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        #status p.success {
+            background: rgba(56, 239, 125, 0.1);
+            color: #38ef7d;
+        }
+
+        #status p.error {
+            background: rgba(245, 87, 108, 0.1);
+            color: #f5576c;
+        }
+
+        #status p.info {
+            background: rgba(79, 172, 254, 0.1);
+            color: #4facfe;
+        }
+
+        #status p.warning {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Popular Dados - SLICED Dashboard</h1>
+        <p class="description">
+            Este utilitário irá popular o Firebase Firestore com dados iniciais para o dashboard funcionar corretamente.
+            Clique no botão abaixo para começar.
+        </p>
+
+        <div class="button-group">
+            <button id="btnPopular" class="btn-primary">
+                ➕ Popular Dados Iniciais
+            </button>
+            <button id="btnLimpar" class="btn-secondary">
+                🗑️ Limpar Status
+            </button>
+        </div>
+
+        <div id="status"></div>
+    </div>
+
+    <script type="module">
+        import { db } from '../controle-dados/firebase-config.js';
+        import { 
+            collection, 
+            addDoc, 
+            setDoc, 
+            doc, 
+            Timestamp 
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const btnPopular = document.getElementById('btnPopular');
+        const btnLimpar = document.getElementById('btnLimpar');
+        const statusDiv = document.getElementById('status');
+
+        function addStatus(message, type = 'info') {
+            const p = document.createElement('p');
+            p.className = type;
+            p.textContent = message;
+            statusDiv.appendChild(p);
+            statusDiv.scrollTop = statusDiv.scrollHeight;
+        }
+
+        function addStatusWithSpinner(message) {
+            const p = document.createElement('p');
+            p.className = 'info';
+            p.innerHTML = `<span class="spinner"></span>${message}`;
+            statusDiv.appendChild(p);
+            statusDiv.scrollTop = statusDiv.scrollHeight;
+            return p;
+        }
+
+        btnLimpar.addEventListener('click', () => {
+            statusDiv.innerHTML = '';
+        });
+
+        btnPopular.addEventListener('click', async () => {
+            btnPopular.disabled = true;
+            statusDiv.innerHTML = '';
+            
+            try {
+                addStatus('🔄 Iniciando população de dados...', 'info');
+
+                // 1. Adicionar jogos
+                addStatus('', 'info');
+                addStatus('📦 Adicionando jogos...', 'info');
+                
+                const jogos = [
+                    {
+                        nome: "Jogo da Velha",
+                        descricao: "Desafie outros jogadores no clássico jogo da velha em tempo real",
+                        icone: "❌⭕",
+                        status: "ativo",
+                        gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                        jogadores: 1234,
+                        partidas: 5678,
+                        online: 89
+                    },
+                    {
+                        nome: "Quiz SLICED",
+                        descricao: "Teste seus conhecimentos sobre a história do SLICED",
+                        icone: "❓",
+                        status: "ativo",
+                        gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                        jogadores: 892,
+                        partidas: 2340,
+                        online: 45
+                    },
+                    {
+                        nome: "Memória SLICED",
+                        descricao: "Encontre os pares de cartas com ídolos e momentos históricos",
+                        icone: "🎯",
+                        status: "em-breve",
+                        gradient: "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)",
+                        jogadores: 0,
+                        partidas: 0,
+                        online: 0
+                    },
+                    {
+                        nome: "Quebra-Cabeça",
+                        descricao: "Monte imagens históricas do clube em diferentes dificuldades",
+                        icone: "🧩",
+                        status: "em-breve",
+                        gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+                        jogadores: 0,
+                        partidas: 0,
+                        online: 0
+                    }
+                ];
+
+                for (const jogo of jogos) {
+                    const jogoId = jogo.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ /g, '-');
+                    await setDoc(doc(db, 'jogos', jogoId), jogo);
+                    addStatus(`✅ Jogo "${jogo.nome}" adicionado`, 'success');
+                }
+
+                // 2. Adicionar atividades de exemplo
+                addStatus('', 'info');
+                addStatus('📋 Adicionando atividades de exemplo...', 'info');
+                
+                const atividades = [
+                    {
+                        tipo: 'game',
+                        titulo: 'Nova partida de Jogo da Velha',
+                        descricao: 'João Silva venceu Maria Santos',
+                        timestamp: Timestamp.now()
+                    },
+                    {
+                        tipo: 'achievement',
+                        titulo: 'Conquista desbloqueada',
+                        descricao: 'Pedro Costa alcançou "Mestre dos Jogos"',
+                        timestamp: Timestamp.fromMillis(Date.now() - 15 * 60 * 1000)
+                    },
+                    {
+                        tipo: 'user',
+                        titulo: 'Novo usuário registrado',
+                        descricao: 'Ana Oliveira se juntou à plataforma',
+                        timestamp: Timestamp.fromMillis(Date.now() - 32 * 60 * 1000)
+                    },
+                    {
+                        tipo: 'quiz',
+                        titulo: 'Quiz completado',
+                        descricao: 'Carlos Mendes acertou 9/10 questões',
+                        timestamp: Timestamp.fromMillis(Date.now() - 60 * 60 * 1000)
+                    },
+                    {
+                        tipo: 'record',
+                        titulo: 'Novo recorde estabelecido',
+                        descricao: 'Beatriz Lima bateu o recorde em Quiz SLICED',
+                        timestamp: Timestamp.fromMillis(Date.now() - 2 * 60 * 60 * 1000)
+                    },
+                    {
+                        tipo: 'profile',
+                        titulo: 'Perfil atualizado',
+                        descricao: 'Rafael Souza alterou sua foto de perfil',
+                        timestamp: Timestamp.fromMillis(Date.now() - 3 * 60 * 60 * 1000)
+                    }
+                ];
+
+                for (const atividade of atividades) {
+                    await addDoc(collection(db, 'atividades'), atividade);
+                    addStatus(`✅ Atividade "${atividade.titulo}" adicionada`, 'success');
+                }
+
+                // 3. Adicionar usuários de exemplo (para top jogadores)
+                addStatus('', 'info');
+                addStatus('👥 Adicionando usuários de exemplo...', 'info');
+                
+                const usuarios = [
+                    {
+                        nomeCompleto: 'João Silva',
+                        email: 'joao.silva@example.com',
+                        pontuacao: 8542,
+                        nivel: 45,
+                        tempoOnline: 250,
+                        dataCadastro: Timestamp.now()
+                    },
+                    {
+                        nomeCompleto: 'Maria Santos',
+                        email: 'maria.santos@example.com',
+                        pontuacao: 7891,
+                        nivel: 42,
+                        tempoOnline: 220,
+                        dataCadastro: Timestamp.now()
+                    },
+                    {
+                        nomeCompleto: 'Pedro Costa',
+                        email: 'pedro.costa@example.com',
+                        pontuacao: 7234,
+                        nivel: 40,
+                        tempoOnline: 200,
+                        dataCadastro: Timestamp.now()
+                    },
+                    {
+                        nomeCompleto: 'Ana Oliveira',
+                        email: 'ana.oliveira@example.com',
+                        pontuacao: 6789,
+                        nivel: 38,
+                        tempoOnline: 180,
+                        dataCadastro: Timestamp.now()
+                    },
+                    {
+                        nomeCompleto: 'Carlos Mendes',
+                        email: 'carlos.mendes@example.com',
+                        pontuacao: 6234,
+                        nivel: 36,
+                        tempoOnline: 160,
+                        dataCadastro: Timestamp.now()
+                    }
+                ];
+
+                for (const usuario of usuarios) {
+                    await addDoc(collection(db, 'SLICED'), usuario);
+                    addStatus(`✅ Usuário "${usuario.nomeCompleto}" adicionado`, 'success');
+                }
+
+                // 4. Adicionar partidas de exemplo
+                addStatus('', 'info');
+                addStatus('🎮 Adicionando partidas de exemplo...', 'info');
+                
+                for (let i = 0; i < 10; i++) {
+                    await addDoc(collection(db, 'partidas'), {
+                        jogo: 'jogo-da-velha',
+                        timestamp: Timestamp.fromMillis(Date.now() - Math.random() * 24 * 60 * 60 * 1000)
+                    });
+                }
+                addStatus(`✅ 10 partidas adicionadas`, 'success');
+
+                // 5. Adicionar conquistas de exemplo
+                addStatus('', 'info');
+                addStatus('🏆 Adicionando conquistas de exemplo...', 'info');
+                
+                for (let i = 0; i < 5; i++) {
+                    await addDoc(collection(db, 'conquistas'), {
+                        nome: `Conquista ${i + 1}`,
+                        timestamp: Timestamp.now()
+                    });
+                }
+                addStatus(`✅ 5 conquistas adicionadas`, 'success');
+
+                // Finalização
+                addStatus('', 'info');
+                addStatus('🎉 Dados populados com sucesso!', 'success');
+                addStatus('✅ Você pode fechar esta página e acessar o dashboard agora.', 'success');
+                
+            } catch (error) {
+                addStatus(`❌ Erro: ${error.message}`, 'error');
+                console.error('Erro detalhado:', error);
+            } finally {
+                btnPopular.disabled = false;
+            }
+        });
+
+        // Log inicial
+        console.log('%c🎮 SLICED - Popular Dados ', 'background: #00ff88; color: white; font-size: 16px; padding: 8px;');
+        console.log('Firebase conectado e pronto para popular dados.');
+    </script>
+</body>
+</html>

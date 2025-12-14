@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migração de Chats - SLICED</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .warning {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .warning h3 {
+            color: #ffc107;
+            margin-bottom: 8px;
+        }
+
+        .info {
+            background: rgba(0, 255, 136, 0.1);
+            border-left: 4px solid #00ff88;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .info h3 {
+            color: #00ff88;
+            margin-bottom: 8px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            display: none;
+        }
+
+        .progress.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .log {
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+
+        .log-item {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-left: 3px solid #00ff88;
+            padding-left: 10px;
+        }
+
+        .log-item.error {
+            border-left-color: #ff4444;
+            color: #ff8888;
+        }
+
+        .log-item.success {
+            border-left-color: #00ff88;
+            color: #88ffbb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Migração de Chats</h1>
+        <p style="margin-bottom: 20px; opacity: 0.8;">Migrar estrutura antiga para SLICED → Chat</p>
+
+        <div class="warning">
+            <h3>⚠️ Atenção</h3>
+            <p>Esta operação irá migrar todos os chats da estrutura antiga (<code>chats/</code>) para a nova estrutura (<code>SLICED/{userId}/Chat/support</code>).</p>
+            <p style="margin-top: 10px;"><strong>Certifique-se de fazer backup antes de continuar!</strong></p>
+        </div>
+
+        <div class="info">
+            <h3>ℹ️ O que será feito:</h3>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>Buscar todos os chats da coleção antiga</li>
+                <li>Criar documentos na nova estrutura</li>
+                <li>Migrar todas as mensagens</li>
+                <li>Manter os dados originais intactos</li>
+            </ul>
+        </div>
+
+        <button id="btnMigrar" onclick="iniciarMigracao()">Iniciar Migração</button>
+
+        <div id="progress" class="progress">
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill">0%</div>
+            </div>
+            <div id="log" class="log"></div>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTX7MMnhHr_QgDpjPuZGuRyG4Uk9GpQAE",
+            authDomain: "sliced-4f1e3.firebaseapp.com",
+            projectId: "sliced-4f1e3",
+            storageBucket: "sliced-4f1e3.firebasestorage.app",
+            messagingSenderId: "800471538497",
+            appId: "1:800471538497:web:c7d7b9eb55c72687365fc0",
+            measurementId: "G-GDYH409PE2"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            const logItem = document.createElement('div');
+            logItem.className = `log-item ${type}`;
+            logItem.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(logItem);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function updateProgress(current, total) {
+            const percentage = Math.round((current / total) * 100);
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = percentage + '%';
+            progressFill.textContent = percentage + '%';
+        }
+
+        async function iniciarMigracao() {
+            const btnMigrar = document.getElementById('btnMigrar');
+            const progress = document.getElementById('progress');
+            
+            btnMigrar.disabled = true;
+            progress.classList.add('active');
+            
+            addLog('🚀 Iniciando migração...', 'info');
+
+            try {
+                // Buscar todos os chats antigos
+                addLog('📥 Buscando chats da estrutura antiga...', 'info');
+                const chatsAntigos = await db.collection('chats').get();
+                
+                if (chatsAntigos.empty) {
+                    addLog('✅ Nenhum chat encontrado na estrutura antiga.', 'success');
+                    addLog('ℹ️ Migração não necessária.', 'info');
+                    btnMigrar.disabled = false;
+                    return;
+                }
+
+                const totalChats = chatsAntigos.size;
+                addLog(`📊 Encontrados ${totalChats} chat(s) para migrar.`, 'info');
+
+                let chatsMigrados = 0;
+                let erros = 0;
+
+                // Migrar cada chat
+                for (const doc of chatsAntigos.docs) {
+                    const chatData = doc.data();
+                    const userId = doc.id;
+
+                    try {
+                        addLog(`🔄 Migrando chat do usuário: ${chatData.userName || userId}`, 'info');
+
+                        // Criar chat na nova estrutura
+                        const novoChatRef = db.collection('SLICED').doc(userId)
+                            .collection('Chat').doc('support');
+
+                        await novoChatRef.set(chatData);
+                        addLog(`✓ Chat criado na nova estrutura`, 'success');
+
+                        // Migrar mensagens
+                        const mensagens = await db.collection('chats').doc(userId)
+                            .collection('messages').get();
+
+                        if (!mensagens.empty) {
+                            addLog(`📨 Migrando ${mensagens.size} mensagem(ns)...`, 'info');
+                            
+                            for (const msgDoc of mensagens.docs) {
+                                await novoChatRef.collection('messages')
+                                    .doc(msgDoc.id)
+                                    .set(msgDoc.data());
+                            }
+                            
+                            addLog(`✓ ${mensagens.size} mensagem(ns) migrada(s)`, 'success');
+                        }
+
+                        chatsMigrados++;
+                        updateProgress(chatsMigrados, totalChats);
+                        addLog(`✅ Chat migrado com sucesso! (${chatsMigrados}/${totalChats})`, 'success');
+
+                    } catch (error) {
+                        erros++;
+                        addLog(`❌ Erro ao migrar chat ${userId}: ${error.message}`, 'error');
+                        console.error('Erro detalhado:', error);
+                    }
+                }
+
+                // Resumo final
+                addLog('', 'info');
+                addLog('═══════════════════════════════', 'info');
+                addLog('📊 RESUMO DA MIGRAÇÃO', 'info');
+                addLog('═══════════════════════════════', 'info');
+                addLog(`✅ Chats migrados: ${chatsMigrados}`, 'success');
+                if (erros > 0) {
+                    addLog(`❌ Erros: ${erros}`, 'error');
+                }
+                addLog(`📈 Total processado: ${totalChats}`, 'info');
+                addLog('', 'info');
+                
+                if (erros === 0) {
+                    addLog('🎉 MIGRAÇÃO CONCLUÍDA COM SUCESSO!', 'success');
+                    addLog('ℹ️ Os dados antigos foram mantidos para segurança.', 'info');
+                    addLog('ℹ️ Você pode deletar a coleção "chats" manualmente após verificar.', 'info');
+                } else {
+                    addLog('⚠️ Migração concluída com alguns erros.', 'error');
+                    addLog('ℹ️ Verifique os logs acima para detalhes.', 'info');
+                }
+
+            } catch (error) {
+                addLog(`❌ Erro fatal: ${error.message}`, 'error');
+                console.error('Erro fatal:', error);
+            } finally {
+                btnMigrar.disabled = false;
+                btnMigrar.textContent = 'Migrar Novamente';
+            }
+        }
+    </script>
+</body>
+</html>

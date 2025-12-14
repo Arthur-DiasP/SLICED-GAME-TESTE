@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anuncie - SLICED</title>
+    <link rel="icon" href="/imgs/LOGO-SLICED.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="anuncie.css">
+</head>
+<body>
+    <!-- Partículas de fundo -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-logo">
+            <img src="/imgs/LOGO-SLICED.png" alt="SLICED Logo">
+            <h1>SLICED</h1>
+        </div>
+        <div class="header-user">
+            <div class="user-info">
+                <div class="user-name" id="userName">Carregando...</div>
+                <div class="user-email" id="userEmail"></div>
+            </div>
+            <button class="btn-logout" id="btnLogout">Sair</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('criar')">Criar Anúncio</button>
+                <button class="tab-btn" onclick="switchTab('meus')">Meus Anúncios</button>
+            </div>
+        </div>
+
+        <!-- Tab: Criar Anúncio -->
+        <div id="tab-criar" class="tab-content active">
+            <div class="ad-form-card">
+                <form id="adForm">
+                    <div class="form-section">
+                        <h3 class="section-title">Detalhes da Campanha</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Categoria</label>
+                                <select class="form-select" id="categoria" required>
+                                    <option value="" disabled selected>Selecione uma categoria</option>
+                                    <option value="Empresa">Empresa</option>
+                                    <option value="Produto Físico">Produto Físico</option>
+                                    <option value="Produto Digital">Produto Digital</option>
+                                    <option value="Projeto">Projeto</option>
+                                    <option value="Startup">Startup</option>
+                                    <option value="Outros">Outros</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Nome do Anúncio</label>
+                                <input type="text" class="form-input" id="nomeAnuncio" placeholder="Ex: Lançamento Camisa 2025" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Descrição Curta</label>
+                            <textarea class="form-textarea" id="descricao" rows="3" placeholder="Descreva seu anúncio em poucas palavras..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">Mídia</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Imagens (Max 5)</label>
+                                <div class="upload-area" id="imageUpload">
+                                    <div class="upload-icon">📷</div>
+                                    <div class="upload-text">Clique ou arraste imagens aqui</div>
+                                    <input type="file" id="imageInput" multiple accept="image/*" style="display: none">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Vídeo (Opcional)</label>
+                                <div class="upload-area" id="videoUpload">
+                                    <div class="upload-icon">🎥</div>
+                                    <div class="upload-text">Clique ou arraste vídeo aqui</div>
+                                    <input type="file" id="videoInput" accept="video/*" style="display: none">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">Orçamento e Alcance</h3>
+                        <div class="budget-container">
+                            <div class="budget-display">
+                                <span>Investimento Diário</span>
+                                <span class="budget-value" id="budgetValue">R$ 500,00</span>
+                            </div>
+                            <input type="range" class="range-slider" id="budgetSlider" min="500" max="10000" step="500" value="500">
+                            
+                            <div class="metrics-card">
+                                <div class="metric-item">
+                                    <h4>Alcance Estimado</h4>
+                                    <div class="metric-value" id="reachValue">5k - 10k</div>
+                                </div>
+                                <div class="metric-item">
+                                    <h4>Visualizações</h4>
+                                    <div class="metric-value" id="viewsValue">2.5k</div>
+                                </div>
+                                <div class="metric-item">
+                                    <h4>Cliques Est.</h4>
+                                    <div class="metric-value" id="clicksValue">150 - 300</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Criar Campanha</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tab: Meus Anúncios -->
+        <div id="tab-meus" class="tab-content">
+            <div class="ads-grid" id="adsList">
+                <!-- Anúncios serão inseridos aqui via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navbar -->
+    <nav class="bottom-navbar">
+        <a href="../inicio/inicio.html" class="nav-item">
+            <i class="material-icons">home</i>
+            <span>Início</span>
+        </a>
+        <a href="../termos/termos.html" class="nav-item">
+            <i class="material-icons">description</i>
+            <span>Termos</span>
+        </a>
+        <a href="../afiliados/afiliados.html" class="nav-item">
+            <i class="material-icons">group_add</i>
+            <span>Afiliados</span>
+        </a>
+      <a href="/usuário/vakinha/vakinha.html" class="nav-item">
+            <i class="material-icons">favorite</i>
+            <span>Vakinha</span>
+        </a>
+        <a href="#" class="nav-item active">
+            <i class="material-icons">campaign</i>
+            <span>Anuncie</span>
+        </a>
+        <a href="../perfil/perfil.html" class="nav-item">
+            <i class="material-icons">person</i>
+            <span>Perfil</span>
+        </a>
+    </nav>
+
+   <script type="module">
+        import { iniciarRastreamentoGlobal } from '../../controle-dados/tracker-config.js';
+        
+        // Inicializar rastreamento e carregar dados
+        iniciarRastreamentoGlobal({
+            onUserLoaded: (dados) => {
+                // Atualizar UI com dados do usuário
+                document.getElementById('userName').textContent = dados.nomeCompleto;
+                document.getElementById('userEmail').textContent = dados.email;
+                
+                // Carregar anúncios salvos (Lógica específica da página)
+                loadAds();
+            },
+            onLogout: () => {
+                window.location.href = '../../login/login.html';
+            }
+        });
+
+        // Partículas
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 8 + 's';
+            particle.style.animationDuration = (Math.random() * 5 + 5) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Tabs Logic
+        window.switchTab = function(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            const buttons = document.querySelectorAll('.tab-btn');
+            if (tabName === 'criar') buttons[0].classList.add('active');
+            if (tabName === 'meus') buttons[1].classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            if (tabName === 'meus') {
+                loadAds();
+            }
+        }
+
+        // Budget Logic
+        const slider = document.getElementById('budgetSlider');
+        const budgetValue = document.getElementById('budgetValue');
+        const reachValue = document.getElementById('reachValue');
+        const viewsValue = document.getElementById('viewsValue');
+        const clicksValue = document.getElementById('clicksValue');
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+        }
+
+        function updateMetrics(value) {
+            budgetValue.textContent = formatCurrency(value);
+            
+            const baseReach = value * 15;
+            const maxReach = value * 25;
+            const views = Math.floor(value * 8.5);
+            const minClicks = Math.floor(value * 0.4);
+            const maxClicks = Math.floor(value * 0.8);
+
+            reachValue.textContent = `${(baseReach/1000).toFixed(1)}k - ${(maxReach/1000).toFixed(1)}k`;
+            viewsValue.textContent = `${(views/1000).toFixed(1)}k`;
+            clicksValue.textContent = `${minClicks} - ${maxClicks}`;
+        }
+
+        if(slider) {
+            slider.addEventListener('input', (e) => updateMetrics(e.target.value));
+        }
+
+        // File Upload UI Interaction
+        const imgUpload = document.getElementById('imageUpload');
+        if(imgUpload) imgUpload.addEventListener('click', () => document.getElementById('imageInput').click());
+        
+        const vidUpload = document.getElementById('videoUpload');
+        if(vidUpload) vidUpload.addEventListener('click', () => document.getElementById('videoInput').click());
+
+        // Form Submission
+        const adForm = document.getElementById('adForm');
+        if(adForm) {
+            adForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const newAd = {
+                    id: Date.now(),
+                    categoria: document.getElementById('categoria').value,
+                    nome: document.getElementById('nomeAnuncio').value,
+                    orcamento: slider.value,
+                    data: new Date().toLocaleDateString('pt-BR'),
+                    status: 'Em Análise'
+                };
+
+                const ads = JSON.parse(localStorage.getItem('spfc_ads') || '[]');
+                ads.unshift(newAd);
+                localStorage.setItem('spfc_ads', JSON.stringify(ads));
+
+                e.target.reset();
+                updateMetrics(500);
+                alert('Anúncio enviado para análise com sucesso!');
+                
+                switchTab('meus');
+            });
+        }
+
+        // Load Ads
+        function loadAds() {
+            const list = document.getElementById('adsList');
+            if(!list) return;
+
+            const ads = JSON.parse(localStorage.getItem('spfc_ads') || '[]');
+
+            if (ads.length === 0) {
+                list.innerHTML = '<p style="color: rgba(255,255,255,0.5); grid-column: 1/-1; text-align: center;">Nenhum anúncio criado ainda.</p>';
+                return;
+            }
+
+            list.innerHTML = ads.map(ad => `
+                <div class="ad-card">
+                    <div class="ad-status status-analise">${ad.status}</div>
+                    <h3 class="ad-title">${ad.nome}</h3>
+                    <div class="ad-details">
+                        <p>Categoria: ${ad.categoria}</p>
+                        <p>Orçamento: ${formatCurrency(ad.orcamento)}/dia</p>
+                        <p>Data: ${ad.data}</p>
+                    </div>
+                    <div class="ad-actions">
+                        ${ad.status === 'Aprovado' ? '<button class="btn-small btn-pay">Pagar Agora</button>' : ''}
+                        <button class="btn-small" style="background: rgba(255,255,255,0.1); color: white;">Detalhes</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize
+        if(slider) updateMetrics(500);
+    </script>
+</body>
+</html>
