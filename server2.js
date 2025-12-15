@@ -1,5 +1,5 @@
 // ==================================================================
-// ARQUIVO: server2.js (Versão Final: WebSocket + Webhook + Firestore)
+// ARQUIVO: server2.js (Versão Final: Secret Files + Webhook)
 // ==================================================================
 
 require('dotenv').config();
@@ -13,25 +13,45 @@ const { MercadoPagoConfig, Payment } = require('mercadopago');
 const { WebSocketServer } = require('ws');
 
 // ==================================================================
-// 1. CONFIGURAÇÃO FIREBASE ADMIN (BLINDADA CONTRA ERROS)
+// 1. CONFIGURAÇÃO FIREBASE ADMIN (COM SECRET FILES)
 // ==================================================================
 const admin = require('firebase-admin');
+const fs = require('fs');
 
-let db = null; // Inicializa nulo
+let db = null;
 
 try {
     let serviceAccount;
+
+    // A. CAMINHO NO RENDER (Secret Files)
+    // O nome do arquivo deve ser EXATAMENTE como você salvou no Render
+    const renderPath = '/etc/secrets/sliced-4f1e3-firebase-adminsdk-fbsvc-3a6db902e2.json';
     
-    // 1. Tenta carregar da Variável de Ambiente (Render/Produção)
-    if (process.env.FIREBASE_CREDENTIALS) {
-        console.log('🔄 [Firebase] Carregando credenciais via Variável de Ambiente...');
-        serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
+    // B. CAMINHO LOCAL (Seu computador)
+    // Pode ser o nome genérico ou o específico
+    const localPathGen = './serviceAccountKey.json';
+    const localPathSpec = './sliced-4f1e3-firebase-adminsdk-fbsvc-3a6db902e2.json';
+
+    // LÓGICA DE CARREGAMENTO:
+    if (fs.existsSync(renderPath)) {
+        console.log('✅ [Firebase] Carregando via Secret File (Render)...');
+        serviceAccount = require(renderPath);
     } 
-    // 2. Se não, tenta carregar do arquivo local (Desenvolvimento)
+    else if (fs.existsSync(localPathGen)) {
+        console.log('✅ [Firebase] Carregando via Arquivo Local (serviceAccountKey.json)...');
+        serviceAccount = require(localPathGen);
+    }
+    else if (fs.existsSync(localPathSpec)) {
+        console.log('✅ [Firebase] Carregando via Arquivo Local Específico...');
+        serviceAccount = require(localPathSpec);
+    }
+    else if (process.env.FIREBASE_CREDENTIALS) {
+        // Fallback antigo caso você ainda tenha a variável
+        console.log('✅ [Firebase] Carregando via Variável de Ambiente...');
+        serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
+    }
     else {
-        console.log('🔄 [Firebase] Tentando carregar arquivo local serviceAccountKey.json...');
-        // O require está dentro do try para não travar o servidor se o arquivo não existir
-        serviceAccount = require('./serviceAccountKey.json');
+        throw new Error('Nenhuma credencial do Firebase encontrada (Secret File ou Local).');
     }
 
     // Inicializa o App
@@ -41,16 +61,12 @@ try {
         });
     }
 
-    // Conecta no Firestore
     db = admin.firestore();
-    console.log('🔥 [Firebase] Admin conectado e pronto para salvar saldo!');
+    console.log('🔥 [Firebase] Admin conectado e pronto!');
 
 } catch (error) {
-    console.warn('⚠️ [AVISO] Não foi possível conectar ao Firebase Admin.');
-    console.warn('❌ Motivo:', error.message);
-    console.warn('💡 Se estiver no Render, verifique a variável FIREBASE_CREDENTIALS.');
-    console.warn('💡 Se estiver local, verifique o arquivo serviceAccountKey.json.');
-    // O servidor continuará rodando, mas sem salvar saldo
+    console.warn('⚠️ [AVISO] Falha ao conectar no Firebase.');
+    console.warn('❌ Erro:', error.message);
 }
 
 // ==================================================================
@@ -133,7 +149,7 @@ wss.on('connection', (ws) => {
 // ==================================================================
 async function adicionarSaldoUsuario(uid, valor) {
     if (!db) {
-        console.error('❌ [DB] Tentativa de salvar saldo falhou: Banco de dados não conectado.');
+        console.error('❌ [DB] Falha: Banco de dados desconectado.');
         return;
     }
 
@@ -149,13 +165,10 @@ async function adicionarSaldoUsuario(uid, valor) {
             }
 
             const dadosAtuais = doc.data();
-            // Pega o saldo atual (ou 0 se não existir) e garante que é número
             const saldoAtual = parseFloat(dadosAtuais.saldo) || 0;
             const valorAdicionar = parseFloat(valor);
-            
             const novoSaldo = saldoAtual + valorAdicionar;
 
-            // Atualiza
             t.update(userRef, { 
                 saldo: novoSaldo,
                 ultimaRecarga: admin.firestore.FieldValue.serverTimestamp()
@@ -181,7 +194,6 @@ app.post('/api/deposit/create', async (req, res) => {
         if (!payerCpf) payerCpf = '';
         payerCpf = payerCpf.replace(/\D/g, '');
 
-        // Email temporário para evitar erro de auto-pagamento em testes
         const emailSeguro = `cliente_${Date.now()}@emailtemp.com`;
 
         const paymentBody = {
@@ -194,9 +206,7 @@ app.post('/api/deposit/create', async (req, res) => {
                 identification: { type: 'CPF', number: payerCpf }
             },
             notification_url: `${BASE_URL}/api/webhook/mercadopago`,
-            metadata: {
-                user_id: userId // Guarda o ID do usuário para usar no webhook
-            }
+            metadata: { user_id: userId }
         };
 
         const payment = await paymentClient.create({ body: paymentBody });
@@ -237,13 +247,12 @@ app.post('/api/webhook/mercadopago', async (req, res) => {
             const amount = payment.transaction_amount;
 
             if (userId && amount) {
-                // 1. Atualiza Saldo no Firebase
+                // 1. Atualiza Saldo
                 await adicionarSaldoUsuario(userId, amount);
-                
-                // 2. Avisa o Frontend (popup e som)
+                // 2. Avisa Frontend
                 avisarFrontend(String(paymentId), 'approved');
             } else {
-                console.error('❌ [Webhook] Metadados (user_id) não encontrados no pagamento.');
+                console.error('❌ [Webhook] Metadados incompletos.');
             }
         }
     } catch (error) {
@@ -257,13 +266,9 @@ app.post('/api/webhook/mercadopago', async (req, res) => {
 app.get('/api/user/:uid/balance', async (req, res) => {
     const { uid } = req.params;
 
-    if (!db) {
-        // Se o banco não conectou, retorna 0 mas avisa erro
-        return res.json({ success: true, data: { balance: 0.00 }, warning: 'DB Offline' });
-    }
+    if (!db) return res.json({ success: true, data: { balance: 0.00 }, warning: 'DB Offline' });
 
     try {
-        // Caminho exato igual ao auth.js
         const userDoc = await db.collection('SLICED').doc('data').collection('Usuários').doc(uid).get();
 
         if (userDoc.exists) {
@@ -281,9 +286,9 @@ app.get('/api/user/:uid/balance', async (req, res) => {
 
 // Solicitação de Saque
 app.post('/api/withdraw/request', async (req, res) => {
-    // Exemplo básico (aqui você deveria descontar do saldo também)
     console.log('💸 [API] Saque solicitado:', req.body);
-    res.json({ success: true, message: 'Solicitação de saque recebida com sucesso.' });
+    // TODO: Implementar lógica de saque real no banco
+    res.json({ success: true, message: 'Solicitação recebida.' });
 });
 
 // ==================================================================
@@ -292,7 +297,6 @@ app.post('/api/withdraw/request', async (req, res) => {
 server.listen(PORT, () => {
     console.log(`=============================================`);
     console.log(`🚀 SERVIDOR RODANDO NA PORTA ${PORT}`);
-    console.log(`📡 Webhook URL: ${BASE_URL}/api/webhook/mercadopago`);
-    console.log(`🔥 Banco de Dados: ${db ? 'CONECTADO ✅' : 'DESCONECTADO ❌'}`);
+    console.log(`🔥 Firebase Mode: Secret Files`);
     console.log(`=============================================`);
 });
