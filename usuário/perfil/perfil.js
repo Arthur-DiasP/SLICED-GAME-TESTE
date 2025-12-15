@@ -1,211 +1,146 @@
 // ==================================================================
-// ARQUIVO: perfil.js (Conexão Total: Auth + Backend Saldo)
+// ARQUIVO: perfil.js (Carregamento Automático Imediato)
 // ==================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     
-    // ------------------------------------------------------------------
-    // 1. CONFIGURAÇÃO DO SERVIDOR (API)
-    // ------------------------------------------------------------------
+    // Configura URL da API
     const PROD_DOMAIN = 'sliced-game-teste.onrender.com';
-    let API_BASE;
+    const API_BASE = (window.location.hostname.includes('render') || window.location.hostname === 'www.sliced.online')
+        ? `https://${PROD_DOMAIN}/api`
+        : 'http://localhost:3001/api';
 
-    // Detecta automaticamente se está no Render ou Localhost
-    if (window.location.hostname.includes('render') || window.location.hostname === 'www.sliced.online') {
-        API_BASE = `https://${PROD_DOMAIN}/api`;
-        console.log('🌍 Modo Produção Ativado');
-    } else {
-        API_BASE = 'http://localhost:3001/api';
-        console.log('🏠 Modo Desenvolvimento (Localhost)');
-    }
-
-    // ------------------------------------------------------------------
-    // 2. ELEMENTOS DA TELA
-    // ------------------------------------------------------------------
-    const elSaldoValor = document.getElementById('balanceAmount');
-    const btnAtualizarSaldo = document.getElementById('btnRefreshBalance');
-    
-    // Variáveis Globais
+    const elSaldo = document.getElementById('balanceAmount');
+    const btnRefresh = document.getElementById('btnRefreshBalance');
     let usuarioAtual = null;
 
-    // ------------------------------------------------------------------
-    // 3. FUNÇÃO: BUSCAR SALDO NO SERVIDOR
-    // ------------------------------------------------------------------
-    async function buscarSaldoServidor(uid) {
-        if (!uid) return;
+    // --- FUNÇÃO DE BUSCA DE SALDO ---
+    async function buscarSaldo(uid) {
+        if(!uid) return;
 
-        // Feedback visual de carregamento
-        if (elSaldoValor) {
-            elSaldoValor.style.opacity = '0.5';
-            elSaldoValor.innerHTML = '<span style="font-size: 1rem">Carregando...</span>';
-        }
+        // Mostra "..." enquanto carrega para o usuário saber que está processando
+        if (elSaldo) elSaldo.innerHTML = '<span style="opacity:0.7; font-size:0.8em">Atualizando...</span>';
 
         try {
-            console.log(`🔄 [API] Buscando saldo para UID: ${uid}`);
-            
-            // Faz a chamada ao seu Backend (server2.js)
-            const resposta = await fetch(`${API_BASE}/user/${uid}/balance`);
-            const dados = await resposta.json();
+            console.log('🔄 Buscando saldo...');
+            const res = await fetch(`${API_BASE}/user/${uid}/balance`);
+            const json = await res.json();
 
-            if (dados.success) {
-                const saldoNumerico = parseFloat(dados.data.balance);
+            if (json.success) {
+                const valor = parseFloat(json.data.balance);
                 
-                // Formata para Real Brasileiro (R$ 5,00)
-                const saldoFormatado = saldoNumerico.toLocaleString('pt-BR', {
+                // Formata R$ 5,50
+                const valorFormatado = valor.toLocaleString('pt-BR', {
                     style: 'currency',
                     currency: 'BRL'
                 });
 
-                console.log(`💰 [API] Saldo recebido: ${saldoNumerico} -> ${saldoFormatado}`);
-
-                if (elSaldoValor) {
-                    elSaldoValor.textContent = saldoFormatado;
-                    elSaldoValor.style.opacity = '1';
-                    
-                    // Salva na sessão para a página de saque/depósito usar rápido
-                    sessionStorage.setItem('userBalance', saldoNumerico);
+                if (elSaldo) {
+                    elSaldo.textContent = valorFormatado;
+                    elSaldo.style.opacity = '1';
                 }
-            } else {
-                console.error('❌ Erro na API:', dados.message);
-                if (elSaldoValor) elSaldoValor.textContent = 'Erro';
+                
+                // Guarda no cache local
+                sessionStorage.setItem('userBalance', valor);
             }
-        } catch (erro) {
-            console.error('❌ Erro de Conexão:', erro);
-            if (elSaldoValor) elSaldoValor.textContent = 'R$ ---';
-        } finally {
-            if (elSaldoValor) elSaldoValor.style.opacity = '1';
+        } catch (e) {
+            console.error('Erro ao buscar saldo:', e);
+            if (elSaldo) elSaldo.textContent = 'R$ ---';
         }
     }
 
-    // ------------------------------------------------------------------
-    // 4. INICIALIZAÇÃO (CONECTANDO COM AUTH.JS)
-    // ------------------------------------------------------------------
-    function iniciarPerfil() {
-        console.log('🚀 Iniciando Perfil...');
-
-        // 1. Tenta ler a sessão criada pelo auth.js (localStorage)
-        const sessaoAuth = localStorage.getItem('spfc_user_session');
-
-        if (sessaoAuth) {
-            const dadosUsuario = JSON.parse(sessaoAuth);
-            
-            // Configura o usuário atual
+    // --- INICIALIZAÇÃO IMEDIATA ---
+    function iniciar() {
+        // 1. Pega dados do localStorage (auth.js)
+        const sessao = localStorage.getItem('spfc_user_session');
+        
+        if (sessao) {
+            const dados = JSON.parse(sessao);
             usuarioAtual = {
-                uid: dadosUsuario.uid,
-                nome: dadosUsuario.nomeCompleto,
-                email: dadosUsuario.email,
-                cpf: dadosUsuario.cpf // O auth.js costuma salvar o CPF formatado
+                uid: dados.uid,
+                nome: dados.nomeCompleto,
+                email: dados.email,
+                cpf: dados.cpf
             };
 
-            // Salva na sessionStorage (para saldo.html e outras páginas usarem sem re-login)
+            // Preenche campos visuais do perfil
+            const elNome = document.getElementById('nomeCompleto');
+            const elEmail = document.getElementById('email');
+            const elCpf = document.getElementById('cpf');
+            const elHeaderNome = document.getElementById('userName');
+
+            if(elNome) elNome.value = usuarioAtual.nome || '';
+            if(elEmail) elEmail.value = usuarioAtual.email || '';
+            if(elCpf && usuarioAtual.cpf) elCpf.value = usuarioAtual.cpf;
+            if(elHeaderNome) elHeaderNome.textContent = usuarioAtual.nome;
+
+            // Salva sessão atualizada
             sessionStorage.setItem('loggedInUser', JSON.stringify(usuarioAtual));
 
-            console.log('✅ Usuário Autenticado:', usuarioAtual.uid);
-
-            // 2. Busca o saldo IMEDIATAMENTE
-            buscarSaldoServidor(usuarioAtual.uid);
+            // 🚀 CHAMA O SALDO IMEDIATAMENTE
+            buscarSaldo(usuarioAtual.uid);
 
         } else {
-            console.warn('⚠️ Nenhuma sessão do Auth.js encontrada.');
-            if (elSaldoValor) elSaldoValor.textContent = 'R$ 0,00';
-            // Opcional: Redirecionar para login
-            // window.location.href = '../../login/login.html';
+            console.warn('Sem sessão. Faça login.');
         }
     }
 
-    // Executa a inicialização
-    iniciarPerfil();
+    // Executa assim que o script lê
+    iniciar();
 
-    // ------------------------------------------------------------------
-    // 5. EVENTOS (Botão de Atualizar)
-    // ------------------------------------------------------------------
-    if (btnAtualizarSaldo) {
-        btnAtualizarSaldo.addEventListener('click', () => {
-            // Animação de giro
-            const icone = btnAtualizarSaldo.querySelector('.material-icons');
-            if (icone) icone.style.transform = 'rotate(360deg)';
+    // --- BOTÃO DE REFRESH MANUAL ---
+    if (btnRefresh) {
+        btnRefresh.addEventListener('click', () => {
+            const icon = btnRefresh.querySelector('i');
+            if(icon) icon.style.transform = 'rotate(360deg)';
             
-            // Recarrega
-            if (usuarioAtual && usuarioAtual.uid) {
-                buscarSaldoServidor(usuarioAtual.uid);
-            }
+            if(usuarioAtual) buscarSaldo(usuarioAtual.uid);
 
-            // Para a animação
-            setTimeout(() => {
-                if (icone) icone.style.transform = 'none';
-            }, 600);
+            setTimeout(() => { if(icon) icon.style.transform = 'none'; }, 500);
         });
     }
 
-    // ------------------------------------------------------------------
-    // 6. LÓGICA DOS BOTÕES DE DEPÓSITO (Redirecionamento)
-    // ------------------------------------------------------------------
-    const botoesDeposito = document.querySelectorAll('.deposit-option-btn');
-    const inputDepositoCustom = document.getElementById('custom-deposit-amount');
-    const btnDepositoCustom = document.getElementById('deposit-custom-btn');
+    // --- BOTÕES DE DEPÓSITO ---
+    const btnsDeposito = document.querySelectorAll('.deposit-option-btn');
+    const inputCustom = document.getElementById('custom-deposit-amount');
+    const btnCustom = document.getElementById('deposit-custom-btn');
 
-    function irParaPagamento(valor) {
-        if (!valor || valor <= 0) return alert('Valor inválido');
-        
+    function irPagar(valor) {
+        if(!valor || valor <= 0) return alert('Valor inválido');
         sessionStorage.setItem('depositAmount', valor.toFixed(2));
-        // Garante que os dados do usuário vão junto
-        sessionStorage.setItem('loggedInUser', JSON.stringify(usuarioAtual));
-        
         window.location.href = 'saldo.html';
     }
 
-    // Botões Fixos
-    botoesDeposito.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const val = parseFloat(e.target.dataset.value);
-            irParaPagamento(val);
-        });
+    btnsDeposito.forEach(btn => {
+        btn.addEventListener('click', (e) => irPagar(parseFloat(e.target.dataset.value)));
     });
 
-    // Botão Customizado
-    if (btnDepositoCustom && inputDepositoCustom) {
-        inputDepositoCustom.addEventListener('input', () => {
-            const val = parseFloat(inputDepositoCustom.value);
-            btnDepositoCustom.disabled = isNaN(val) || val < 100; // Mínimo 100
+    if(btnCustom && inputCustom) {
+        inputCustom.addEventListener('input', () => {
+            const v = parseFloat(inputCustom.value);
+            btnCustom.disabled = isNaN(v) || v < 100;
         });
-
-        btnDepositoCustom.addEventListener('click', () => {
-            irParaPagamento(parseFloat(inputDepositoCustom.value));
-        });
+        btnCustom.addEventListener('click', () => irPagar(parseFloat(inputCustom.value)));
     }
 
-    // ------------------------------------------------------------------
-    // 7. LÓGICA DE SAQUE (Modal)
-    // ------------------------------------------------------------------
+    // --- MODAL DE SAQUE ---
     const btnSaque = document.getElementById('btnWithdraw');
     const modalSaque = document.getElementById('withdrawModal');
-    const btnFecharModal = document.getElementById('closeWithdrawModal');
-    const formSaque = document.getElementById('withdrawForm');
-    const inputValorSaque = document.getElementById('withdrawAmount');
-
-    if (btnSaque) {
+    const btnFechaSaque = document.getElementById('closeWithdrawModal');
+    
+    if(btnSaque && modalSaque) {
         btnSaque.addEventListener('click', () => {
             modalSaque.classList.add('show');
-            // Atualiza o placeholder com o saldo atual conhecido
-            const saldoAtual = sessionStorage.getItem('userBalance') || '0.00';
-            if (inputValorSaque) {
-                inputValorSaque.placeholder = `Máx: R$ ${parseFloat(saldoAtual).toFixed(2)}`;
+            const inputVal = document.getElementById('withdrawAmount');
+            if(inputVal && usuarioAtual) {
+                // Mostra saldo atual no placeholder
+                const saldoAtual = sessionStorage.getItem('userBalance') || 0;
+                inputVal.placeholder = `Disp: R$ ${parseFloat(saldoAtual).toFixed(2)}`;
             }
         });
     }
-
-    if (btnFecharModal) {
-        btnFecharModal.addEventListener('click', () => {
-            modalSaque.classList.remove('show');
-        });
+    
+    if(btnFechaSaque && modalSaque) {
+        btnFechaSaque.addEventListener('click', () => modalSaque.classList.remove('show'));
     }
-
-    if (formSaque) {
-        formSaque.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            alert('Funcionalidade de saque será implementada em breve no backend.');
-            modalSaque.classList.remove('show');
-        });
-    }
-
 });

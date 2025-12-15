@@ -1378,7 +1378,7 @@
         const db = firebase.firestore();
     </script>
 
-    <script type="module">
+   <script type="module">
         import { atualizarDadosUsuario } from '../../controle-dados/auth.js';
         import { iniciarRastreamentoGlobal } from '../../controle-dados/tracker-config.js';
 
@@ -1386,75 +1386,42 @@
         const contentSection = document.getElementById('contentSection');
         const successMessage = document.getElementById('successMessage');
 
-        // Variáveis Globais (usadas pela função loadBalance)
-        const API_BASE = 'https://sliced-game-front-back-render.onrender.com/api';
-        const balanceAmount = document.getElementById('balanceAmount');
+        // Variável para armazenar o objeto usuário para updates
+        let currentUser = null; 
 
-        let currentUser = null; // Para armazenar o objeto usuário para updates
-
-        // ============================================
-        // FUNÇÃO PARA CARREGAR O SALDO
-        // ============================================
-        async function loadBalance() {
-            if (!currentUser || !currentUser.uid) {
-                balanceAmount.textContent = 'R$ 0,00';
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/user/${currentUser.uid}/balance`);
-                const result = await response.json();
-
-                if (result.success) {
-                    const balance = parseFloat(result.data.balance);
-                    // Atualiza o DOM (balanceAmount é o seletor)
-                    balanceAmount.textContent = `R$ ${balance.toFixed(2).replace('.', ',')}`;
-
-                    // Variável local no perfil.js precisa ser atualizada também
-                    // Nota: O perfil.js separado (não este bloco) usa a variável 'currentBalance' para validar o saque.
-                    // Aqui, apenas atualizamos o DOM, assumindo que o perfil.js lida com a variável de estado.
-                } else {
-                    console.error('Erro ao carregar saldo:', result.message);
-                    balanceAmount.textContent = 'R$ 0,00';
-                }
-            } catch (error) {
-                console.error('Erro ao carregar saldo (fetch):', error);
-                balanceAmount.textContent = 'R$ 0,00';
-            }
-        }
-
-
-        // Inicializar rastreamento global (Online Status)
+        // Inicializar rastreamento global (Online Status e Preenchimento de Dados)
         iniciarRastreamentoGlobal({
             onUserLoaded: (dados) => {
                 // Armazenar referência para uso nos formulários de update
                 currentUser = { uid: dados.uid, ...dados };
 
                 // Atualizar header
-                document.getElementById('userName').textContent = dados.nomeCompleto;
-                document.getElementById('userEmail').textContent = dados.email;
+                const elUserName = document.getElementById('userName');
+                const elUserEmail = document.getElementById('userEmail');
+                if(elUserName) elUserName.textContent = dados.nomeCompleto;
+                if(elUserEmail) elUserEmail.textContent = dados.email;
 
                 // Preencher formulário de dados pessoais
-                document.getElementById('nomeCompleto').value = dados.nomeCompleto || '';
-                document.getElementById('email').value = dados.email || '';
-                document.getElementById('cpf').value = dados.cpf || '';
-                document.getElementById('telefone').value = dados.telefone || '';
+                if(document.getElementById('nomeCompleto')) document.getElementById('nomeCompleto').value = dados.nomeCompleto || '';
+                if(document.getElementById('email')) document.getElementById('email').value = dados.email || '';
+                if(document.getElementById('cpf')) document.getElementById('cpf').value = dados.cpf || '';
+                if(document.getElementById('telefone')) document.getElementById('telefone').value = dados.telefone || '';
 
                 // Preencher formulário de endereço
-                document.getElementById('cep').value = dados.cep || '';
-                document.getElementById('cidade').value = dados.cidade || '';
-                document.getElementById('estado').value = dados.estado || '';
-                document.getElementById('bairro').value = dados.bairro || '';
-                document.getElementById('rua').value = dados.rua || '';
-                document.getElementById('numero').value = dados.numero || '';
-                document.getElementById('complemento').value = dados.complemento || '';
+                if(document.getElementById('cep')) document.getElementById('cep').value = dados.cep || '';
+                if(document.getElementById('cidade')) document.getElementById('cidade').value = dados.cidade || '';
+                if(document.getElementById('estado')) document.getElementById('estado').value = dados.estado || '';
+                if(document.getElementById('bairro')) document.getElementById('bairro').value = dados.bairro || '';
+                if(document.getElementById('rua')) document.getElementById('rua').value = dados.rua || '';
+                if(document.getElementById('numero')) document.getElementById('numero').value = dados.numero || '';
+                if(document.getElementById('complemento')) document.getElementById('complemento').value = dados.complemento || '';
 
                 // Mostrar conteúdo
                 loadingSection.style.display = 'none';
                 contentSection.style.display = 'block';
 
-                // 💡 CHAMADA CRÍTICA: Carrega o saldo do Backend
-                loadBalance();
+                // 🛑 REMOVIDO: loadBalance() 
+                // O arquivo perfil.js externo agora cuida 100% do saldo.
             },
             onLogout: () => {
                 window.location.href = '../../login/login.html';
@@ -1486,21 +1453,18 @@
                 .replace(/(-\d{3})\d+?$/, '$1');
         }
 
-        // Aplicar máscaras
-        document.getElementById('cpf').addEventListener('input', (e) => {
-            e.target.value = formatCPF(e.target.value);
-        });
+        // Aplicar máscaras (Verificando se elementos existem para evitar erros)
+        const inputCpf = document.getElementById('cpf');
+        const inputTel = document.getElementById('telefone');
+        const inputCep = document.getElementById('cep');
 
-        document.getElementById('telefone').addEventListener('input', (e) => {
-            e.target.value = formatPhone(e.target.value);
-        });
-
-        document.getElementById('cep').addEventListener('input', (e) => {
-            e.target.value = formatCEP(e.target.value);
-        });
+        if(inputCpf) inputCpf.addEventListener('input', (e) => e.target.value = formatCPF(e.target.value));
+        if(inputTel) inputTel.addEventListener('input', (e) => e.target.value = formatPhone(e.target.value));
+        if(inputCep) inputCep.addEventListener('input', (e) => e.target.value = formatCEP(e.target.value));
 
         // Show success message
         function showSuccess(message) {
+            if(!successMessage) return;
             successMessage.textContent = message;
             successMessage.classList.add('show');
             setTimeout(() => {
@@ -1511,170 +1475,164 @@
         // --- FORM SUBMISSIONS (Usam currentUser definido no onLoad) ---
 
         // Salvar dados pessoais
-        document.getElementById('formDadosPessoais').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!currentUser) return;
+        const formDados = document.getElementById('formDadosPessoais');
+        if(formDados) {
+            formDados.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!currentUser) return;
 
-            try {
-                const dadosAtualizados = {
-                    nomeCompleto: document.getElementById('nomeCompleto').value,
-                    cpf: document.getElementById('cpf').value,
-                    telefone: document.getElementById('telefone').value
-                };
+                try {
+                    const dadosAtualizados = {
+                        nomeCompleto: document.getElementById('nomeCompleto').value,
+                        cpf: document.getElementById('cpf').value,
+                        telefone: document.getElementById('telefone').value
+                    };
 
-                const resultado = await atualizarDadosUsuario(currentUser.uid, dadosAtualizados);
+                    const resultado = await atualizarDadosUsuario(currentUser.uid, dadosAtualizados);
 
-                if (resultado.success) {
-                    showSuccess('✓ Dados pessoais atualizados com sucesso!');
-                    document.getElementById('userName').textContent = dadosAtualizados.nomeCompleto;
-                } else {
-                    alert('Erro ao atualizar dados: ' + (resultado.error || 'Erro desconhecido'));
+                    if (resultado.success) {
+                        showSuccess('✓ Dados pessoais atualizados com sucesso!');
+                        document.getElementById('userName').textContent = dadosAtualizados.nomeCompleto;
+                    } else {
+                        alert('Erro ao atualizar dados: ' + (resultado.error || 'Erro desconhecido'));
+                    }
+                } catch (error) {
+                    console.error('Erro:', error);
                 }
-            } catch (error) {
-                console.error('Erro:', error);
-            }
-        });
+            });
+        }
 
         // Salvar endereço
-        document.getElementById('formEndereco').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!currentUser) return;
+        const formEnd = document.getElementById('formEndereco');
+        if(formEnd) {
+            formEnd.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!currentUser) return;
 
-            try {
-                const dadosAtualizados = {
-                    cep: document.getElementById('cep').value,
-                    cidade: document.getElementById('cidade').value,
-                    estado: document.getElementById('estado').value,
-                    bairro: document.getElementById('bairro').value,
-                    rua: document.getElementById('rua').value,
-                    numero: document.getElementById('numero').value,
-                    complemento: document.getElementById('complemento').value
-                };
+                try {
+                    const dadosAtualizados = {
+                        cep: document.getElementById('cep').value,
+                        cidade: document.getElementById('cidade').value,
+                        estado: document.getElementById('estado').value,
+                        bairro: document.getElementById('bairro').value,
+                        rua: document.getElementById('rua').value,
+                        numero: document.getElementById('numero').value,
+                        complemento: document.getElementById('complemento').value
+                    };
 
-                const resultado = await atualizarDadosUsuario(currentUser.uid, dadosAtualizados);
+                    const resultado = await atualizarDadosUsuario(currentUser.uid, dadosAtualizados);
 
-                if (resultado.success) {
-                    showSuccess('✓ Endereço atualizado com sucesso!');
-                } else {
-                    alert('Erro ao atualizar endereço: ' + (resultado.error || 'Erro desconhecido'));
+                    if (resultado.success) {
+                        showSuccess('✓ Endereço atualizado com sucesso!');
+                    } else {
+                        alert('Erro ao atualizar endereço: ' + (resultado.error || 'Erro desconhecido'));
+                    }
+                } catch (error) {
+                    console.error('Erro:', error);
                 }
-            } catch (error) {
-                console.error('Erro:', error);
-            }
-        });
+            });
+        }
 
         // ============================================
         // SISTEMA DE CHAT COM SUPORTE (FIREBASE FIRESTORE)
         // ============================================
-
-        // Elementos do DOM do Chat
+        // Mantido igual pois funciona independente do server2.js
+        
         const chatButton = document.getElementById('chatButton');
         const chatPopup = document.getElementById('chatPopup');
         const closeChat = document.getElementById('closeChat');
         const chatForm = document.getElementById('chatForm');
         const chatMessages = document.getElementById('chatMessages');
         const messageInput = document.getElementById('messageInput');
-        let chatListener = null; // Variável para gerenciar a inscrição do listener
+        let chatListener = null;
 
-        // Abrir/Fechar Chat
-        chatButton.addEventListener('click', () => {
-            chatPopup.style.display = 'flex';
-            chatButton.style.display = 'none';
-            loadChatMessages(); // Carrega as mensagens quando o chat abre
-        });
+        if(chatButton) {
+            chatButton.addEventListener('click', () => {
+                chatPopup.style.display = 'flex';
+                chatButton.style.display = 'none';
+                loadChatMessages();
+            });
+        }
 
-        closeChat.addEventListener('click', () => {
-            chatPopup.style.display = 'none';
-            chatButton.style.display = 'flex';
-            if (chatListener) {
-                chatListener(); // Desinscreve o listener ao fechar o chat
-            }
-        });
+        if(closeChat) {
+            closeChat.addEventListener('click', () => {
+                chatPopup.style.display = 'none';
+                chatButton.style.display = 'flex';
+                if (chatListener) chatListener();
+            });
+        }
 
-        // Formatar horário
         function formatTime(timestamp) {
             if (!timestamp) return '';
-            // Assume que 'firebase' está disponível no escopo global (scripts acima)
             const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
             const hours = date.getHours().toString().padStart(2, '0');
             const minutes = date.getMinutes().toString().padStart(2, '0');
             return `${hours}:${minutes}`;
         }
 
-        // Carregar mensagens do chat
         async function loadChatMessages() {
-            if (!currentUser || !firebase) return; // Verifica se o Firebase global existe
+            if (!currentUser || typeof firebase === 'undefined') return;
 
-            // Referência à coleção de mensagens do usuário: SLICED/{userId}/Chat/support/messages
             const chatRef = db.collection('SLICED').doc(currentUser.uid)
                 .collection('Chat').doc('support');
 
-            // Configura o listener em tempo real
             chatListener = chatRef.collection('messages')
                 .orderBy('timestamp', 'asc')
                 .onSnapshot((snapshot) => {
-                    chatMessages.innerHTML = ''; // Limpa antes de carregar
+                    chatMessages.innerHTML = '';
                     snapshot.forEach((doc) => {
                         const msg = doc.data();
                         addMessageToChat(msg.text, msg.sender, msg.timestamp);
                     });
-                    // Rola para a mensagem mais recente
                     chatMessages.scrollTop = chatMessages.scrollHeight;
                 });
         }
 
-        // Adicionar mensagem ao DOM
         function addMessageToChat(text, sender, timestamp) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `chat-message ${sender}`;
-
             const timeStr = formatTime(timestamp);
 
             messageDiv.innerHTML = `
-        <div class="message-content">
-            <p>${text}</p>
-            <span class="message-time">${timeStr}</span>
-        </div>
-        `;
+                <div class="message-content">
+                    <p>${text}</p>
+                    <span class="message-time">${timeStr}</span>
+                </div>
+            `;
             chatMessages.appendChild(messageDiv);
         }
 
-        // Enviar mensagem
-        chatForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        if(chatForm) {
+            chatForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const message = messageInput.value.trim();
+                if (!message || !currentUser || typeof firebase === 'undefined') return;
 
-            const message = messageInput.value.trim();
-            if (!message || !currentUser || !firebase) return;
+                try {
+                    const chatRef = db.collection('SLICED').doc(currentUser.uid)
+                        .collection('Chat').doc('support');
 
-            try {
-                // Referência ao documento de chat
-                const chatRef = db.collection('SLICED').doc(currentUser.uid)
-                    .collection('Chat').doc('support');
+                    await chatRef.set({
+                        userId: currentUser.uid,
+                        userName: currentUser.nomeCompleto || 'Usuário',
+                        userEmail: currentUser.email,
+                        lastMessage: message,
+                        lastMessageTime: firebase.firestore.FieldValue.serverTimestamp(),
+                        unreadSupport: firebase.firestore.FieldValue.increment(1)
+                    }, { merge: true });
 
-                // Criar/Atualizar documento do chat principal (para histórico/controle do admin)
-                await chatRef.set({
-                    userId: currentUser.uid,
-                    userName: document.getElementById('userName').textContent,
-                    userEmail: currentUser.email,
-                    lastMessage: message,
-                    lastMessageTime: firebase.firestore.FieldValue.serverTimestamp(),
-                    unreadSupport: firebase.firestore.FieldValue.increment(1) // Contador para o admin
-                }, { merge: true });
+                    await chatRef.collection('messages').add({
+                        text: message,
+                        sender: 'user',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
 
-                // Adicionar mensagem à subcoleção
-                await chatRef.collection('messages').add({
-                    text: message,
-                    sender: 'user',
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                messageInput.value = '';
-            } catch (error) {
-                console.error('Erro ao enviar mensagem:', error);
-                alert('Erro ao enviar mensagem. Tente novamente.');
-            }
-        });
-
+                    messageInput.value = '';
+                } catch (error) {
+                    console.error('Erro ao enviar mensagem:', error);
+                }
+            });
+        }
     </script>
 
     <!-- Chat Flutuante -->
