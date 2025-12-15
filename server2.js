@@ -1,4 +1,9 @@
-// --- ARQUIVO: server2.js ---
+// ==================================================================
+// ARQUIVO: server2.js (Versão Final: WebSocket + Webhook + .env)
+// ==================================================================
+
+// 1. Carrega variáveis de ambiente
+require('dotenv').config();
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -11,50 +16,46 @@ const { WebSocketServer } = require('ws');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// ==================================================================
-// 1. CONFIGURAÇÃO DA URL DE NOTIFICAÇÃO (CRÍTICO)
-// ==================================================================
-// Essa é a URL que o Mercado Pago vai chamar.
-// Tem que ser EXATAMENTE a URL do seu servidor no Render.
-const BASE_URL = 'https://sliced-game-teste.onrender.com';
+// 2. Configurações via .env
+// Se não houver URL definida, usa a do Render como padrão
+const BASE_URL = process.env.USER_BASE_URL || 'https://sliced-game-teste.onrender.com';
+const ACCESS_TOKEN = process.env.MERCADO_PAGO_ACCESS_TOKEN;
 
-// Chave fornecida anteriormente
-const MERCADO_PAGO_ACCESS_TOKEN = 'f3c5276a78082bfdbcb6a09e58ab5d1b3441cb62c6bcda745eebe48e19828911';
-
-// Configuração do SDK
+// 3. Configuração do SDK Mercado Pago
 let paymentClient;
-try {
-    const client = new MercadoPagoConfig({ accessToken: MERCADO_PAGO_ACCESS_TOKEN });
-    paymentClient = new Payment(client);
-    console.log('✅ SDK Mercado Pago configurado.');
-} catch (error) {
-    console.error('❌ Erro SDK:', error);
+
+if (!ACCESS_TOKEN) {
+    console.error('❌ ERRO CRÍTICO: Token do Mercado Pago não encontrado no .env!');
+} else {
+    try {
+        const client = new MercadoPagoConfig({ accessToken: ACCESS_TOKEN });
+        paymentClient = new Payment(client);
+        console.log('✅ SDK Mercado Pago configurado com sucesso.');
+    } catch (error) {
+        console.error('❌ Erro ao configurar SDK:', error.message);
+    }
 }
 
-// Middlewares
+// 4. Middlewares
 app.use(cors());
 app.use(bodyParser.json());
+// Serve os arquivos do frontend (HTML/CSS/JS)
 app.use(express.static(path.join(__dirname)));
 app.use('/usuário', express.static(path.join(__dirname, 'usuário')));
 
 // ==================================================================
-// 2. SISTEMA DE WEBSOCKET (O "Telefone" com o Frontend)
+// 5. CONFIGURAÇÃO WEB SOCKET (Notificação em Tempo Real)
 // ==================================================================
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
-
-// Mapa para guardar quem está esperando qual pagamento
-// Exemplo: { "123456789": ConexãoDoUsuario }
 const paymentClients = new Map();
 
-// Função que o Webhook vai chamar para avisar o Frontend
+// Função para enviar mensagem ao Frontend
 function avisarFrontend(paymentId, status) {
-    // Verifica se tem alguém online esperando por ESSE paymentId
     if (paymentClients.has(paymentId)) {
         const ws = paymentClients.get(paymentId);
-        
         if (ws.readyState === 1) { // 1 = Conectado
-            console.log(`📡 [WS] Avisando o frontend sobre o ID ${paymentId}: ${status}`);
+            console.log(`📡 [WS] Avisando frontend: Pagamento ${paymentId} -> ${status}`);
             
             ws.send(JSON.stringify({
                 type: 'payment_status',
@@ -62,30 +63,25 @@ function avisarFrontend(paymentId, status) {
                 paymentId: paymentId
             }));
 
-            // Se aprovado, fecha a conexão pois já acabou
+            // Fecha a conexão após aprovação para economizar recursos
             if (status === 'approved') {
                 setTimeout(() => {
                     ws.close();
                     paymentClients.delete(paymentId);
-                }, 1000);
+                }, 2000);
             }
         }
-    } else {
-        console.log(`⚠️ [WS] Webhook recebido para ID ${paymentId}, mas o usuário não está conectado.`);
     }
 }
 
 wss.on('connection', (ws) => {
-    let meuPaymentId = null;
-
     ws.on('message', (message) => {
         try {
             const data = JSON.parse(message);
-            // O Frontend envia: { type: 'register', paymentId: '123...' }
+            // O frontend envia { type: 'register', paymentId: '...' }
             if (data.type === 'register' && data.paymentId) {
-                meuPaymentId = data.paymentId;
-                paymentClients.set(meuPaymentId, ws);
-                console.log(`🔗 [WS] Cliente conectado aguardando pagamento ID: ${meuPaymentId}`);
+                paymentClients.set(data.paymentId, ws);
+                console.log(`🔗 [WS] Cliente aguardando ID: ${data.paymentId}`);
             }
         } catch (e) {
             console.error('Erro WS:', e);
@@ -93,100 +89,144 @@ wss.on('connection', (ws) => {
     });
 
     ws.on('close', () => {
-        if (meuPaymentId) {
-            paymentClients.delete(meuPaymentId);
-        }
+        // Limpeza automática (opcional, mas boa prática)
+        paymentClients.forEach((clientWs, key) => {
+            if (clientWs === ws) paymentClients.delete(key);
+        });
     });
 });
 
 // ==================================================================
-// 3. ROTA PARA CRIAR O PIX
+// 6. ROTA: CRIAR PIX
 // ==================================================================
 app.post('/api/deposit/create', async (req, res) => {
+    if (!paymentClient) {
+        return res.status(500).json({ success: false, message: 'Servidor sem Token configurado.' });
+    }
+
     try {
-        let { amount, userId, email, payerCpf, firstName } = req.body;
+        let { amount, userId, payerCpf, firstName } = req.body;
 
-        // Limpeza básica
+        // Limpeza e Validação de CPF
         if (!payerCpf) payerCpf = '';
-        payerCpf = payerCpf.replace(/\D/g, '');
-        if (!email || !email.includes('@')) email = 'user@sliced.com';
+        payerCpf = payerCpf.replace(/\D/g, ''); // Remove pontos e traços
 
-        // Validação CPF (MP exige 11 dígitos)
         if (payerCpf.length !== 11) {
-            return res.status(400).json({ success: false, message: 'CPF deve ter 11 dígitos.' });
+            return res.status(400).json({ 
+                success: false, 
+                message: 'CPF inválido. Necessário 11 dígitos numéricos.' 
+            });
         }
 
-        const body = {
+        // Gera email único para evitar erro "PA_UNAUTHORIZED" (pagar para si mesmo)
+        const emailSeguro = `cliente_${Date.now()}@emailtemp.com`;
+
+        console.log(`💳 Criando PIX: R$ ${amount} para CPF ${payerCpf}`);
+
+        const paymentBody = {
             transaction_amount: parseFloat(amount),
-            description: `Depósito ${userId}`,
+            description: `Recarga SLICED - User: ${userId}`,
             payment_method_id: 'pix',
             payer: {
-                email: email,
-                first_name: firstName || 'User',
-                identification: { type: 'CPF', number: payerCpf }
+                email: emailSeguro,
+                first_name: firstName || 'Cliente',
+                identification: {
+                    type: 'CPF',
+                    number: payerCpf
+                }
             },
-            // 🚨 AQUI ESTÁ O SEGREDO: A URL QUE O MP VAI CHAMAR
+            // O Mercado Pago chamará esta URL quando o pagamento mudar de status
             notification_url: `${BASE_URL}/api/webhook/mercadopago`,
-            metadata: { user_id: userId }
+            metadata: {
+                user_id: userId
+            }
         };
 
-        const payment = await paymentClient.create({ body });
+        const payment = await paymentClient.create({ body: paymentBody });
 
         if (payment && payment.id) {
             res.json({
                 success: true,
                 data: {
-                    paymentId: payment.id, // O Identificador único
+                    paymentId: payment.id,
                     qrCodeBase64: `data:image/png;base64,${payment.point_of_interaction.transaction_data.qr_code_base64}`,
                     pixCopiaECola: payment.point_of_interaction.transaction_data.qr_code
                 }
             });
         } else {
-            res.status(400).json({ success: false, message: 'Falha ao criar PIX' });
+            throw new Error('Mercado Pago não retornou ID de pagamento.');
         }
+
     } catch (error) {
-        console.error('Erro Criar PIX:', error);
-        res.status(500).json({ success: false, message: error.message });
+        console.error('❌ ERRO MP API:', JSON.stringify(error, null, 2));
+        
+        // Pega a mensagem detalhada do erro se existir
+        const detalhe = error.cause?.description || error.message;
+        
+        res.status(500).json({ 
+            success: false, 
+            message: `Erro ao gerar PIX: ${detalhe}` 
+        });
     }
 });
 
 // ==================================================================
-// 4. ROTA DO WEBHOOK (Onde o MP avisa que pagou)
+// 7. ROTA: WEBHOOK (Recebe aviso do Mercado Pago)
 // ==================================================================
 app.post('/api/webhook/mercadopago', async (req, res) => {
-    // O Mercado Pago envia o ID no corpo ou na query
+    // Tenta pegar o ID da query (?id=...) ou do corpo (req.body.data.id)
     const paymentId = req.query.id || (req.body.data && req.body.data.id);
-
-    // Se não tiver ID ou não for aviso de pagamento, ignora
-    if (!paymentId || (req.body.type !== 'payment' && req.query.topic !== 'payment')) {
-        return res.status(200).send('OK');
-    }
+    
+    // Se não tiver ID, apenas responde OK
+    if (!paymentId) return res.status(200).send('OK');
 
     try {
-        // Consultamos o status atualizado no Mercado Pago
-        const payment = await paymentClient.get({ id: paymentId });
+        // Consulta o status real na API do Mercado Pago
+        const payment = await paymentClient.get({ id: String(paymentId) });
         const status = payment.status;
 
-        console.log(`🔔 NOTIFICAÇÃO RECEBIDA! ID: ${paymentId} | Status: ${status}`);
+        console.log(`🔔 Webhook Recebido | ID: ${paymentId} | Status: ${status}`);
 
         if (status === 'approved') {
-            console.log('💰 PAGAMENTO APROVADO!');
-            // AQUI OCORRE A MÁGICA: O Node avisa o Frontend
+            console.log('💰 Pagamento APROVADO! Notificando usuário...');
+            // Avisa o Frontend via WebSocket
             avisarFrontend(String(paymentId), 'approved');
         }
 
-        res.status(200).send('OK');
     } catch (error) {
-        console.error('Erro Webhook:', error);
-        res.status(200).send('OK'); // Responde OK para o MP não ficar tentando de novo
+        console.error('Erro ao processar webhook:', error.message);
     }
+
+    // Sempre responde 200 OK para o Mercado Pago não reenviar a notificação
+    res.status(200).send('OK');
 });
 
-// Rotas Mock (Simulações para não travar o front sem DB)
-app.get('/api/user/:uid/balance', (req, res) => res.json({ success: true, data: { balance: 0 } }));
-app.post('/api/withdraw/request', (req, res) => res.json({ success: true, message: 'Saque simulado.' }));
+// ==================================================================
+// 8. ROTAS MOCK (Simulação de Banco de Dados)
+// ==================================================================
+// Essas rotas existem para que o frontend não dê erro 404 enquanto o Firebase está desligado.
 
+// Mock Saldo
+app.get('/api/user/:uid/balance', (req, res) => {
+    // Retorna saldo zero por enquanto (já que não temos DB)
+    res.json({ success: true, data: { balance: 0.00 } });
+});
+
+// Mock Saque
+app.post('/api/withdraw/request', (req, res) => {
+    // Simula sucesso no saque
+    console.log('💸 Saque simulado solicitado:', req.body);
+    res.json({ success: true, message: 'Solicitação de saque simulada com sucesso.' });
+});
+
+
+// ==================================================================
+// 9. INICIALIZAÇÃO
+// ==================================================================
 server.listen(PORT, () => {
-    console.log(`🚀 SERVIDOR RODANDO!`);
-    console.log(`📡 URL Base Webhook: ${BASE_URL}/api/webhook/mercadopago`);
+    console.log(`=============================================`);
+    console.log(`🚀 SERVIDOR RODANDO NA PORTA ${PORT}`);
+    console.log(`📡 URL Webhook: ${BASE_URL}/api/webhook/mercadopago`);
+    console.log(`🔑 Token Carregado: ${ACCESS_TOKEN ? 'Sim (Do .env)' : 'NÃO ❌'}`);
+    console.log(`=============================================`);
 });
