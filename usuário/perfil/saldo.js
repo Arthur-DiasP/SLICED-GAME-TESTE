@@ -3,18 +3,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // ======================================================================
     // 1. CONFIGURAÇÃO DE URLS (AUTOMÁTICA)
     // ======================================================================
-    // Se o domínio atual for o do Render, usa as URLs de produção.
-    // Se for localhost ou 127.0.0.1, usa as URLs locais.
-    
+    // Substitua 'sliced-game-teste.onrender.com' pelo seu domínio real do Render se for diferente
     const PROD_DOMAIN = 'sliced-game-teste.onrender.com';
     
     let API_BASE;
     let WS_BASE_URL;
 
+    // Detecta se está rodando no Render ou em Localhost
     if (window.location.hostname.includes('render') || window.location.hostname === 'www.sliced.online') {
         // Produção (Render)
         API_BASE = `https://${PROD_DOMAIN}/api`;
-        WS_BASE_URL = `wss://${PROD_DOMAIN}`; // WSS é WebSocket Seguro (HTTPS)
+        WS_BASE_URL = `wss://${PROD_DOMAIN}`; // WSS = WebSocket Seguro
         console.log('🌍 Ambiente de Produção Detectado');
     } else {
         // Localhost
@@ -24,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ======================================================================
-    // 2. RECUPERAÇÃO DE DADOS DA SESSÃO
+    // 2. RECUPERAÇÃO E VALIDAÇÃO DE DADOS
     // ======================================================================
     const rawDepositAmount = sessionStorage.getItem('depositAmount');
     const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
@@ -38,11 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const pixDetailsArea = document.getElementById('pix-details-area');
     const pixLoadingArea = document.getElementById('pix-loading-area');
     const pixExpirationTime = document.getElementById('pix-expiration-time');
-    const paymentSuccessArea = document.getElementById('payment-success-area');
+    
+    // Elementos do Pop-up
+    const popupOverlay = document.getElementById('payment-popup');
+    const btnClosePopup = document.getElementById('btn-close-popup');
 
-    // Validação Básica
+    // Validação de Segurança
     if (!rawDepositAmount || !loggedInUser) {
-        alert('Dados da sessão perdidos. Por favor, inicie o depósito novamente.');
+        alert('Sessão expirada ou dados inválidos. Retornando ao perfil.');
         window.location.href = 'perfil.html';
         return;
     }
@@ -56,27 +58,27 @@ document.addEventListener('DOMContentLoaded', () => {
     let paymentWebSocket = null;
 
     function initWebSocket(paymentId) {
-        // Fecha conexão anterior se existir
+        // Fecha conexão anterior se existir para evitar duplicidade
         if (paymentWebSocket) paymentWebSocket.close();
 
-        console.log(`🔌 Conectando ao WebSocket em: ${WS_BASE_URL}...`);
+        console.log(`🔌 Conectando ao WebSocket: ${WS_BASE_URL}`);
         paymentWebSocket = new WebSocket(WS_BASE_URL);
 
-        // Quando conectar, envia o ID que queremos "vigiar"
         paymentWebSocket.onopen = () => {
             console.log('✅ WebSocket Conectado! Monitorando ID:', paymentId);
+            // Registra o cliente no servidor para este ID específico
             paymentWebSocket.send(JSON.stringify({
                 type: 'register',
                 paymentId: paymentId
             }));
         };
 
-        // Quando receber mensagem do servidor
         paymentWebSocket.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
                 console.log('📩 Mensagem recebida:', data);
 
+                // Se o servidor avisar que foi aprovado
                 if (data.type === 'payment_status' && data.status === 'approved') {
                     handlePaymentSuccess();
                 }
@@ -86,34 +88,50 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         paymentWebSocket.onerror = (error) => {
-            console.warn('⚠️ Erro na conexão WebSocket (pode ser normal em localhost sem HTTPS):', error);
+            console.warn('⚠️ Aviso WebSocket:', error);
+        };
+        
+        paymentWebSocket.onclose = () => {
+            console.log('🔌 WebSocket desconectado.');
         };
     }
 
-    // Função visual de sucesso
+    // ======================================================================
+    // 4. FUNÇÃO DE SUCESSO (ATIVA O POP-UP)
+    // ======================================================================
     function handlePaymentSuccess() {
         console.log('🎉 PAGAMENTO CONFIRMADO!');
-        
-        // Esconde o QR Code e mostra a tela de sucesso
+
+        // 1. Tocar som de sucesso (opcional)
+        try {
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3');
+            audio.volume = 0.5;
+            audio.play().catch(() => {}); // Ignora erro de autoplay
+        } catch (e) {}
+
+        // 2. Esconder áreas de pagamento
         pixDetailsArea.style.display = 'none';
         pixLoadingArea.style.display = 'none';
-        paymentSuccessArea.style.display = 'block'; // Certifique-se que esse ID existe no HTML
-        document.getElementById('deposit-title').textContent = 'Sucesso!';
-        document.getElementById('deposit-instructions').textContent = 'Depósito confirmado.';
+        
+        // 3. Mostrar o Pop-up
+        if (popupOverlay) {
+            popupOverlay.classList.add('show');
+        }
 
-        // Fecha o socket
+        // 4. Encerrar conexão WebSocket
         if (paymentWebSocket) paymentWebSocket.close();
     }
 
     // ======================================================================
-    // 4. FUNÇÃO PARA GERAR O PIX NO BACKEND
+    // 5. GERAR O PIX NO BACKEND
     // ======================================================================
     async function generatePixPayment() {
+        // Reset visual
         pixLoadingArea.style.display = 'block';
         pixDetailsArea.style.display = 'none';
 
         try {
-            // Prepara os dados (limpa CPF)
+            // Preparação dos dados
             const cpfLimpo = loggedInUser.cpf ? loggedInUser.cpf.replace(/\D/g, '') : '';
             const nomeCompleto = loggedInUser.nomeCompleto || 'Usuario Sliced';
             const [firstName, ...rest] = nomeCompleto.split(' ');
@@ -128,8 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 payerCpf: cpfLimpo
             };
 
-            console.log('📤 Solicitando PIX ao servidor...');
-            
+            console.log('📤 Solicitando PIX...');
+
             const response = await fetch(`${API_BASE}/deposit/create`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -139,66 +157,77 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if (!result.success) {
-                throw new Error(result.message || 'Erro desconhecido do servidor');
+                throw new Error(result.message || 'Erro ao gerar pagamento');
             }
 
             const { paymentId, qrCodeBase64, pixCopiaECola } = result.data;
 
             console.log('📥 PIX Gerado! ID:', paymentId);
 
-            // Atualiza a tela com o QR Code
+            // Atualiza Interface
             pixQrCodeEl.src = qrCodeBase64;
             pixCopyPasteCodeEl.value = pixCopiaECola;
             
-            // Define vencimento visual (1 hora)
+            // Define hora de vencimento (1 hora à frente)
             const expirationDate = new Date();
             expirationDate.setHours(expirationDate.getHours() + 1);
             pixExpirationTime.textContent = expirationDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-            // Mostra os detalhes
+            // Exibe resultados
             pixLoadingArea.style.display = 'none';
             pixDetailsArea.style.display = 'block';
             document.getElementById('deposit-title').textContent = 'Escaneie o QR Code';
 
-            // 🚀 INICIA O MONITORAMENTO EM TEMPO REAL
+            // Inicia monitoramento
             initWebSocket(paymentId);
 
         } catch (error) {
             console.error('❌ Erro:', error);
             
-            // Tratamento especial para erro de CPF
             let msgErro = error.message;
             if (msgErro.includes('CPF')) {
-                msgErro = 'Seu CPF no cadastro é inválido para PIX. Atualize seu perfil.';
+                msgErro = 'CPF inválido no cadastro. Atualize seu perfil.';
             }
 
             pixLoadingArea.innerHTML = `
                 <div style="color: #ff4444; padding: 20px;">
-                    <i class="material-icons" style="font-size: 40px;">error_outline</i>
-                    <p><strong>Não foi possível gerar o PIX</strong></p>
+                    <i class="material-icons" style="font-size: 48px;">error_outline</i>
+                    <p style="margin-top:10px; font-weight:bold;">Erro ao gerar PIX</p>
                     <p>${msgErro}</p>
-                    <button onclick="window.location.href='perfil.html'" class="btn btn-primary" style="margin-top:15px;">Voltar ao Perfil</button>
+                    <button onclick="window.location.href='perfil.html'" class="btn btn-primary" style="margin-top:20px;">
+                        Voltar
+                    </button>
                 </div>
             `;
         }
     }
 
     // ======================================================================
-    // 5. EVENTOS DE INTERFACE
+    // 6. EVENT LISTENERS
     // ======================================================================
     
-    // Botão Copiar
+    // Botão Copiar Código
     copyPixBtn.addEventListener('click', () => {
         pixCopyPasteCodeEl.select();
         pixCopyPasteCodeEl.setSelectionRange(0, 99999); // Mobile
+        
         navigator.clipboard.writeText(pixCopyPasteCodeEl.value)
             .then(() => {
                 copyMessage.style.display = 'block';
                 setTimeout(() => { copyMessage.style.display = 'none'; }, 2000);
             })
-            .catch(() => alert('Não foi possível copiar automaticamente. Selecione e copie manualmente.'));
+            .catch(() => {
+                alert('Erro ao copiar. Selecione o texto manualmente.');
+            });
     });
 
-    // Iniciar processo
+    // Botão Fechar Pop-up (Voltar ao Perfil)
+    if (btnClosePopup) {
+        btnClosePopup.addEventListener('click', () => {
+            window.location.href = 'perfil.html';
+        });
+    }
+
+    // Iniciar processo assim que a página carrega
     generatePixPayment();
 });

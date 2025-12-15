@@ -1,10 +1,13 @@
-/* Estilos para a página de Depósito PIX (saldo.html) */
-
+/* ========================================= */
+/* VARIÁVEIS E RESET GLOBAL                  */
+/* ========================================= */
 :root {
-    --primary-color: #00ff88;
-    --primary-color-dark: #00cc6e;
-    --dark-bg: #000000;
+    --primary-color: #00ff88;         /* Verde Neon */
+    --primary-color-dark: #00cc6e;    /* Verde Mais Escuro */
+    --dark-bg: #000000;               /* Fundo Preto */
+    --card-bg: rgba(255, 255, 255, 0.05);
     --text-primary: #ffffff;
+    --font-main: 'Outfit', sans-serif;
 }
 
 * {
@@ -14,14 +17,16 @@
 }
 
 body {
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-main);
     background: linear-gradient(135deg, #000000 0%, #0a0a0a 100%);
     color: var(--text-primary);
     min-height: 100vh;
     padding-bottom: 30px;
 }
 
-/* Header Simples */
+/* ========================================= */
+/* HEADER                                    */
+/* ========================================= */
 .app-header-simple {
     background: rgba(0, 0, 0, 0.95);
     backdrop-filter: blur(20px);
@@ -62,7 +67,9 @@ body {
     color: var(--primary-color);
 }
 
-/* Container Principal */
+/* ========================================= */
+/* CONTAINER PRINCIPAL                       */
+/* ========================================= */
 .container {
     max-width: 800px;
     margin: 0 auto;
@@ -83,7 +90,9 @@ body {
     margin-bottom: 30px;
 }
 
-/* Caixa de Informação do PIX */
+/* ========================================= */
+/* CAIXA DE INFORMAÇÃO DO VALOR              */
+/* ========================================= */
 .pix-info-box {
     background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 204, 110, 0.1) 100%);
     backdrop-filter: blur(10px);
@@ -99,6 +108,8 @@ body {
     color: rgba(255, 255, 255, 0.8);
     font-size: 0.95rem;
     margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .pix-info-box h3 {
@@ -108,25 +119,20 @@ body {
     text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
 }
 
-/* Área de Loading */
+/* ========================================= */
+/* LOADING (SPINNER)                         */
+/* ========================================= */
 #pix-loading-area {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--card-bg);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 40px;
     text-align: center;
 }
 
-#pix-loading-area p {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 1.1rem;
-    margin-top: 20px;
-}
-
-/* Spinner de Loading */
-.spinner {
-    width: 50px;
-    height: 50px;
+.spinner-large {
+    width: 60px;
+    height: 60px;
     border: 4px solid rgba(255, 255, 255, 0.2);
     border-top-color: var(--primary-color);
     border-radius: 50%;
@@ -135,14 +141,14 @@ body {
 }
 
 @keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+    to { transform: rotate(360deg); }
 }
 
-/* Área de Detalhes do PIX */
+/* ========================================= */
+/* ÁREA DO QR CODE E DETALHES                */
+/* ========================================= */
 #pix-details-area {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--card-bg);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
@@ -151,17 +157,10 @@ body {
 }
 
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* Container do QR Code */
 .qr-code-container {
     background: white;
     padding: 20px;
@@ -174,9 +173,10 @@ body {
 .qr-code-container img {
     display: block;
     border-radius: 10px;
+    max-width: 100%;
 }
 
-/* Container de Copia e Cola */
+/* Input Copia e Cola */
 .copy-paste-container {
     margin-top: 30px;
 }
@@ -186,7 +186,6 @@ body {
     color: rgba(255, 255, 255, 0.9);
     font-weight: 600;
     margin-bottom: 12px;
-    font-size: 1rem;
 }
 
 .copy-paste-container textarea {
@@ -209,63 +208,39 @@ body {
     box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
 }
 
-/* Botão de Copiar */
-#copy-pix-btn {
-    width: 100%;
+/* Botão Genérico */
+.btn {
     padding: 14px 28px;
-    background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
     border: none;
     border-radius: 12px;
-    color: #000;
     font-weight: 700;
     font-size: 1rem;
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-main);
     cursor: pointer;
     transition: all 0.3s ease;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    width: 100%;
 }
 
-#copy-pix-btn:hover {
+.btn-primary {
+    background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+    color: #000;
+}
+
+.btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 255, 136, 0.5);
 }
 
-#copy-pix-btn:active {
-    transform: translateY(0);
-}
-
-#copy-pix-btn .material-icons {
-    font-size: 20px;
-}
-
-/* Mensagem de Copiado */
-#copy-message {
-    text-align: center;
-    color: var(--primary-color);
-    font-weight: 600;
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-/* Informação de Vencimento */
+/* Vencimento */
 .pix-expiration {
-    text-align: center;
     padding: 15px;
     background: rgba(255, 136, 0, 0.1);
     border: 1px solid rgba(255, 136, 0, 0.3);
     border-radius: 12px;
-    margin-top: 20px;
 }
 
 .pix-expiration span {
@@ -273,14 +248,112 @@ body {
     font-weight: 700;
 }
 
-/* Responsividade */
+/* ========================================= */
+/* POP-UP DE PAGAMENTO APROVADO (MODAL)      */
+/* ========================================= */
+.popup-overlay {
+    display: none; /* Oculto por padrão, ativado via JS */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85); /* Fundo escuro com transparência */
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.4s ease;
+}
+
+.popup-overlay.show {
+    display: flex;
+}
+
+.popup-content {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    border: 2px solid var(--primary-color);
+    padding: 40px;
+    border-radius: 25px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 0 50px rgba(0, 255, 136, 0.2);
+    transform: scale(0.8);
+    animation: popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Ícone de Check Animado */
+.icon-circle {
+    width: 90px;
+    height: 90px;
+    background: rgba(0, 255, 136, 0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px;
+    border: 3px solid var(--primary-color);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+}
+
+.icon-circle .material-icons {
+    font-size: 50px;
+    color: var(--primary-color);
+}
+
+.popup-content h3 {
+    color: white;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    font-weight: 800;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.popup-content p {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 30px;
+    font-size: 1.05rem;
+    line-height: 1.5;
+}
+
+#btn-close-popup {
+    background: var(--primary-color);
+    color: #000000;
+    border: none;
+    padding: 16px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    border-radius: 12px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#btn-close-popup:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.5);
+    background: #ffffff;
+}
+
+/* Animações do Popup */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes popUp {
+    to { transform: scale(1); }
+}
+
+/* ========================================= */
+/* RESPONSIVIDADE                            */
+/* ========================================= */
 @media (max-width: 768px) {
     .container {
         padding: 20px 15px;
-    }
-
-    .page-content h2 {
-        font-size: 1.5rem;
     }
 
     .pix-info-box h3 {
@@ -289,6 +362,11 @@ body {
 
     .qr-code-container {
         padding: 15px;
+    }
+
+    .qr-code-container img {
+        width: 220px !important;
+        height: 220px !important;
     }
 
     #pix-details-area {
@@ -306,7 +384,7 @@ body {
     }
 
     .page-content h2 {
-        font-size: 1.3rem;
+        font-size: 1.4rem;
     }
 
     .pix-info-box {
@@ -318,8 +396,8 @@ body {
     }
 
     .qr-code-container img {
-        width: 200px !important;
-        height: 200px !important;
+        width: 180px !important;
+        height: 180px !important;
     }
 
     #pix-details-area {
@@ -328,5 +406,14 @@ body {
 
     .copy-paste-container textarea {
         font-size: 0.8rem;
+    }
+    
+    .popup-content {
+        padding: 30px 20px;
+        width: 95%;
+    }
+    
+    .popup-content h3 {
+        font-size: 1.5rem;
     }
 }
