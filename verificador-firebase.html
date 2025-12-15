@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificador de Estrutura Firebase - SLICED</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #000000 0%, #1a0000 50%, #000000 100%);
+            color: #00ff88;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff88;
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 255, 136, 0.05);
+            border-left: 4px solid #00ff88;
+            border-radius: 8px;
+        }
+
+        .section h2 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.5);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #output {
+            background: #000;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #00ff88;
+            min-height: 200px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .success {
+            color: #00ff88;
+        }
+
+        .error {
+            color: #ff4444;
+        }
+
+        .warning {
+            color: #ffaa00;
+        }
+
+        .info {
+            color: #00aaff;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 255, 136, 0.3);
+            border-top-color: #00ff88;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(0, 255, 136, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #00ff88;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificador de Estrutura Firebase</h1>
+
+        <div class="section">
+            <h2>📊 Ações Disponíveis</h2>
+            <button onclick="verificarEstrutura()">Verificar Estrutura Atual</button>
+            <button onclick="listarUsuarios()">Listar Todos os Usuários</button>
+            <button onclick="verificarSaldos()">Verificar Saldos</button>
+            <button onclick="limparOutput()">Limpar Console</button>
+        </div>
+
+        <div class="section">
+            <h2>📋 Console de Saída</h2>
+            <div id="output">Aguardando comando...</div>
+        </div>
+
+        <div id="statsSection" class="section hidden">
+            <h2>📈 Estatísticas</h2>
+            <div class="stats" id="stats"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Configuração do Firebase (mesma do projeto)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOOBNt_wbxmF1wMCLvvJOY8xCGiL_Qy3s",
+            authDomain: "sliced-4f1e3.firebaseapp.com",
+            projectId: "sliced-4f1e3",
+            storageBucket: "sliced-4f1e3.firebasestorage.app",
+            messagingSenderId: "1078305919043",
+            appId: "1:1078305919043:web:8e1a5e6e3f8b5f8e8e8e8e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const output = document.getElementById('output');
+        const statsSection = document.getElementById('statsSection');
+        const statsDiv = document.getElementById('stats');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString('pt-BR');
+            const className = type;
+            output.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function showLoading(message) {
+            output.innerHTML += `<div><span class="spinner"></span>${message}</div>\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        window.limparOutput = function() {
+            output.innerHTML = 'Console limpo.\n';
+            statsSection.classList.add('hidden');
+        };
+
+        window.verificarEstrutura = async function() {
+            log('🔍 Iniciando verificação da estrutura do Firebase...', 'info');
+            showLoading('Verificando...');
+
+            try {
+                // Verifica estrutura NOVA (SLICED/{userId})
+                log('\n📁 Verificando estrutura NOVA: SLICED/{userId}', 'info');
+                const slicedRef = collection(db, 'SLICED');
+                const slicedSnapshot = await getDocs(slicedRef);
+                
+                log(`✅ Encontrados ${slicedSnapshot.size} documentos na coleção SLICED`, 'success');
+
+                let usuariosComSaldo = 0;
+                let totalSaldo = 0;
+
+                slicedSnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    log(`  📄 Documento: ${doc.id}`, 'info');
+                    
+                    if (data.balance !== undefined) {
+                        log(`    💰 Saldo: R$ ${parseFloat(data.balance).toFixed(2)}`, 'success');
+                        usuariosComSaldo++;
+                        totalSaldo += parseFloat(data.balance);
+                    } else {
+                        log(`    ⚠️ Campo 'balance' não encontrado`, 'warning');
+                    }
+
+                    if (data.email) log(`    📧 Email: ${data.email}`, 'info');
+                    if (data.nome) log(`    👤 Nome: ${data.nome}`, 'info');
+                });
+
+                // Mostra estatísticas
+                statsSection.classList.remove('hidden');
+                statsDiv.innerHTML = `
+                    <div class="stat-card">
+                        <h3>${slicedSnapshot.size}</h3>
+                        <p>Total de Usuários</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${usuariosComSaldo}</h3>
+                        <p>Com Saldo Definido</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>R$ ${totalSaldo.toFixed(2)}</h3>
+                        <p>Saldo Total</p>
+                    </div>
+                `;
+
+                log('\n✅ Verificação concluída!', 'success');
+
+            } catch (error) {
+                log(`❌ ERRO: ${error.message}`, 'error');
+                console.error(error);
+            }
+        };
+
+        window.listarUsuarios = async function() {
+            log('📋 Listando todos os usuários...', 'info');
+            showLoading('Carregando usuários...');
+
+            try {
+                const slicedRef = collection(db, 'SLICED');
+                const snapshot = await getDocs(slicedRef);
+
+                log(`\n📊 Total de ${snapshot.size} usuários encontrados:\n`, 'success');
+
+                snapshot.forEach((doc, index) => {
+                    const data = doc.data();
+                    log(`\n${index + 1}. ID: ${doc.id}`, 'info');
+                    log(`   Nome: ${data.nome || data.nomeCompleto || 'N/A'}`, 'info');
+                    log(`   Email: ${data.email || 'N/A'}`, 'info');
+                    log(`   Saldo: R$ ${(data.balance || 0).toFixed(2)}`, data.balance > 0 ? 'success' : 'warning');
+                    log(`   CPF: ${data.cpf || 'N/A'}`, 'info');
+                });
+
+                log('\n✅ Listagem concluída!', 'success');
+
+            } catch (error) {
+                log(`❌ ERRO: ${error.message}`, 'error');
+                console.error(error);
+            }
+        };
+
+        window.verificarSaldos = async function() {
+            log('💰 Verificando saldos de todos os usuários...', 'info');
+            showLoading('Analisando saldos...');
+
+            try {
+                const slicedRef = collection(db, 'SLICED');
+                const snapshot = await getDocs(slicedRef);
+
+                let comSaldo = 0;
+                let semSaldo = 0;
+                let saldoTotal = 0;
+                let maiorSaldo = 0;
+                let usuarioMaiorSaldo = '';
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const saldo = parseFloat(data.balance || 0);
+
+                    if (saldo > 0) {
+                        comSaldo++;
+                        saldoTotal += saldo;
+
+                        if (saldo > maiorSaldo) {
+                            maiorSaldo = saldo;
+                            usuarioMaiorSaldo = data.nome || data.email || doc.id;
+                        }
+                    } else {
+                        semSaldo++;
+                    }
+                });
+
+                log(`\n📊 Relatório de Saldos:`, 'info');
+                log(`   ✅ Usuários com saldo: ${comSaldo}`, 'success');
+                log(`   ⚠️ Usuários sem saldo: ${semSaldo}`, 'warning');
+                log(`   💵 Saldo total no sistema: R$ ${saldoTotal.toFixed(2)}`, 'success');
+                log(`   📈 Saldo médio: R$ ${(saldoTotal / (comSaldo || 1)).toFixed(2)}`, 'info');
+                log(`   🏆 Maior saldo: R$ ${maiorSaldo.toFixed(2)} (${usuarioMaiorSaldo})`, 'success');
+
+                log('\n✅ Análise concluída!', 'success');
+
+            } catch (error) {
+                log(`❌ ERRO: ${error.message}`, 'error');
+                console.error(error);
+            }
+        };
+
+        // Executa verificação automática ao carregar
+        log('🚀 Sistema iniciado. Clique em um botão para começar.', 'success');
+    </script>
+</body>
+</html>

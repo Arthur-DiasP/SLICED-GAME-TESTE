@@ -1,41 +1,35 @@
-// js/saldo.js
-
-// Nota: Assumimos que o perfil.js já salvou 'loggedInUser' na sessionStorage
-// com os campos uid, email, nome e cpf preenchidos e válidos.
-
 document.addEventListener('DOMContentLoaded', () => {
 
     // ======================================================================
-    // 🛠️ CONSTANTES DE URLS (API e WebSocket) - ATUALIZADAS
+    // 1. CONFIGURAÇÃO DE URLS (AUTOMÁTICA)
     // ======================================================================
-    // 💡 NOVO BACKEND
-    const RENDER_BASE_DOMAIN = 'sliced-game-teste.onrender.com';
-    // 💡 NOVO FRONTEND (Para comparação de ambiente)
-    const PRODUCTION_FRONTEND_DOMAIN = 'sliced-teste.onrender.com'; 
+    // Se o domínio atual for o do Render, usa as URLs de produção.
+    // Se for localhost ou 127.0.0.1, usa as URLs locais.
     
-    // Configurações de URL
-    const PRODUCTION_API_URL = `https://${RENDER_BASE_DOMAIN}/api`;
-    const LOCAL_API_URL = 'http://localhost:3001/api';
-    const PRODUCTION_WS_URL = `wss://${RENDER_BASE_DOMAIN}`;
-    const LOCAL_WS_URL = `ws://localhost:3001`;
-
+    const PROD_DOMAIN = 'sliced-game-teste.onrender.com';
+    
     let API_BASE;
     let WS_BASE_URL;
 
-    // Determina se está em ambiente de produção ou local
-    if (window.location.hostname === PRODUCTION_FRONTEND_DOMAIN) {
-        API_BASE = PRODUCTION_API_URL;
-        WS_BASE_URL = PRODUCTION_WS_URL;
+    if (window.location.hostname.includes('render') || window.location.hostname === 'www.sliced.online') {
+        // Produção (Render)
+        API_BASE = `https://${PROD_DOMAIN}/api`;
+        WS_BASE_URL = `wss://${PROD_DOMAIN}`; // WSS é WebSocket Seguro (HTTPS)
+        console.log('🌍 Ambiente de Produção Detectado');
     } else {
-        API_BASE = LOCAL_API_URL;
-        WS_BASE_URL = LOCAL_WS_URL;
+        // Localhost
+        API_BASE = 'http://localhost:3001/api';
+        WS_BASE_URL = 'ws://localhost:3001';
+        console.log('🏠 Ambiente Local Detectado');
     }
-    // ======================================================================
 
-    // --- Variáveis de Estado e Seletores ---
+    // ======================================================================
+    // 2. RECUPERAÇÃO DE DADOS DA SESSÃO
+    // ======================================================================
     const rawDepositAmount = sessionStorage.getItem('depositAmount');
     const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
 
+    // Elementos do DOM
     const pixValueDisplay = document.getElementById('pix-value-display');
     const pixQrCodeEl = document.getElementById('pix-qr-code');
     const pixCopyPasteCodeEl = document.getElementById('pix-copia-cola-input');
@@ -46,14 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const pixExpirationTime = document.getElementById('pix-expiration-time');
     const paymentSuccessArea = document.getElementById('payment-success-area');
 
-    // Variáveis do WebSocket
-    let paymentWebSocket = null;
-    let currentPaymentId = null;
-
-
-    // Verifica se há dados e usuário
-    if (!rawDepositAmount || !loggedInUser || !loggedInUser.uid || !loggedInUser.cpf) {
-        alert('Erro: Dados do depósito ou CPF do usuário ausentes. Retorne ao perfil.');
+    // Validação Básica
+    if (!rawDepositAmount || !loggedInUser) {
+        alert('Dados da sessão perdidos. Por favor, inicie o depósito novamente.');
         window.location.href = 'perfil.html';
         return;
     }
@@ -61,163 +50,155 @@ document.addEventListener('DOMContentLoaded', () => {
     const depositAmount = parseFloat(rawDepositAmount);
     pixValueDisplay.textContent = `R$ ${depositAmount.toFixed(2).replace('.', ',')}`;
 
-    // ==================================================================
-    // 1. LÓGICA DO WEB SOCKET
-    // ==================================================================
+    // ======================================================================
+    // 3. LÓGICA DO WEBSOCKET (NOTIFICAÇÃO EM TEMPO REAL)
+    // ======================================================================
+    let paymentWebSocket = null;
 
     function initWebSocket(paymentId) {
-        currentPaymentId = paymentId;
-
-        // Fecha conexões anteriores se houver
+        // Fecha conexão anterior se existir
         if (paymentWebSocket) paymentWebSocket.close();
 
+        console.log(`🔌 Conectando ao WebSocket em: ${WS_BASE_URL}...`);
         paymentWebSocket = new WebSocket(WS_BASE_URL);
 
+        // Quando conectar, envia o ID que queremos "vigiar"
         paymentWebSocket.onopen = () => {
-            console.log('🔗 WebSocket conectado. Registrando paymentId...');
+            console.log('✅ WebSocket Conectado! Monitorando ID:', paymentId);
             paymentWebSocket.send(JSON.stringify({
                 type: 'register',
-                paymentId: currentPaymentId
+                paymentId: paymentId
             }));
         };
 
+        // Quando receber mensagem do servidor
         paymentWebSocket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
+            try {
+                const data = JSON.parse(event.data);
+                console.log('📩 Mensagem recebida:', data);
 
-            if (data.type === 'payment_status') {
-                console.log(`[WS] Status recebido: ${data.status}`);
-
-                if (data.status === 'approved') {
-                    // AÇÃO DE SUCESSO!
-                    // 1. Oculta PIX e mostra área de sucesso
-                    pixDetailsArea.style.display = 'none';
-                    pixLoadingArea.style.display = 'none';
-                    
-                    // Atualiza a mensagem antes de mostrar a área de sucesso
-                    const depositValue = data.valor ? parseFloat(data.valor).toFixed(2).replace('.', ',') : depositAmount.toFixed(2).replace('.', ',');
-                    document.getElementById('payment-success-area').querySelector('p').textContent = `Seu depósito de R$ ${depositValue} foi creditado com sucesso.`;
-                    
-                    paymentSuccessArea.style.display = 'block';
-
-                    // 2. Fecha o WebSocket (o backend também fará isso)
-                    paymentWebSocket.close();
-                    
-                } else if (data.status === 'rejected' || data.status === 'cancelled') {
-                    // AÇÃO DE FALHA
-                    alert('❌ Pagamento rejeitado ou cancelado. Tente novamente.');
-                    window.location.href = 'perfil.html?status=deposit_failure'; 
+                if (data.type === 'payment_status' && data.status === 'approved') {
+                    handlePaymentSuccess();
                 }
+            } catch (e) {
+                console.error('Erro ao processar mensagem WS:', e);
             }
         };
 
         paymentWebSocket.onerror = (error) => {
-            console.error('❌ Erro no WebSocket:', error);
-            // Alertamos o usuário, mas a atualização ainda deve ocorrer via Webhook
-            alert('A conexão em tempo real falhou. O pagamento será processado via Webhook.');
-        };
-
-        paymentWebSocket.onclose = () => {
-            console.log('💔 WebSocket fechado.');
+            console.warn('⚠️ Erro na conexão WebSocket (pode ser normal em localhost sem HTTPS):', error);
         };
     }
 
-    // ==================================================================
-    // 2. FUNÇÃO PARA GERAR O PIX (CHAMADA API - SEM INPUT DE USUÁRIO)
-    // ==================================================================
+    // Função visual de sucesso
+    function handlePaymentSuccess() {
+        console.log('🎉 PAGAMENTO CONFIRMADO!');
+        
+        // Esconde o QR Code e mostra a tela de sucesso
+        pixDetailsArea.style.display = 'none';
+        pixLoadingArea.style.display = 'none';
+        paymentSuccessArea.style.display = 'block'; // Certifique-se que esse ID existe no HTML
+        document.getElementById('deposit-title').textContent = 'Sucesso!';
+        document.getElementById('deposit-instructions').textContent = 'Depósito confirmado.';
 
+        // Fecha o socket
+        if (paymentWebSocket) paymentWebSocket.close();
+    }
+
+    // ======================================================================
+    // 4. FUNÇÃO PARA GERAR O PIX NO BACKEND
+    // ======================================================================
     async function generatePixPayment() {
         pixLoadingArea.style.display = 'block';
         pixDetailsArea.style.display = 'none';
 
         try {
-            // Usa o CPF e dados salvos na sessão, removendo a necessidade de input
-            const cpfLimpo = loggedInUser.cpf.replace(/\D/g, '');
-            
-            // Assume que o nome completo existe e tenta separá-lo
-            const nomeCompleto = loggedInUser.nomeCompleto || loggedInUser.nome || 'SLICED User';
-            const firstName = nomeCompleto.split(' ')[0];
-            const lastName = nomeCompleto.split(' ').slice(1).join(' ') || 'User';
+            // Prepara os dados (limpa CPF)
+            const cpfLimpo = loggedInUser.cpf ? loggedInUser.cpf.replace(/\D/g, '') : '';
+            const nomeCompleto = loggedInUser.nomeCompleto || 'Usuario Sliced';
+            const [firstName, ...rest] = nomeCompleto.split(' ');
+            const lastName = rest.join(' ') || 'Cliente';
 
             const requestData = {
                 amount: depositAmount,
                 userId: loggedInUser.uid,
-                email: loggedInUser.email || 'usuario@sliced.com',
+                email: loggedInUser.email || 'email@teste.com',
                 firstName: firstName,
                 lastName: lastName,
-                payerCpf: cpfLimpo // CPF do usuário logado é usado como CPF do pagador
+                payerCpf: cpfLimpo
             };
 
-            const apiUrl = `${API_BASE}/deposit/create`;
-            const response = await fetch(apiUrl, {
+            console.log('📤 Solicitando PIX ao servidor...');
+            
+            const response = await fetch(`${API_BASE}/deposit/create`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestData)
             });
 
-            const responseText = await response.text();
-            let result;
-            try {
-                result = JSON.parse(responseText);
-            } catch (e) {
-                throw new Error(`Resposta inválida do servidor: ${responseText.substring(0, 50)}...`);
-            }
+            const result = await response.json();
 
             if (!result.success) {
-                throw new Error(result.message || 'Erro ao gerar PIX');
+                throw new Error(result.message || 'Erro desconhecido do servidor');
             }
-            
-            const { paymentId, pixCopiaECola, qrCodeBase64 } = result.data;
 
-            // --- Exibição dos Dados ---
-            document.getElementById('deposit-title').textContent = 'Pague o PIX para Continuar';
-            document.getElementById('deposit-instructions').textContent = 'Seu pagamento de R$ ' + depositAmount.toFixed(2).replace('.', ',') + ' está pendente.';
-            
+            const { paymentId, qrCodeBase64, pixCopiaECola } = result.data;
+
+            console.log('📥 PIX Gerado! ID:', paymentId);
+
+            // Atualiza a tela com o QR Code
             pixQrCodeEl.src = qrCodeBase64;
             pixCopyPasteCodeEl.value = pixCopiaECola;
-
+            
+            // Define vencimento visual (1 hora)
             const expirationDate = new Date();
             expirationDate.setHours(expirationDate.getHours() + 1);
-            pixExpirationTime.textContent = expirationDate.toLocaleString('pt-BR');
+            pixExpirationTime.textContent = expirationDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-            // Oculta loading e mostra detalhes
+            // Mostra os detalhes
             pixLoadingArea.style.display = 'none';
             pixDetailsArea.style.display = 'block';
+            document.getElementById('deposit-title').textContent = 'Escaneie o QR Code';
 
-            console.log('✅ PIX gerado com sucesso! Iniciando WebSocket.');
-            
-            // 3. INICIAR CONEXÃO WEB SOCKET
+            // 🚀 INICIA O MONITORAMENTO EM TEMPO REAL
             initWebSocket(paymentId);
 
         } catch (error) {
-            console.error('❌ Erro Crítico no PIX:', error);
-
-            let errorMessage = error.message.includes('Failed to fetch') 
-                ? `Não foi possível conectar ao servidor: ${API_BASE}.` 
-                : error.message;
-
-            alert(`Não foi possível gerar o PIX: ${errorMessage}`);
+            console.error('❌ Erro:', error);
             
-            // Exibe erro no loading area
+            // Tratamento especial para erro de CPF
+            let msgErro = error.message;
+            if (msgErro.includes('CPF')) {
+                msgErro = 'Seu CPF no cadastro é inválido para PIX. Atualize seu perfil.';
+            }
+
             pixLoadingArea.innerHTML = `
-                <p style="color: red; margin-bottom: 15px;">❌ Erro: ${errorMessage}</p>
-                <button onclick="window.location.href='perfil.html'" style="padding: 10px 20px; background: #00ff88; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                    Voltar para o Perfil
-                </button>
+                <div style="color: #ff4444; padding: 20px;">
+                    <i class="material-icons" style="font-size: 40px;">error_outline</i>
+                    <p><strong>Não foi possível gerar o PIX</strong></p>
+                    <p>${msgErro}</p>
+                    <button onclick="window.location.href='perfil.html'" class="btn btn-primary" style="margin-top:15px;">Voltar ao Perfil</button>
+                </div>
             `;
-            pixLoadingArea.style.display = 'block';
-            pixDetailsArea.style.display = 'none';
         }
     }
 
-    // --- 3. Event Listener para Copiar o Código ---
+    // ======================================================================
+    // 5. EVENTOS DE INTERFACE
+    // ======================================================================
+    
+    // Botão Copiar
     copyPixBtn.addEventListener('click', () => {
         pixCopyPasteCodeEl.select();
-        document.execCommand('copy');
-
-        copyMessage.style.display = 'block';
-        setTimeout(() => { copyMessage.style.display = 'none'; }, 3000);
+        pixCopyPasteCodeEl.setSelectionRange(0, 99999); // Mobile
+        navigator.clipboard.writeText(pixCopyPasteCodeEl.value)
+            .then(() => {
+                copyMessage.style.display = 'block';
+                setTimeout(() => { copyMessage.style.display = 'none'; }, 2000);
+            })
+            .catch(() => alert('Não foi possível copiar automaticamente. Selecione e copie manualmente.'));
     });
 
-    // Inicia o processo de geração do PIX
+    // Iniciar processo
     generatePixPayment();
 });

@@ -4,6 +4,8 @@ node_modules/
 # Exclui arquivos de configuração sensíveis (incluindo o .env)
 .env
 
+
+USER_BASE_URL="https://sliced-game-teste.onrender.com"
 # =========================================================
 # CHAVE DE SERVIÇO FIREBASE ADMIN (CRÍTICO: NÃO ENVIAR)
 # =========================================================

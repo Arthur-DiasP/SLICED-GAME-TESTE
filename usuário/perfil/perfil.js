@@ -1,13 +1,11 @@
 // js/perfil.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    // === Seletores do DOM ===
+    // ... (Seletores do DOM e Variáveis de Ambiente/Constantes MIN_CUSTOM_DEPOSIT) ...
     const depositOptionButtons = document.querySelectorAll('.deposit-option-btn');
     const customDepositInput = document.getElementById('custom-deposit-amount');
     const depositCustomBtn = document.getElementById('deposit-custom-btn');
-    
-    // Elementos Financeiros
-    const balanceAmountDisplay = document.getElementById('balanceAmount'); // Onde o saldo é exibido
+    const balanceAmountDisplay = document.getElementById('balanceAmount');
     const btnRefreshBalance = document.getElementById('btnRefreshBalance');
     const btnWithdraw = document.getElementById('btnWithdraw');
     const withdrawModal = document.getElementById('withdrawModal');
@@ -15,35 +13,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const withdrawForm = document.getElementById('withdrawForm');
     const withdrawLoading = document.getElementById('withdrawLoading');
     const withdrawAmountInput = document.getElementById('withdrawAmount');
-    const successMessage = document.getElementById('successMessage'); // Selecionar o elemento de sucesso
 
-    // Variáveis de Ambiente
-    const API_BASE = 'https://sliced-game-teste.onrender.com/api';
+    const API_BASE = 'https://sliced-game-front-back-render.onrender.com/api';
+    let currentUser = null;
+    let currentBalance = 0.00;
+    const MIN_CUSTOM_DEPOSIT = 100.00;
 
-    // === Variável para armazenar dados do usuário e saldo ===
-    let currentUser = null; 
-    let currentBalance = 0.00; // Saldo real em memória
 
-    // === CONSTANTE DE DEPÓSITO MÍNIMO PERSONALIZADO ===
-    const MIN_CUSTOM_DEPOSIT = 100.00; // NOVO MÍNIMO DE R$ 100,00
-
-    
     // ============================================
     // FUNÇÃO PARA CARREGAR SALDO DO BACKEND
     // ============================================
     async function loadBalance() {
         if (!currentUser || !currentUser.uid) {
             // Tenta obter o usuário da session novamente, caso tenha sido preenchido
+            // pelo script module do perfil.html
             const sessionData = sessionStorage.getItem('loggedInUser');
             if (sessionData) {
                 currentUser = JSON.parse(sessionData);
             } else {
-                 balanceAmountDisplay.textContent = 'R$ 0,00';
-                 return;
+                balanceAmountDisplay.textContent = 'R$ 0,00';
+                return;
             }
         }
 
         try {
+            // Puxa o saldo atualizado do Firestore via Backend
             const response = await fetch(`${API_BASE}/user/${currentUser.uid}/balance`);
             const result = await response.json();
 
@@ -68,11 +62,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const sessao = localStorage.getItem('spfc_user_session');
             if (sessao) {
                 const dadosSessao = JSON.parse(sessao);
-                
+
+                // Pega dados do DOM, se existirem (preenchidos pelo tracker-config)
                 const nomeCompleto = document.getElementById('nomeCompleto')?.value || dadosSessao.nomeCompleto || 'Usuário';
                 const email = document.getElementById('email')?.value || dadosSessao.email || '';
                 const cpf = document.getElementById('cpf')?.value || '';
-                
+
                 currentUser = {
                     uid: dadosSessao.uid,
                     email: email,
@@ -83,83 +78,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Salva na sessionStorage (usado pelo saldo.js)
                 sessionStorage.setItem('loggedInUser', JSON.stringify(currentUser));
-                
+
                 console.log('✅ Dados do usuário carregados para depósito.');
-                
-                // CARREGA SALDO IMEDIATAMENTE
-                loadBalance(); 
+
+                // 💡 CARREGA SALDO IMEDIATAMENTE (solução mais garantida)
+                loadBalance();
             } else {
                 console.warn('⚠️ Sessão não encontrada. Necessário Login.');
             }
         } catch (error) {
             console.error('Erro ao carregar dados do usuário:', error);
         }
-    }, 0);
+    }, 0); // EXECUTA IMEDIATAMENTE (0ms)
 
 
-    // ==================================================================
-    // 💡 NOVA FUNÇÃO: Trata o status de retorno do Mercado Pago (back_urls)
-    // ==================================================================
-    function handleDepositStatus() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const status = urlParams.get('status');
-        
-        if (status) {
-            let message = '';
-            let isSuccess = false;
-
-            switch (status) {
-                case 'deposit_success':
-                    // Se o WebSocket falhou, esta é a garantia da mensagem
-                    message = '✓ Depósito concluído com sucesso! Seu saldo foi atualizado.';
-                    isSuccess = true;
-                    break;
-                case 'deposit_pending':
-                    message = '⏳ Seu depósito está pendente de confirmação. Verifique seu saldo em instantes.';
-                    break;
-                case 'deposit_failure':
-                    message = '❌ Depósito falhou ou foi cancelado. Tente novamente.';
-                    break;
-            }
-
-            if (message) {
-                // Exibe a mensagem
-                successMessage.textContent = message;
-                successMessage.classList.add('show');
-                
-                // Força a recarga do saldo se for um status final ou pendente
-                loadBalance(); 
-
-                // Limpa o parâmetro da URL para não exibir de novo ao recarregar
-                const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-                window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
-            }
-        }
-    }
-    
-    // Chama a nova função após a inicialização do DOM
-    handleDepositStatus(); 
-
+    // ... (As funções startDepositFlow, listeners de depósito, e funções de saque permanecem as mesmas) ...
+    // Note que a função loadBalance já está definida acima.
 
     /**
      * Função principal para iniciar o fluxo de depósito.
-     * @param {number} amount O valor selecionado para depósito.
      */
     function startDepositFlow(amount) {
+        // ... (Validações de valor e mínimo de 100) ...
         if (amount <= 0 || isNaN(amount)) {
             alert('Por favor, selecione ou digite um valor válido para depósito.');
             return;
         }
-        
-        // Validação para depósito personalizado (se vier do campo custom)
+
         if (amount >= MIN_CUSTOM_DEPOSIT && customDepositInput && parseFloat(customDepositInput.value) === amount) {
-             if (amount < MIN_CUSTOM_DEPOSIT) {
-                 alert(`O valor mínimo para depósito personalizado é de R$ ${MIN_CUSTOM_DEPOSIT.toFixed(2).replace('.', ',')}.`);
-                 return;
-             }
+            if (amount < MIN_CUSTOM_DEPOSIT) {
+                alert(`O valor mínimo para depósito personalizado é de R$ ${MIN_CUSTOM_DEPOSIT.toFixed(2).replace('.', ',')}.`);
+                return;
+            }
         }
 
-        // Atualizar dados do usuário antes de redirecionar 
+        // ... (Atualiza sessionStorage com dados do usuário) ...
         try {
             const sessao = localStorage.getItem('spfc_user_session');
             if (sessao) {
@@ -167,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const nomeCompleto = document.getElementById('nomeCompleto')?.value || dadosSessao.nomeCompleto || 'Usuário';
                 const email = document.getElementById('email')?.value || dadosSessao.email || '';
                 const cpf = document.getElementById('cpf')?.value || '';
-                
+
                 const userData = {
                     uid: dadosSessao.uid,
                     email: email,
@@ -175,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     nomeCompleto: nomeCompleto,
                     cpf: cpf
                 };
-                
+
                 sessionStorage.setItem('loggedInUser', JSON.stringify(userData));
             }
         } catch (error) {
@@ -184,14 +137,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Salvar o valor do depósito
         sessionStorage.setItem('depositAmount', amount.toFixed(2));
-        
+
         // Redirecionar para a página de saldo
         window.location.href = 'saldo.html';
     }
 
     // === EVENT LISTENERS DE DEPÓSITO ===
 
-    // Botões de Opções Fixas (incluindo R$ 0,50)
+    // Botões de Opções Fixas
     depositOptionButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             const amount = parseFloat(e.target.dataset.value);
@@ -203,8 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (customDepositInput) {
         customDepositInput.addEventListener('input', () => {
             const value = parseFloat(customDepositInput.value);
-            
-            // Habilita o botão APENAS se o valor for >= R$ 100,00
+
             if (depositCustomBtn) {
                 depositCustomBtn.disabled = isNaN(value) || value < MIN_CUSTOM_DEPOSIT;
             }
@@ -258,9 +210,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const pixKeyType = document.getElementById('pixKeyType').value;
         const pixKey = document.getElementById('pixKey').value;
         const withdrawAmount = parseFloat(amount);
-        
+
         const MIN_WITHDRAWAL = 20.00;
-        
+
         // 1. Validação do Mínimo de Saque (Frontend)
         if (isNaN(withdrawAmount) || withdrawAmount < MIN_WITHDRAWAL) {
             alert(`Valor de saque mínimo é de R$ ${MIN_WITHDRAWAL.toFixed(2).replace('.', ',')}.`);
