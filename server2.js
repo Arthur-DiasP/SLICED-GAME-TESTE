@@ -1,5 +1,5 @@
 // ==================================================================
-// ARQUIVO: server2.js (Versão Final: WebSocket + Webhook + .env)
+// ARQUIVO: server2.js (Versão Final Corrigida: WebSocket + Webhook)
 // ==================================================================
 
 // 1. Carrega variáveis de ambiente
@@ -48,29 +48,41 @@ app.use('/usuário', express.static(path.join(__dirname, 'usuário')));
 // ==================================================================
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
-const paymentClients = new Map();
+const paymentClients = new Map(); // Armazena pares: "ID_PAGAMENTO" => Conexão WS
 
 // Função para enviar mensagem ao Frontend
 function avisarFrontend(paymentId, status) {
-    if (paymentClients.has(paymentId)) {
-        const ws = paymentClients.get(paymentId);
+    // Garante que o ID seja string para bater com a chave do Map
+    const idString = String(paymentId);
+
+    // LOG DE DEBUG: Ajuda a ver o que está acontecendo no terminal
+    console.log(`🔍 [WS] Tentando notificar ID: "${idString}"`);
+    console.log(`📂 [WS] IDs Conectados no momento:`, Array.from(paymentClients.keys()));
+
+    if (paymentClients.has(idString)) {
+        const ws = paymentClients.get(idString);
         if (ws.readyState === 1) { // 1 = Conectado
-            console.log(`📡 [WS] Avisando frontend: Pagamento ${paymentId} -> ${status}`);
+            console.log(`📡 [WS] Sucesso! Avisando frontend: Pagamento ${idString} -> ${status}`);
             
             ws.send(JSON.stringify({
                 type: 'payment_status',
                 status: status,
-                paymentId: paymentId
+                paymentId: idString
             }));
 
             // Fecha a conexão após aprovação para economizar recursos
             if (status === 'approved') {
                 setTimeout(() => {
                     ws.close();
-                    paymentClients.delete(paymentId);
+                    paymentClients.delete(idString);
                 }, 2000);
             }
+        } else {
+            console.warn(`⚠️ [WS] Cliente encontrado, mas conexão fechada.`);
+            paymentClients.delete(idString);
         }
+    } else {
+        console.warn(`⚠️ [WS] ID ${idString} não encontrado na lista de conexões ativas.`);
     }
 }
 
@@ -78,10 +90,14 @@ wss.on('connection', (ws) => {
     ws.on('message', (message) => {
         try {
             const data = JSON.parse(message);
+            
             // O frontend envia { type: 'register', paymentId: '...' }
             if (data.type === 'register' && data.paymentId) {
-                paymentClients.set(data.paymentId, ws);
-                console.log(`🔗 [WS] Cliente aguardando ID: ${data.paymentId}`);
+                // CORREÇÃO CRÍTICA: Forçar String para garantir compatibilidade
+                const strPaymentId = String(data.paymentId);
+                
+                paymentClients.set(strPaymentId, ws);
+                console.log(`🔗 [WS] Cliente registrado aguardando ID: "${strPaymentId}"`);
             }
         } catch (e) {
             console.error('Erro WS:', e);
@@ -89,9 +105,12 @@ wss.on('connection', (ws) => {
     });
 
     ws.on('close', () => {
-        // Limpeza automática (opcional, mas boa prática)
+        // Limpeza automática para remover conexões mortas
         paymentClients.forEach((clientWs, key) => {
-            if (clientWs === ws) paymentClients.delete(key);
+            if (clientWs === ws) {
+                // console.log(`🔌 [WS] Cliente desconectado. Removendo ID: ${key}`);
+                paymentClients.delete(key);
+            }
         });
     });
 });
@@ -118,7 +137,7 @@ app.post('/api/deposit/create', async (req, res) => {
             });
         }
 
-        // Gera email único para evitar erro "PA_UNAUTHORIZED" (pagar para si mesmo)
+        // Gera email único para evitar erro "PA_UNAUTHORIZED" (pagar para si mesmo em testes)
         const emailSeguro = `cliente_${Date.now()}@emailtemp.com`;
 
         console.log(`💳 Criando PIX: R$ ${amount} para CPF ${payerCpf}`);
@@ -160,7 +179,6 @@ app.post('/api/deposit/create', async (req, res) => {
     } catch (error) {
         console.error('❌ ERRO MP API:', JSON.stringify(error, null, 2));
         
-        // Pega a mensagem detalhada do erro se existir
         const detalhe = error.cause?.description || error.message;
         
         res.status(500).json({ 
@@ -189,8 +207,12 @@ app.post('/api/webhook/mercadopago', async (req, res) => {
 
         if (status === 'approved') {
             console.log('💰 Pagamento APROVADO! Notificando usuário...');
-            // Avisa o Frontend via WebSocket
+            
+            // Avisa o Frontend via WebSocket (Força String no ID)
             avisarFrontend(String(paymentId), 'approved');
+            
+            // AQUI: Você pode adicionar lógica para atualizar saldo no Banco de Dados
+            // ex: await atualizarSaldoUsuario(payment.metadata.user_id, payment.transaction_amount);
         }
 
     } catch (error) {
@@ -204,17 +226,15 @@ app.post('/api/webhook/mercadopago', async (req, res) => {
 // ==================================================================
 // 8. ROTAS MOCK (Simulação de Banco de Dados)
 // ==================================================================
-// Essas rotas existem para que o frontend não dê erro 404 enquanto o Firebase está desligado.
+// Estas rotas impedem erro 404 no frontend enquanto não há conexão real com Firebase Admin
 
 // Mock Saldo
 app.get('/api/user/:uid/balance', (req, res) => {
-    // Retorna saldo zero por enquanto (já que não temos DB)
     res.json({ success: true, data: { balance: 0.00 } });
 });
 
 // Mock Saque
 app.post('/api/withdraw/request', (req, res) => {
-    // Simula sucesso no saque
     console.log('💸 Saque simulado solicitado:', req.body);
     res.json({ success: true, message: 'Solicitação de saque simulada com sucesso.' });
 });
