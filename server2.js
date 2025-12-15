@@ -1,5 +1,5 @@
 // ==================================================================
-// ARQUIVO: server2.js (Versão Final: Secret Files + Webhook + DB Fix)
+// ARQUIVO: server2.js (Versão Final: Secret Files + Idempotência + Webhook)
 // ==================================================================
 
 require('dotenv').config();
@@ -13,7 +13,7 @@ const { MercadoPagoConfig, Payment } = require('mercadopago');
 const { WebSocketServer } = require('ws');
 
 // ==================================================================
-// 1. CONFIGURAÇÃO FIREBASE ADMIN (COM SECRET FILES)
+// 1. CONFIGURAÇÃO FIREBASE ADMIN (COM CARREGAMENTO INTELIGENTE)
 // ==================================================================
 const admin = require('firebase-admin');
 const fs = require('fs');
@@ -24,14 +24,14 @@ try {
     let serviceAccount;
 
     // A. CAMINHO NO RENDER (Secret Files)
-    // Este arquivo é injetado pelo Render na pasta segura
+    // O arquivo que você salvou na aba "Secret Files" do Render
     const renderPath = '/etc/secrets/sliced-4f1e3-firebase-adminsdk-fbsvc-3a6db902e2.json';
     
-    // B. CAMINHOS LOCAIS (Para testar no seu PC)
+    // B. CAMINHOS LOCAIS (Para testar no seu computador)
     const localPathGen = './serviceAccountKey.json';
     const localPathSpec = './sliced-4f1e3-firebase-adminsdk-fbsvc-3a6db902e2.json';
 
-    // LÓGICA DE CARREGAMENTO INTELIGENTE:
+    // LÓGICA DE CARREGAMENTO:
     if (fs.existsSync(renderPath)) {
         console.log('✅ [Firebase] Carregando via Secret File (Render)...');
         serviceAccount = require(renderPath);
@@ -45,14 +45,15 @@ try {
         serviceAccount = require(localPathSpec);
     }
     else if (process.env.FIREBASE_CREDENTIALS) {
+        // Fallback para Variável de Ambiente
         console.log('✅ [Firebase] Carregando via Variável de Ambiente...');
         serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
     }
     else {
-        throw new Error('Nenhuma credencial do Firebase encontrada.');
+        throw new Error('Nenhuma credencial do Firebase encontrada (Secret File ou Local).');
     }
 
-    // Inicializa o App se necessário
+    // Inicializa o App
     if (!admin.apps.length) {
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount)
@@ -135,7 +136,6 @@ wss.on('connection', (ws) => {
             }
         } catch (e) { console.error('Erro WS:', e); }
     });
-    
     ws.on('close', () => {
         paymentClients.forEach((clientWs, key) => {
             if (clientWs === ws) paymentClients.delete(key);
@@ -144,46 +144,68 @@ wss.on('connection', (ws) => {
 });
 
 // ==================================================================
-// 4. FUNÇÃO DE BANCO DE DADOS (CRIA CAMPO SALDO SE NÃO EXISTIR)
+// 4. LÓGICA DE SALDO E IDEMPOTÊNCIA (EVITA PAGAMENTO DUPLO)
 // ==================================================================
-async function adicionarSaldoUsuario(uid, valor) {
+async function processarPagamento(uid, valor, paymentId) {
     if (!db) {
         console.error('❌ [DB] Erro: Banco de dados desconectado.');
-        return;
+        return false;
     }
 
-    // O caminho EXATO conforme seu auth.js:
+    // Referência do Usuário (Caminho igual ao auth.js)
     const userRef = db.collection('SLICED').doc('data').collection('Usuários').doc(uid);
+    // Referência da Transação (Subcoleção para controle)
+    const transacaoRef = userRef.collection('Transacoes').doc(String(paymentId));
 
     try {
         await db.runTransaction(async (t) => {
-            const doc = await t.get(userRef);
-            
-            if (!doc.exists) {
-                throw new Error(`Usuário com UID ${uid} não encontrado no banco.`);
+            // 1. Leituras (Obrigatório ser antes das escritas)
+            const userDoc = await t.get(userRef);
+            const transDoc = await t.get(transacaoRef);
+
+            if (!userDoc.exists) {
+                throw new Error(`Usuário ${uid} não encontrado.`);
             }
 
-            const dadosAtuais = doc.data();
-            
-            // Verifica se o campo saldo existe. Se não, assume 0.
-            const saldoAtual = Number(dadosAtuais.saldo) || 0; 
+            // 🛑 CHECK DE DUPLICIDADE: Se já existe recibo, para aqui.
+            if (transDoc.exists) {
+                console.log(`✋ [DB] Pagamento ID ${paymentId} já processado. Ignorando.`);
+                return; 
+            }
+
+            // 2. Cálculos
+            const dadosAtuais = userDoc.data();
+            const saldoAtual = Number(dadosAtuais.saldo) || 0;
             const valorAdicionar = Number(valor);
-            
+
             if (isNaN(valorAdicionar)) throw new Error('Valor inválido');
 
             const novoSaldo = saldoAtual + valorAdicionar;
 
-            // 'merge: true' cria o campo saldo se ele não existir
+            // 3. Gravações (Atômicas)
+            
+            // Atualiza Saldo
             t.set(userRef, { 
                 saldo: novoSaldo,
                 ultimaRecarga: admin.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
-            
-            console.log(`✅ [DB] SUCESSO! UID: ${uid}`);
-            console.log(`💰 Saldo Anterior: R$ ${saldoAtual.toFixed(2)} | Novo: R$ ${novoSaldo.toFixed(2)}`);
+
+            // Cria Recibo (Impede reprocessamento)
+            t.set(transacaoRef, {
+                valor: valorAdicionar,
+                data: admin.firestore.FieldValue.serverTimestamp(),
+                tipo: 'deposito_pix',
+                status: 'aprovado',
+                paymentId: String(paymentId)
+            });
+
+            console.log(`✅ [DB] SALDO ATUALIZADO! UID: ${uid}`);
+            console.log(`💰 Anterior: R$ ${saldoAtual.toFixed(2)} | Novo: R$ ${novoSaldo.toFixed(2)}`);
         });
+        return true;
     } catch (e) {
-        console.error('❌ [DB] FALHA AO SALVAR SALDO:', e.message);
+        console.error('❌ [DB] FALHA NA TRANSAÇÃO:', e.message);
+        return false;
     }
 }
 
@@ -200,6 +222,7 @@ app.post('/api/deposit/create', async (req, res) => {
         if (!payerCpf) payerCpf = '';
         payerCpf = payerCpf.replace(/\D/g, '');
 
+        // Email temporário para evitar erro de auto-pagamento em testes
         const emailSeguro = `cliente_${Date.now()}@emailtemp.com`;
 
         const paymentBody = {
@@ -212,7 +235,7 @@ app.post('/api/deposit/create', async (req, res) => {
                 identification: { type: 'CPF', number: payerCpf }
             },
             notification_url: `${BASE_URL}/api/webhook/mercadopago`,
-            metadata: { user_id: userId } // ID necessário para o webhook
+            metadata: { user_id: userId } // ID fundamental para o webhook
         };
 
         const payment = await paymentClient.create({ body: paymentBody });
@@ -237,11 +260,11 @@ app.post('/api/deposit/create', async (req, res) => {
     }
 });
 
-// Webhook (Recebe notificação do Mercado Pago e Atualiza Saldo)
+// Webhook (Recebe notificação do MP)
 app.post('/api/webhook/mercadopago', async (req, res) => {
     const paymentId = req.query.id || (req.body.data && req.body.data.id);
     
-    // Responde rápido para o MP
+    // Responde rápido para o MP não reenviar
     res.status(200).send('OK');
 
     if (!paymentId) return;
@@ -257,12 +280,13 @@ app.post('/api/webhook/mercadopago', async (req, res) => {
             const amount = payment.transaction_amount;
 
             if (userId && amount) {
-                // 1. Atualiza o banco
-                await adicionarSaldoUsuario(userId, amount);
-                // 2. Avisa o frontend
+                // 1. Processa no Banco (com trava de segurança)
+                await processarPagamento(userId, amount, String(paymentId));
+                
+                // 2. Avisa o Frontend (WebSocket)
                 avisarFrontend(String(paymentId), 'approved');
             } else {
-                console.error('❌ [Webhook] Metadados incompletos (sem user_id).');
+                console.error('❌ [Webhook] Metadados incompletos.');
             }
         }
     } catch (error) {
@@ -270,22 +294,22 @@ app.post('/api/webhook/mercadopago', async (req, res) => {
     }
 });
 
-// Consultar Saldo (Lê do Firebase)
+// Consultar Saldo (GET)
 app.get('/api/user/:uid/balance', async (req, res) => {
     const { uid } = req.params;
 
     if (!db) return res.json({ success: true, data: { balance: 0.00 }, warning: 'DB Offline' });
 
     try {
-        // Caminho exato igual ao auth.js
         const userDoc = await db.collection('SLICED').doc('data').collection('Usuários').doc(uid).get();
 
         if (userDoc.exists) {
             const dados = userDoc.data();
-            const saldo = parseFloat(dados.saldo) || 0.00;
-            res.json({ success: true, data: { balance: saldo } });
+            // Garante retorno numérico
+            const saldo = Number(dados.saldo); 
+            res.json({ success: true, data: { balance: isNaN(saldo) ? 0.00 : saldo } });
         } else {
-            // Se o usuário existe mas não tem saldo, retorna 0
+            // Usuário existe mas não tem saldo
             res.json({ success: true, data: { balance: 0.00 } });
         }
     } catch (error) {
@@ -294,7 +318,7 @@ app.get('/api/user/:uid/balance', async (req, res) => {
     }
 });
 
-// Solicitação de Saque (Futuro)
+// Solicitação de Saque
 app.post('/api/withdraw/request', async (req, res) => {
     console.log('💸 [API] Saque solicitado:', req.body);
     res.json({ success: true, message: 'Solicitação recebida.' });
@@ -306,6 +330,6 @@ app.post('/api/withdraw/request', async (req, res) => {
 server.listen(PORT, () => {
     console.log(`=============================================`);
     console.log(`🚀 SERVIDOR RODANDO NA PORTA ${PORT}`);
-    console.log(`🔥 Firebase pronto para gravar saldo!`);
+    console.log(`🛡️ Idempotência Ativa (Sem pagamentos duplos)`);
     console.log(`=============================================`);
 });
