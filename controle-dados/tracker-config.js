@@ -55,7 +55,7 @@ export function iniciarRastreamentoGlobal(options = {}) {
 
                 // Callback para atualizar UI da página específica
                 if (options.onUserLoaded) {
-                    options.onUserLoaded(dados);
+                    options.onUserLoaded(dados, user);
                 }
 
                 // Configurar botões de logout se existirem

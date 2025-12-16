@@ -1105,6 +1105,107 @@
                 padding: 15px;
             }
         }
+
+        /* ============================================ */
+        /* HISTÓRICO DE SAQUES */
+        /* ============================================ */
+
+        .withdraw-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .withdraw-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(0, 255, 136, 0.3);
+            transform: translateX(5px);
+        }
+
+        .withdraw-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .withdraw-amount {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #00ff88;
+        }
+
+        .withdraw-status {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .withdraw-status.pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .withdraw-status.approved {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .withdraw-status.rejected {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .withdraw-status.processing {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196f3;
+            border: 1px solid rgba(33, 150, 243, 0.3);
+        }
+
+        .withdraw-item-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .withdraw-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .withdraw-detail-label {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .withdraw-detail-value {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .withdraw-item-details {
+                grid-template-columns: 1fr;
+            }
+
+            .withdraw-amount {
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 
@@ -1243,6 +1344,91 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- Card de Chave PIX -->
+                <div class="profile-card">
+                    <div class="card-header">
+                        <i class="material-icons">pix</i>
+                        <h3>Chave PIX</h3>
+                    </div>
+
+                    <div id="pixKeyDisplay" style="display: none;">
+                        <div style="background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">Tipo:</span>
+                                <span id="pixKeyTypeDisplay" style="color: #00ff88; font-weight: 700;"></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">Chave:</span>
+                                <span id="pixKeyValueDisplay" style="color: white; font-weight: 600; font-family: 'Courier New', monospace;"></span>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" id="btnEditPixKey" style="flex: 1;">
+                                <i class="material-icons">edit</i>
+                                Editar
+                            </button>
+                            <button type="button" class="btn" id="btnRemovePixKey" style="flex: 1; background: rgba(255, 0, 0, 0.2); border: 2px solid rgba(255, 0, 0, 0.3); color: white;">
+                                <i class="material-icons">delete</i>
+                                Remover
+                            </button>
+                        </div>
+                    </div>
+
+                    <form id="formPixKey" style="display: none;">
+                        <div class="form-group">
+                            <label for="pixKeyTypeSelect">Tipo de Chave PIX</label>
+                            <select id="pixKeyTypeSelect" required>
+                                <option value="">Selecione...</option>
+                                <option value="cpf">CPF</option>
+                                <option value="email">E-mail</option>
+                                <option value="telefone">Telefone</option>
+                                <option value="aleatoria">Chave Aleatória</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pixKeyInput">Chave PIX</label>
+                            <input type="text" id="pixKeyInput" required placeholder="Digite sua chave PIX">
+                            <small id="pixKeyHint" style="display: block; margin-top: 8px; color: rgba(255, 255, 255, 0.6); font-size: 0.85rem;"></small>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="material-icons">save</i>
+                                Salvar Chave PIX
+                            </button>
+                            <button type="button" class="btn" id="btnCancelPixKey" style="background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.2); color: white; display: none;">
+                                <i class="material-icons">close</i>
+                                Cancelar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Card de Histórico de Saques -->
+                <div class="profile-card">
+                    <div class="card-header">
+                        <i class="material-icons">history</i>
+                        <h3>Histórico de Saques</h3>
+                    </div>
+
+                    <div id="withdrawHistoryContainer">
+                        <div id="withdrawHistoryLoading" style="text-align: center; padding: 40px 20px;">
+                            <div class="spinner" style="width: 40px; height: 40px; margin: 0 auto 15px;"></div>
+                            <p style="color: rgba(255, 255, 255, 0.6);">Carregando histórico...</p>
+                        </div>
+
+                        <div id="withdrawHistoryEmpty" style="display: none; text-align: center; padding: 40px 20px;">
+                            <i class="material-icons" style="font-size: 48px; color: rgba(255, 255, 255, 0.3); margin-bottom: 15px;">receipt_long</i>
+                            <p style="color: rgba(255, 255, 255, 0.6);">Nenhum saque solicitado ainda</p>
+                        </div>
+
+                        <div id="withdrawHistoryList" style="display: none;">
+                            <!-- Lista de saques será preenchida dinamicamente -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1277,28 +1463,40 @@
             </div>
 
             <div class="modal-body">
-                <p class="modal-description">Informe os dados para receber o saque via PIX:</p>
+                <!-- Alerta de chave PIX não cadastrada -->
+                <div id="pixKeyWarning" style="display: none; background: rgba(255, 193, 7, 0.2); border: 1px solid rgba(255, 193, 7, 0.5); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="material-icons" style="color: #ffc107; font-size: 24px;">warning</i>
+                        <div>
+                            <p style="margin: 0; color: #ffc107; font-weight: 600;">Chave PIX não cadastrada</p>
+                            <p style="margin: 5px 0 0 0; color: rgba(255, 255, 255, 0.8); font-size: 0.9rem;">
+                                Você precisa cadastrar uma chave PIX antes de solicitar um saque.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informação da chave PIX cadastrada -->
+                <div id="pixKeyInfo" style="display: none; background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="color: rgba(255, 255, 255, 0.7); font-size: 0.85rem;">Chave PIX Cadastrada:</span>
+                        <span id="pixKeyInfoType" style="color: #00ff88; font-weight: 700; font-size: 0.85rem;"></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span id="pixKeyInfoValue" style="color: white; font-weight: 600; font-family: 'Courier New', monospace;"></span>
+                        <i class="material-icons" style="color: #00ff88; font-size: 20px;">check_circle</i>
+                    </div>
+                </div>
+
+                <p class="modal-description">Informe o valor do saque:</p>
 
                 <form id="withdrawForm">
                     <div class="form-group">
                         <label for="withdrawAmount">Valor do Saque (R$)</label>
-                        <input type="number" id="withdrawAmount" min="10" step="0.01" required placeholder="0,00">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="pixKeyType">Tipo de Chave PIX</label>
-                        <select id="pixKeyType" required>
-                            <option value="">Selecione...</option>
-                            <option value="cpf">CPF</option>
-                            <option value="email">E-mail</option>
-                            <option value="phone">Telefone</option>
-                            <option value="random">Chave Aleatória</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="pixKey">Chave PIX</label>
-                        <input type="text" id="pixKey" required placeholder="Digite sua chave PIX">
+                        <input type="number" id="withdrawAmount" min="20" step="0.01" required placeholder="Mínimo: R$ 20,00">
+                        <small style="display: block; margin-top: 8px; color: rgba(255, 255, 255, 0.6); font-size: 0.85rem;">
+                            Valor mínimo: R$ 20,00
+                        </small>
                     </div>
 
                     <div class="withdraw-info">
@@ -1306,7 +1504,7 @@
                         <p>O saque será processado em até 24 horas úteis.</p>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="btnConfirmWithdraw">
                         <i class="material-icons">check_circle</i>
                         Confirmar Saque
                     </button>
@@ -1654,6 +1852,16 @@
                 <i class="material-icons">close</i>
             </button>
         </div>
+        
+        <!-- Notificação de 24 horas -->
+        <div class="chat-notification">
+            <i class="material-icons">schedule</i>
+            <div class="notification-text">
+                <strong>⏰ Mensagens temporárias</strong>
+                <p>Todas as mensagens duram até 24 horas e depois serão excluídas permanentemente.</p>
+            </div>
+        </div>
+        
         <div id="chatMessages" class="chat-messages"></div>
         <form id="chatForm" class="chat-input-form">
             <input type="text" id="messageInput" placeholder="Digite sua mensagem..." required autocomplete="off">
@@ -1789,6 +1997,56 @@
         .chat-close-btn .material-icons {
             color: white;
             font-size: 20px;
+        }
+
+        /* Notificação de 24 horas */
+        .chat-notification {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 152, 0, 0.1) 100%);
+            border-bottom: 1px solid rgba(255, 193, 7, 0.3);
+            border-left: 4px solid #ffc107;
+            margin: 0;
+            animation: slideInNotification 0.5s ease;
+        }
+
+        @keyframes slideInNotification {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-notification .material-icons {
+            color: #ffc107;
+            font-size: 24px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .notification-text {
+            flex: 1;
+        }
+
+        .notification-text strong {
+            display: block;
+            color: #ffc107;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .notification-text p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.8rem;
+            line-height: 1.4;
         }
 
         .chat-messages {
@@ -1935,6 +2193,22 @@
                 font-size: 0.75rem;
             }
 
+            .chat-notification {
+                padding: 12px 15px;
+            }
+
+            .chat-notification .material-icons {
+                font-size: 20px;
+            }
+
+            .notification-text strong {
+                font-size: 0.85rem;
+            }
+
+            .notification-text p {
+                font-size: 0.75rem;
+            }
+
             .message-content {
                 max-width: 85%;
             }
@@ -1963,6 +2237,22 @@
 
             .chat-float-button .material-icons {
                 font-size: 26px;
+            }
+
+            .chat-notification {
+                padding: 10px 12px;
+            }
+
+            .chat-notification .material-icons {
+                font-size: 18px;
+            }
+
+            .notification-text strong {
+                font-size: 0.8rem;
+            }
+
+            .notification-text p {
+                font-size: 0.7rem;
             }
 
             .message-content {

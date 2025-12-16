@@ -1,368 +1,551 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - SLICED</title>
+    <title>Dashboard Admin - SLICED</title>
     <link rel="icon" href="/imgs/LOGO-SLICED.png" type="image/png">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <meta name="description" content="Dashboard administrativo da plataforma de jogos do São Paulo Futebol Clube">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="dashboard-inicio.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: #00ff88;
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #00ff88;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .search-input::placeholder {
+            color: #888;
+        }
+
+        .filter-select {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.4);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #00ff88;
+            border-bottom: 2px solid rgba(0, 255, 136, 0.3);
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .edit-btn {
+            padding: 8px 16px;
+            background: rgba(0, 123, 255, 0.2);
+            border: 1px solid #007bff;
+            border-radius: 6px;
+            color: #007bff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn:hover {
+            background: #007bff;
+            color: #fff;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-concluido {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            border: 1px solid #00ff88;
+        }
+
+        .status-pendente {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid #ffc107;
+        }
+
+        /* ===== NAVBAR INFERIOR (DOCK) ===== */
+.bottom-navbar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    z-index: 9999;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 
+                0 0 20px rgba(0, 255, 136, 0.05);
+    transition: all 0.3s ease;
+}
+
+.nav-dock-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #666;
+    position: relative;
+    padding: 8px 12px;
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-dock-item .material-icons {
+    font-size: 28px;
+    margin-bottom: 2px;
+    transition: transform 0.3s ease;
+}
+
+.nav-dock-item .nav-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    height: 0;
+    overflow: hidden;
+}
+
+/* Estado Hover */
+.nav-dock-item:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-dock-item:hover .material-icons {
+    transform: translateY(-2px);
+}
+
+/* Estado Ativo (Página Atual) */
+.nav-dock-item.active {
+    color: #00ff88; /* Verde Neon */
+    background: rgba(0, 255, 136, 0.1);
+}
+
+.nav-dock-item.active .material-icons {
+    transform: translateY(0);
+}
+
+/* Ponto de luz indicador */
+.nav-dock-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    width: 4px;
+    height: 4px;
+    background: #00ff88;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #00ff88;
+}
+
+/* Responsividade para telas muito pequenas */
+@media (max-width: 480px) {
+    .bottom-navbar {
+        width: 95%;
+        bottom: 15px;
+        padding: 10px 20px;
+    }
+}
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header {
+            margin-bottom: 25px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.8rem;
+            color: #00ff88;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            flex: 1;
+            padding: 12px;
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-filter {
+                flex-direction: column;
+            }
+
+            .bottom-navbar {
+                width: 95%;
+                padding: 10px 15px;
+                gap: 20px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <!-- Background Animado -->
-    <div class="animated-background">
-        <div class="bg-gradient bg-gradient-1"></div>
-        <div class="bg-gradient bg-gradient-2"></div>
-        <div class="bg-gradient bg-gradient-3"></div>
-    </div>
-
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-container">
-                <img src="/imgs/LOGO-SLICED.png" alt="SLICED Logo" class="logo-img">
-                <div class="logo-text">
-                    <h1>SLICED</h1>
-                    <p>GAMING</p>
-                </div>
-            </div>
-        </div>
-
-        <nav>
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="#" class="nav-link active">
-                        <span class="nav-icon">📊</span>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <span class="nav-icon">🎮</span>
-                        <span>Jogos</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <span class="nav-icon">👥</span>
-                        <span>Usuários</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <span class="nav-icon">📈</span>
-                        <span>Estatísticas</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <span class="nav-icon">🏆</span>
-                        <span>Conquistas</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <span class="nav-icon">💬</span>
-                        <span>Mensagens</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <span class="nav-icon">⚙️</span>
-                        <span>Configurações</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="../login/login.html" class="nav-link">
-                        <span class="nav-icon">🚪</span>
-                        <span>Sair</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-
-        <div class="sidebar-footer">
-            <div class="user-profile">
-                <div class="user-avatar">AD</div>
-                <div class="user-info">
-                    <h4>Administrador</h4>
-                    <p>Admin SLICED</p>
-                </div>
-            </div>
-        </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="main-content">
+    <div class="container">
         <!-- Header -->
-        <header class="dashboard-header">
-            <div class="header-top">
-                <div class="header-title">
-                    <h1>Dashboard</h1>
-                    <p>Bem-vindo ao painel de controle da plataforma SLICED Gaming</p>
-                </div>
-                <div class="header-actions">
-                    <button class="btn btn-secondary">
-                        <span>📅</span>
-                        <span>Hoje</span>
-                    </button>
-                </div>
-            </div>
-        </header>
+        <div class="header">
+            <h1>🎮 Dashboard Administrativo</h1>
+            <p>Painel de controle completo da plataforma SLICED</p>
+        </div>
 
         <!-- Stats Grid -->
-        <section class="stats-grid">
+        <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon">
-                        👥
-                    </div>
-                    <div class="stat-trend up">
-                        <span>↑</span>
-                        <span>12.5%</span>
-                    </div>
-                </div>
-                <div class="stat-body">
-                    <h3>2,847</h3>
-                    <p>Usuários Ativos</p>
-                </div>
+                <h3>Usuários Cadastrados</h3>
+                <div class="value" id="totalUsers">0</div>
+                <div class="label">Total de usuários</div>
             </div>
 
             <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon">
-                        🎮
-                    </div>
-                    <div class="stat-trend up">
-                        <span>↑</span>
-                        <span>8.2%</span>
-                    </div>
-                </div>
-                <div class="stat-body">
-                    <h3>15,234</h3>
-                    <p>Partidas Jogadas</p>
-                </div>
+                <h3>Faturamento Total</h3>
+                <div class="value" id="totalRevenue">R$ 0,00</div>
+                <div class="label">Soma de todos os saldos</div>
             </div>
 
             <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon">
-                        ⏱️
-                    </div>
-                    <div class="stat-trend up">
-                        <span>↑</span>
-                        <span>15.8%</span>
-                    </div>
-                </div>
-                <div class="stat-body">
-                    <h3>4.2h</h3>
-                    <p>Tempo Médio Online</p>
-                </div>
+                <h3>Taxa da Plataforma (20%)</h3>
+                <div class="value" id="platformFee">R$ 0,00</div>
+                <div class="label">Comissão das partidas</div>
             </div>
 
             <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon">
-                        🏆
-                    </div>
-                    <div class="stat-trend down">
-                        <span>↓</span>
-                        <span>2.1%</span>
-                    </div>
-                </div>
-                <div class="stat-body">
-                    <h3>892</h3>
-                    <p>Conquistas Desbloqueadas</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Content Grid -->
-        <div class="content-grid">
-            <!-- Recent Activity -->
-            <div class="card recent-activity">
-                <div class="card-header">
-                    <h2 class="card-title">Atividades Recentes</h2>
-                    <a href="#" class="card-action">Ver todas →</a>
-                </div>
-                <ul class="activity-list">
-                    <li class="activity-item">
-                        <div class="activity-icon game">🎮</div>
-                        <div class="activity-content">
-                            <h4>Nova partida de Jogo da Velha</h4>
-                            <p>João Silva venceu Maria Santos</p>
-                        </div>
-                        <span class="activity-time">2 min atrás</span>
-                    </li>
-                    <li class="activity-item">
-                        <div class="activity-icon achievement">🏆</div>
-                        <div class="activity-content">
-                            <h4>Conquista desbloqueada</h4>
-                            <p>Pedro Costa alcançou "Mestre dos Jogos"</p>
-                        </div>
-                        <span class="activity-time">15 min atrás</span>
-                    </li>
-                    <li class="activity-item">
-                        <div class="activity-icon user">👤</div>
-                        <div class="activity-content">
-                            <h4>Novo usuário registrado</h4>
-                            <p>Ana Oliveira se juntou à plataforma</p>
-                        </div>
-                        <span class="activity-time">32 min atrás</span>
-                    </li>
-                    <li class="activity-item">
-                        <div class="activity-icon game">🎮</div>
-                        <div class="activity-content">
-                            <h4>Quiz completado</h4>
-                            <p>Carlos Mendes acertou 9/10 questões</p>
-                        </div>
-                        <span class="activity-time">1h atrás</span>
-                    </li>
-                    <li class="activity-item">
-                        <div class="activity-icon achievement">🏆</div>
-                        <div class="activity-content">
-                            <h4>Novo recorde estabelecido</h4>
-                            <p>Beatriz Lima bateu o recorde em Quiz SLICED</p>
-                        </div>
-                        <span class="activity-time">2h atrás</span>
-                    </li>
-                    <li class="activity-item">
-                        <div class="activity-icon user">👤</div>
-                        <div class="activity-content">
-                            <h4>Perfil atualizado</h4>
-                            <p>Rafael Souza alterou sua foto de perfil</p>
-                        </div>
-                        <span class="activity-time">3h atrás</span>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Top Players -->
-            <div class="card top-players">
-                <div class="card-header">
-                    <h2 class="card-title">Top Jogadores</h2>
-                    <a href="#" class="card-action">Ranking →</a>
-                </div>
-                <ul class="player-list">
-                    <li class="player-item">
-                        <div class="player-rank">1</div>
-                        <div class="player-avatar">JS</div>
-                        <div class="player-info">
-                            <h4>João Silva</h4>
-                            <p>Nível 45</p>
-                        </div>
-                        <span class="player-score">8,542</span>
-                    </li>
-                    <li class="player-item">
-                        <div class="player-rank">2</div>
-                        <div class="player-avatar">MS</div>
-                        <div class="player-info">
-                            <h4>Maria Santos</h4>
-                            <p>Nível 42</p>
-                        </div>
-                        <span class="player-score">7,891</span>
-                    </li>
-                    <li class="player-item">
-                        <div class="player-rank">3</div>
-                        <div class="player-avatar">PC</div>
-                        <div class="player-info">
-                            <h4>Pedro Costa</h4>
-                            <p>Nível 40</p>
-                        </div>
-                        <span class="player-score">7,234</span>
-                    </li>
-                    <li class="player-item">
-                        <div class="player-rank">4</div>
-                        <div class="player-avatar">AO</div>
-                        <div class="player-info">
-                            <h4>Ana Oliveira</h4>
-                            <p>Nível 38</p>
-                        </div>
-                        <span class="player-score">6,789</span>
-                    </li>
-                    <li class="player-item">
-                        <div class="player-rank">5</div>
-                        <div class="player-avatar">CM</div>
-                        <div class="player-info">
-                            <h4>Carlos Mendes</h4>
-                            <p>Nível 36</p>
-                        </div>
-                        <span class="player-score">6,234</span>
-                    </li>
-                </ul>
+                <h3>Saques Pendentes</h3>
+                <div class="value" id="pendingWithdrawals">0</div>
+                <div class="label">Aguardando aprovação</div>
             </div>
         </div>
 
-        <!-- Games Grid -->
-        <div class="content-grid">
-            <div class="card games-grid">
-                <div class="card-header">
-                    <h2 class="card-title">Jogos Disponíveis</h2>
-                    <a href="#" class="card-action">Ver todos →</a>
-                </div>
-                <div class="games-list">
-                    <div class="game-card">
-                        <div class="game-thumbnail">
-                            <span>❌⭕</span>
-                            <span class="game-status active">Ativo</span>
-                        </div>
-                        <div class="game-body">
-                            <h3>Jogo da Velha</h3>
-                            <p>Desafie outros jogadores no clássico jogo da velha em tempo real</p>
-                            <div class="game-stats">
-                                <div class="game-stat">
-                                    <span>Jogadores</span>
-                                    <strong>1,234</strong>
-                                </div>
-                                <div class="game-stat">
-                                    <span>Partidas</span>
-                                    <strong>5,678</strong>
-                                </div>
-                                <div class="game-stat">
-                                    <span>Online</span>
-                                    <strong>89</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <!-- Usuários Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>👥 Gerenciar Usuários</h2>
+            </div>
 
-                    <div class="game-card">
-                        <div class="game-thumbnail" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                            <span>❓</span>
-                            <span class="game-status active">Ativo</span>
-                        </div>
-                        <div class="game-body">
-                            <h3>Quiz SLICED</h3>
-                            <p>Teste seus conhecimentos sobre a história do SLICED</p>
-                            <div class="game-stats">
-                                <div class="game-stat">
-                                    <span>Jogadores</span>
-                                    <strong>892</strong>
-                                </div>
-                                <div class="game-stat">
-                                    <span>Questões</span>
-                                    <strong>150</strong>
-                                </div>
-                                <div class="game-stat">
-                                    <span>Online</span>
-                                    <strong>45</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="search-filter">
+                <input type="text" id="searchInput" class="search-input"
+                    placeholder="Buscar por Nome, E-mail ou CPF...">
+                <select id="filterType" class="filter-select">
+                    <option value="all">Todos os Usuários</option>
+                    <option value="active">Ativos</option>
+                    <option value="inactive">Inativos</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>Nome Completo</th>
+                            <th>E-mail</th>
+                            <th>CPF</th>
+                            <th>Saldo</th>
+                            <th>Data Cadastro</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: #888;">
+                                Carregando usuários...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <nav class="bottom-navbar">
-    <!-- Item Ativo -->
+        <!-- Solicitações de Saque -->
+        <div class="section">
+            <div class="section-header">
+                <h2>💰 Solicitações de Saque</h2>
+            </div>
+
+            <div class="table-container">
+                <table id="withdrawalsTable">
+                    <thead>
+                        <tr>
+                            <th>Usuário</th>
+                            <th>Valor</th>
+                            <th>Data Solicitação</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="withdrawalsTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 40px; color: #888;">
+                                Nenhuma solicitação de saque
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Usuário -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Usuário</h2>
+            </div>
+            <form id="editUserForm">
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" id="editName" required>
+                </div>
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" id="editEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>CPF</label>
+                    <input type="text" id="editCPF" required>
+                </div>
+                <div class="form-group">
+                    <label>Saldo (R$)</label>
+                    <input type="number" id="editBalance" step="0.01" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeEditModal()">Cancelar</button>
+                    <button type="submit" class="btn-save">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bottom Navbar -->
+    <nav class="bottom-navbar">
     <a href="dashboard-inicio.html" class="nav-dock-item active">
         <span class="material-icons">dashboard</span>
-        <!-- <span class="nav-label">Início</span> (Opcional se quiser texto) -->
     </a>
     
     <a href="dashboard-quiz.html" class="nav-dock-item">
@@ -372,316 +555,13 @@
     <a href="dashboard-suporte.html" class="nav-dock-item">
         <span class="material-icons">support_agent</span>
     </a>
+    
+    <a href="../login/login.html" class="nav-dock-item">
+        <span class="material-icons">logout</span>
+    </a>
 </nav>
-        
-        <!-- CARD AÇÕES RÁPIDAS REMOVIDO DAQUI -->
 
-    </main>
-
-    <script type="module">
-        import { 
-            inicializarDashboard,
-            escutarAtividades,
-            escutarUsuariosOnlineCount,
-            formatarTempoRelativo,
-            obterIniciais,
-            formatarNumero,
-            obterIconeAtividade,
-            obterClasseAtividade
-        } from './dashboard-data.js';
-
-        // ===== ELEMENTOS DO DOM =====
-        const statsElements = {
-            usuarios: document.querySelector('.stat-card:nth-child(1) .stat-body h3'),
-            partidas: document.querySelector('.stat-card:nth-child(2) .stat-body h3'),
-            tempoMedio: document.querySelector('.stat-card:nth-child(3) .stat-body h3'),
-            conquistas: document.querySelector('.stat-card:nth-child(4) .stat-body h3')
-        };
-
-        const atividadesContainer = document.querySelector('.activity-list');
-        const topJogadoresContainer = document.querySelector('.player-list');
-        const jogosContainer = document.querySelector('.games-list');
-
-        // ===== FUNÇÕES DE RENDERIZAÇÃO =====
-
-        /**
-         * Atualizar cards de estatísticas
-         */
-        function atualizarEstatisticas(stats) {
-            if (statsElements.usuarios) {
-                statsElements.usuarios.textContent = formatarNumero(stats.usuarios);
-            }
-            if (statsElements.partidas) {
-                statsElements.partidas.textContent = formatarNumero(stats.partidas);
-            }
-            if (statsElements.tempoMedio) {
-                statsElements.tempoMedio.textContent = `${stats.tempoMedio}h`;
-            }
-            if (statsElements.conquistas) {
-                statsElements.conquistas.textContent = formatarNumero(stats.conquistas);
-            }
-        }
-
-        /**
-         * Renderizar lista de atividades
-         */
-        function renderizarAtividades(atividades) {
-            if (!atividadesContainer) return;
-
-            if (atividades.length === 0) {
-                atividadesContainer.innerHTML = `
-                    <li class="activity-item">
-                        <div class="activity-icon game">📭</div>
-                        <div class="activity-content">
-                            <h4>Nenhuma atividade recente</h4>
-                            <p>As atividades aparecerão aqui quando os usuários interagirem com a plataforma</p>
-                        </div>
-                    </li>
-                `;
-                return;
-            }
-
-            atividadesContainer.innerHTML = atividades.map(atividade => `
-                <li class="activity-item">
-                    <div class="activity-icon ${obterClasseAtividade(atividade.tipo)}">
-                        ${obterIconeAtividade(atividade.tipo)}
-                    </div>
-                    <div class="activity-content">
-                        <h4>${atividade.titulo}</h4>
-                        <p>${atividade.descricao}</p>
-                    </div>
-                    <span class="activity-time">${formatarTempoRelativo(atividade.timestamp)}</span>
-                </li>
-            `).join('');
-        }
-
-        /**
-         * Renderizar top jogadores
-         */
-        function renderizarTopJogadores(jogadores) {
-            if (!topJogadoresContainer) return;
-
-            if (jogadores.length === 0) {
-                topJogadoresContainer.innerHTML = `
-                    <li class="player-item">
-                        <div class="player-icon">🏆</div>
-                        <div class="player-info">
-                            <h4>Nenhum jogador ainda</h4>
-                            <p>O ranking aparecerá quando houver jogadores</p>
-                        </div>
-                    </li>
-                `;
-                return;
-            }
-
-            topJogadoresContainer.innerHTML = jogadores.map((jogador, index) => `
-                <li class="player-item">
-                    <div class="player-rank">${index + 1}</div>
-                    <div class="player-avatar">${obterIniciais(jogador.nome)}</div>
-                    <div class="player-info">
-                        <h4>${jogador.nome}</h4>
-                        <p>Nível ${jogador.nivel || 1}</p>
-                    </div>
-                    <span class="player-score">${formatarNumero(jogador.pontuacao || 0)}</span>
-                </li>
-            `).join('');
-        }
-
-        /**
-         * Renderizar jogos disponíveis
-         */
-        function renderizarJogos(jogos) {
-            if (!jogosContainer) return;
-
-            // Jogos padrão (Jogos removidos do array default também)
-            const jogosDefault = [
-                {
-                    id: 'jogo-da-velha',
-                    nome: 'Jogo da Velha',
-                    descricao: 'Desafie outros jogadores no clássico jogo da velha em tempo real',
-                    icone: '❌⭕',
-                    status: 'ativo',
-                    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    jogadores: 0,
-                    partidas: 0,
-                    online: 0
-                },
-                {
-                    id: 'quiz-spfc',
-                    nome: 'Quiz SLICED',
-                    descricao: 'Teste seus conhecimentos sobre a história do SLICED',
-                    icone: '❓',
-                    status: 'ativo',
-                    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    jogadores: 0,
-                    partidas: 0,
-                    online: 0
-                }
-            ];
-
-            const jogosParaRenderizar = jogos.length > 0 ? jogos : jogosDefault;
-
-            jogosContainer.innerHTML = jogosParaRenderizar.map(jogo => {
-                const statusTexto = jogo.status === 'ativo' ? 'Ativo' : 'Em Breve';
-                const statusClasse = jogo.status === 'ativo' ? 'active' : 'coming-soon';
-                
-                return `
-                    <div class="game-card">
-                        <div class="game-thumbnail" style="background: ${jogo.gradient || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};">
-                            <span>${jogo.icone}</span>
-                            <span class="game-status ${statusClasse}">${statusTexto}</span>
-                        </div>
-                        <div class="game-body">
-                            <h3>${jogo.nome}</h3>
-                            <p>${jogo.descricao}</p>
-                            <div class="game-stats">
-                                <div class="game-stat">
-                                    <span>Jogadores</span>
-                                    <strong>${formatarNumero(jogo.jogadores || 0)}</strong>
-                                </div>
-                                <div class="game-stat">
-                                    <span>Partidas</span>
-                                    <strong>${formatarNumero(jogo.partidas || 0)}</strong>
-                                </div>
-                                <div class="game-stat">
-                                    <span>Online</span>
-                                    <strong>${formatarNumero(jogo.online || 0)}</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // ===== INICIALIZAÇÃO =====
-
-        /**
-         * Carregar dados iniciais do dashboard
-         */
-        async function carregarDashboard() {
-            try {
-                console.log('%c🔄 Carregando dados do Firebase...', 'color: #4facfe; font-size: 14px;');
-                
-                // Mostrar loading (opcional)
-                const dados = await inicializarDashboard();
-                
-                // Atualizar interface
-                atualizarEstatisticas(dados.stats);
-                renderizarAtividades(dados.atividades);
-                renderizarTopJogadores(dados.topJogadores);
-                renderizarJogos(dados.jogos);
-                
-                console.log('%c✅ Dashboard carregado com sucesso!', 'color: #38ef7d; font-size: 14px;');
-                console.log('Dados:', dados);
-                
-                // Configurar listener para atividades em tempo real
-                escutarAtividades((atividades) => {
-                    console.log('🔔 Novas atividades recebidas:', atividades.length);
-                    renderizarAtividades(atividades);
-                }, 6);
-                
-                // Configurar listener para usuários online em tempo real
-                escutarUsuariosOnlineCount((totalOnline) => {
-                    console.log('👥 Usuários online atualizados:', totalOnline);
-                    if (statsElements.usuarios) {
-                        statsElements.usuarios.textContent = formatarNumero(totalOnline);
-                    }
-                });
-                
-            } catch (error) {
-                console.error('%c❌ Erro ao carregar dashboard:', 'color: #f5576c; font-size: 14px;', error);
-                
-                // Mostrar mensagem de erro amigável
-                if (atividadesContainer) {
-                    atividadesContainer.innerHTML = `
-                        <li class="activity-item">
-                            <div class="activity-icon game">⚠️</div>
-                            <div class="activity-content">
-                                <h4>Erro ao carregar dados</h4>
-                                <p>Verifique sua conexão com o Firebase. Consulte o console para mais detalhes.</p>
-                            </div>
-                        </li>
-                    `;
-                }
-            }
-        }
-
-        // ===== UTILITÁRIOS =====
-
-        /**
-         * Atualizar hora em tempo real
-         */
-        function updateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('pt-BR', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-            const dateString = now.toLocaleDateString('pt-BR', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            });
-            
-            console.log(`📅 ${dateString} - ${timeString}`);
-        }
-
-        // Atualizar a cada minuto
-        setInterval(updateTime, 60000);
-        updateTime();
-
-        // ===== ANIMAÇÕES =====
-
-        // Animação de entrada dos cards
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        // Observar todos os cards
-        document.querySelectorAll('.stat-card, .card, .game-card').forEach(card => {
-            observer.observe(card);
-        });
-
-        // ===== MOBILE =====
-
-        // Toggle sidebar em mobile
-        const menuToggle = document.querySelector('.menu-toggle');
-        const sidebar = document.querySelector('.sidebar');
-        
-        if (menuToggle) {
-            menuToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('active');
-            });
-        }
-
-        // Fechar sidebar ao clicar fora (mobile)
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 1024) {
-                if (sidebar && !sidebar.contains(e.target) && !e.target.classList.contains('menu-toggle')) {
-                    sidebar.classList.remove('active');
-                }
-            }
-        });
-
-        // ===== INICIAR APLICAÇÃO =====
-
-        // Log de boas-vindas
-        console.log('%c🎮 SLICED Gaming Dashboard ', 'background: #00ff88; color: white; font-size: 20px; padding: 10px;');
-        
-        // Carregar dados
-        carregarDashboard();
-    </script>
+    <script type="module" src="dashboard-admin.js"></script>
 </body>
+
 </html>

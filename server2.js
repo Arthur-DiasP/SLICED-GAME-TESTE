@@ -201,6 +201,125 @@ app.get('/api/user/:uid/balance', async (req, res) => {
     }
 });
 
+// ==================================================================
+// 6. ENDPOINTS DE JOGO (APOSTAS)
+// ==================================================================
+
+// Cobra entrada do jogo
+app.post('/api/game/charge', async (req, res) => {
+    if (!db) return res.status(500).json({ success: false, message: 'Banco de dados indisponível' });
+    
+    try {
+        const { userId, amount, gameType, betValue, description } = req.body;
+        
+        if (!userId || !amount) {
+            return res.status(400).json({ success: false, message: 'Dados incompletos' });
+        }
+
+        const userRef = db.collection('SLICED').doc('data').collection('Usuários').doc(userId);
+        
+        await db.runTransaction(async (t) => {
+            const userDoc = await t.get(userRef);
+            
+            if (!userDoc.exists) {
+                throw new Error('Usuário não encontrado');
+            }
+
+            const dados = userDoc.data();
+            const saldoAtual = Number(dados.saldo) || 0;
+            const valorCobrar = Number(amount);
+
+            if (saldoAtual < valorCobrar) {
+                throw new Error(`Saldo insuficiente. Você tem R$ ${saldoAtual.toFixed(2)}, mas precisa de R$ ${valorCobrar.toFixed(2)}`);
+            }
+
+            const novoSaldo = saldoAtual - valorCobrar;
+
+            // Atualiza saldo
+            t.update(userRef, { 
+                saldo: novoSaldo,
+                ultimaAtualizacao: admin.firestore.FieldValue.serverTimestamp()
+            });
+
+            // Registra transação
+            const transacaoRef = userRef.collection('Transacoes').doc();
+            t.set(transacaoRef, {
+                tipo: 'cobranca_jogo',
+                gameType: gameType || 'desconhecido',
+                betValue: betValue || 0,
+                valor: -valorCobrar,
+                saldoAnterior: saldoAtual,
+                saldoNovo: novoSaldo,
+                descricao: description || 'Entrada em jogo',
+                data: admin.firestore.FieldValue.serverTimestamp()
+            });
+
+            console.log(`💰 [Game] Cobrado R$ ${valorCobrar.toFixed(2)} de ${userId} - Novo saldo: R$ ${novoSaldo.toFixed(2)}`);
+        });
+
+        res.json({ success: true, message: 'Entrada cobrada com sucesso' });
+
+    } catch (e) {
+        console.error('❌ [Game] Erro ao cobrar entrada:', e.message);
+        res.status(400).json({ success: false, message: e.message });
+    }
+});
+
+// Credita prêmio ao vencedor
+app.post('/api/game/credit', async (req, res) => {
+    if (!db) return res.status(500).json({ success: false, message: 'Banco de dados indisponível' });
+    
+    try {
+        const { userId, amount, gameType, betValue, description } = req.body;
+        
+        if (!userId || !amount) {
+            return res.status(400).json({ success: false, message: 'Dados incompletos' });
+        }
+
+        const userRef = db.collection('SLICED').doc('data').collection('Usuários').doc(userId);
+        
+        await db.runTransaction(async (t) => {
+            const userDoc = await t.get(userRef);
+            
+            if (!userDoc.exists) {
+                throw new Error('Usuário não encontrado');
+            }
+
+            const dados = userDoc.data();
+            const saldoAtual = Number(dados.saldo) || 0;
+            const valorCreditar = Number(amount);
+            const novoSaldo = saldoAtual + valorCreditar;
+
+            // Atualiza saldo
+            t.update(userRef, { 
+                saldo: novoSaldo,
+                ultimaAtualizacao: admin.firestore.FieldValue.serverTimestamp()
+            });
+
+            // Registra transação
+            const transacaoRef = userRef.collection('Transacoes').doc();
+            t.set(transacaoRef, {
+                tipo: 'premio_jogo',
+                gameType: gameType || 'desconhecido',
+                betValue: betValue || 0,
+                valor: valorCreditar,
+                saldoAnterior: saldoAtual,
+                saldoNovo: novoSaldo,
+                descricao: description || 'Prêmio de jogo',
+                data: admin.firestore.FieldValue.serverTimestamp()
+            });
+
+            console.log(`🎉 [Game] Creditado R$ ${valorCreditar.toFixed(2)} para ${userId} - Novo saldo: R$ ${novoSaldo.toFixed(2)}`);
+        });
+
+        res.json({ success: true, message: 'Prêmio creditado com sucesso' });
+
+    } catch (e) {
+        console.error('❌ [Game] Erro ao creditar prêmio:', e.message);
+        res.status(400).json({ success: false, message: e.message });
+    }
+});
+
 app.post('/api/withdraw/request', (req, res) => res.json({ success: true }));
 
 server.listen(PORT, () => console.log(`🚀 Server ON na porta ${PORT}`));

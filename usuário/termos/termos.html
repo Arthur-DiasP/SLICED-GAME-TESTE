@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,8 +10,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="../../controle-dados/balance-widget.css">
     <link rel="stylesheet" href="termos.css">
 </head>
+
 <body>
     <!-- Partículas de fundo -->
     <div class="particles" id="particles"></div>
@@ -30,13 +33,18 @@
         </div>
     </header>
 
+    <!-- Widget de Saldo -->
+    <div id="balance-widget" class="balance-widget"></div>
+
     <div class="main-container">
         <div class="terms-card">
             <h2 class="terms-title">Termos e Condições</h2>
-            
+
             <div class="terms-content">
                 <h3>1. Introdução</h3>
-                <p>Bem-vindo à plataforma oficial do torcedor do São Paulo Futebol Clube. Ao acessar e utilizar este site, você concorda com estes termos e condições em sua totalidade. Se você não concordar com qualquer parte destes termos, não deverá utilizar nossa plataforma.</p>
+                <p>Bem-vindo à plataforma oficial. Ao acessar e utilizar este
+                    site, você concorda com estes termos e condições em sua totalidade. Se você não concordar com
+                    qualquer parte destes termos, não deverá utilizar nossa plataforma.</p>
 
                 <h3>2. Uso da Plataforma</h3>
                 <p>Esta plataforma destina-se ao uso pessoal e não comercial dos torcedores do SLICED. É proibido:</p>
@@ -50,15 +58,20 @@
                 <p>Ao participar do programa de afiliados, você concorda que:</p>
                 <ul>
                     <li>As comissões e pontos serão creditados apenas para indicações válidas e confirmadas.</li>
-                    <li>O SLICED reserva-se o direito de cancelar contas que demonstrem atividade suspeita ou fraudulenta.</li>
-                    <li>Os pontos não podem ser trocados por dinheiro, apenas por produtos e experiências listadas na loja oficial.</li>
+                    <li>O SLICED reserva-se o direito de cancelar contas que demonstrem atividade suspeita ou
+                        fraudulenta.</li>
+                    <li>Os pontos não podem ser trocados por dinheiro, apenas por produtos e experiências listadas na
+                        loja oficial.</li>
                 </ul>
 
                 <h3>4. Privacidade de Dados</h3>
-                <p>Respeitamos sua privacidade e protegemos seus dados pessoais de acordo com a Lei Geral de Proteção de Dados (LGPD). Suas informações serão utilizadas apenas para melhorar sua experiência na plataforma e comunicar novidades do clube.</p>
+                <p>Respeitamos sua privacidade e protegemos seus dados pessoais de acordo com a Lei Geral de Proteção de
+                    Dados (LGPD). Suas informações serão utilizadas apenas para melhorar sua experiência na plataforma e
+                    comunicar novidades do clube.</p>
 
                 <h3>5. Alterações nos Termos</h3>
-                <p>O São Paulo Futebol Clube reserva-se o direito de alterar estes termos a qualquer momento. Recomendamos que você revise esta página periodicamente para estar ciente de quaisquer mudanças.</p>
+                <p>O São Paulo Futebol Clube reserva-se o direito de alterar estes termos a qualquer momento.
+                    Recomendamos que você revise esta página periodicamente para estar ciente de quaisquer mudanças.</p>
             </div>
         </div>
     </div>
@@ -93,12 +106,18 @@
 
     <script type="module">
         import { iniciarRastreamentoGlobal } from '../../controle-dados/tracker-config.js';
+        import { initBalanceWidget } from '../../controle-dados/balance-widget.js';
 
         // Inicializar rastreamento e auth
         iniciarRastreamentoGlobal({
-            onUserLoaded: (dados) => {
+            onUserLoaded: async (dados, user) => {
                 document.getElementById('userName').textContent = dados.nomeCompleto;
                 document.getElementById('userEmail').textContent = dados.email;
+
+                // Inicializar widget de saldo
+                if (user && user.uid) {
+                    await initBalanceWidget(user.uid);
+                }
             },
             onLogout: () => {
                 window.location.href = '../../login/login.html';
@@ -117,4 +136,5 @@
         }
     </script>
 </body>
+
 </html>

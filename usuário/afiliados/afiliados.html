@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="../../controle-dados/balance-widget.css">
     <link rel="stylesheet" href="afiliados.css">
 </head>
 <body>
@@ -29,6 +30,9 @@
             <button class="btn-logout" id="btnLogout">Sair</button>
         </div>
     </header>
+
+    <!-- Widget de Saldo -->
+    <div id="balance-widget" class="balance-widget"></div>
 
     <div class="main-container">
         <div class="affiliates-hero">
@@ -93,13 +97,19 @@
 
     <script type="module">
         import { iniciarRastreamentoGlobal } from '../../controle-dados/tracker-config.js';
+        import { initBalanceWidget } from '../../controle-dados/balance-widget.js';
 
         // Inicializar rastreamento
         iniciarRastreamentoGlobal({
-            onUserLoaded: (dados) => {
+            onUserLoaded: async (dados, user) => {
                 // Atualizar dados na tela
                 document.getElementById('userName').textContent = dados.nomeCompleto;
                 document.getElementById('userEmail').textContent = dados.email;
+                
+                // Inicializar widget de saldo
+                if (user && user.uid) {
+                    await initBalanceWidget(user.uid);
+                }
                 
                 // Gerar link de afiliado baseado no ID (dados.uid vem do Firestore)
                 const userIdShort = dados.uid.substring(0, 8);

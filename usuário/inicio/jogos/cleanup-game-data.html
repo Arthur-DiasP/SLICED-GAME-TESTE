@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpeza de Dados - Jogo da Velha</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            padding: 40px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #4ade80;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .info {
+            background: rgba(74, 222, 128, 0.1);
+            border-left: 4px solid #4ade80;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .warning {
+            background: rgba(251, 191, 36, 0.1);
+            border-left: 4px solid #fbbf24;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        button {
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(74, 222, 128, 0.4);
+        }
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+        }
+        .log-success {
+            color: #4ade80;
+        }
+        .log-error {
+            color: #ef4444;
+        }
+        .log-info {
+            color: #60a5fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Limpeza de Dados do Jogo</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Atenção:</strong> Este script irá remover TODOS os dados de filas de espera e partidas ativas do Jogo da Velha. Use apenas se houver dados fantasmas causando problemas.
+        </div>
+
+        <div class="info">
+            <strong>📋 O que será limpo:</strong>
+            <ul>
+                <li>Todas as filas de espera (waiting_rooms)</li>
+                <li>Todas as partidas ativas (matches)</li>
+                <li>Todas as salas privadas (private_rooms)</li>
+            </ul>
+        </div>
+
+        <button id="cleanupBtn" onclick="cleanupAllData()">
+            🗑️ Limpar Todos os Dados
+        </button>
+
+        <div class="log" id="logContainer">
+            <div class="log-entry log-info">Aguardando ação...</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db } from './firebase-config.js';
+        import {
+            collection,
+            getDocs,
+            deleteDoc,
+            doc
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const BET_VALUES = [1, 10, 30, 50, 100, 200, 350, 500, 1000, 2000, 3000, 5000];
+
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        window.cleanupAllData = async function() {
+            const btn = document.getElementById('cleanupBtn');
+            btn.disabled = true;
+            btn.textContent = '🔄 Limpando...';
+
+            const logContainer = document.getElementById('logContainer');
+            logContainer.innerHTML = '';
+
+            addLog('🚀 Iniciando limpeza...', 'info');
+
+            let totalDeleted = 0;
+
+            try {
+                // 1. Limpar filas de espera (waiting_rooms)
+                addLog('📂 Limpando filas de espera...', 'info');
+                for (const betValue of BET_VALUES) {
+                    try {
+                        const queueRef = collection(db, 'SLICED', 'data', 'waiting_rooms', `bet_${betValue}`, 'players');
+                        const snapshot = await getDocs(queueRef);
+                        
+                        if (snapshot.size > 0) {
+                            addLog(`   Fila R$ ${betValue}: ${snapshot.size} jogador(es) encontrado(s)`, 'info');
+                            
+                            for (const docSnap of snapshot.docs) {
+                                await deleteDoc(docSnap.ref);
+                                totalDeleted++;
+                            }
+                            
+                            addLog(`   ✅ Fila R$ ${betValue} limpa!`, 'success');
+                        }
+                    } catch (e) {
+                        addLog(`   ❌ Erro na fila R$ ${betValue}: ${e.message}`, 'error');
+                    }
+                }
+
+                // 2. Limpar partidas ativas (matches)
+                addLog('🎮 Limpando partidas ativas...', 'info');
+                try {
+                    const matchesRef = collection(db, 'SLICED', 'data', 'matches');
+                    const matchesSnapshot = await getDocs(matchesRef);
+                    
+                    if (matchesSnapshot.size > 0) {
+                        addLog(`   ${matchesSnapshot.size} partida(s) encontrada(s)`, 'info');
+                        
+                        for (const docSnap of matchesSnapshot.docs) {
+                            await deleteDoc(docSnap.ref);
+                            totalDeleted++;
+                        }
+                        
+                        addLog(`   ✅ Partidas limpas!`, 'success');
+                    } else {
+                        addLog(`   ℹ️ Nenhuma partida encontrada`, 'info');
+                    }
+                } catch (e) {
+                    addLog(`   ❌ Erro ao limpar partidas: ${e.message}`, 'error');
+                }
+
+                // 3. Limpar salas privadas (private_rooms)
+                addLog('🔒 Limpando salas privadas...', 'info');
+                try {
+                    const privateRoomsRef = collection(db, 'SLICED', 'data', 'private_rooms');
+                    const privateSnapshot = await getDocs(privateRoomsRef);
+                    
+                    if (privateSnapshot.size > 0) {
+                        addLog(`   ${privateSnapshot.size} sala(s) privada(s) encontrada(s)`, 'info');
+                        
+                        for (const docSnap of privateSnapshot.docs) {
+                            await deleteDoc(docSnap.ref);
+                            totalDeleted++;
+                        }
+                        
+                        addLog(`   ✅ Salas privadas limpas!`, 'success');
+                    } else {
+                        addLog(`   ℹ️ Nenhuma sala privada encontrada`, 'info');
+                    }
+                } catch (e) {
+                    addLog(`   ❌ Erro ao limpar salas privadas: ${e.message}`, 'error');
+                }
+
+                addLog(``, 'info');
+                addLog(`🎉 Limpeza concluída! Total de ${totalDeleted} documento(s) removido(s)`, 'success');
+                addLog(`✅ Os contadores agora devem mostrar "Vazio" em todas as salas`, 'success');
+
+            } catch (error) {
+                addLog(`❌ Erro geral: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🗑️ Limpar Novamente';
+            }
+        };
+    </script>
+</body>
+</html>

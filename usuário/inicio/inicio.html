@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="../../controle-dados/balance-widget.css">
     <style>
         * {
             margin: 0;
@@ -671,6 +672,9 @@
         </div>
     </header>
 
+    <!-- Widget de Saldo -->
+    <div id="balance-widget" class="balance-widget"></div>
+
     <!-- Container Principal -->
     <div class="container">
         <div id="loadingSection" class="loading">
@@ -789,6 +793,7 @@
     <script type="module">
         import { verificarAutenticacao, obterDadosUsuario, fazerLogout } from '../../controle-dados/auth.js';
         import { inicializarSistemaOnline } from '../../controle-dados/online-tracker.js';
+        import { initBalanceWidget } from '../../controle-dados/balance-widget.js';
 
         const loadingSection = document.getElementById('loadingSection');
         const contentSection = document.getElementById('contentSection');
@@ -831,6 +836,9 @@
                     });
                     console.log('✅ Usuário registrado como online no dashboard!');
                     // =========================================
+
+                    // Inicializar widget de saldo
+                    await initBalanceWidget(user.uid);
 
                     // Mostrar conteúdo
                     loadingSection.style.display = 'none';

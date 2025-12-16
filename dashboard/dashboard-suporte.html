@@ -641,6 +641,10 @@
     <a href="dashboard-suporte.html" class="nav-dock-item active">
         <span class="material-icons">support_agent</span>
     </a>
+    
+    <a href="../login/login.html" class="nav-dock-item">
+        <span class="material-icons">logout</span>
+    </a>
 </nav>
 
     <!-- Firebase -->
@@ -692,54 +696,97 @@
         }
 
         // Carregar lista de chats
-        function loadChatList() {
-            // Nova estrutura: buscar todos os usuários e depois seus chats
-            db.collectionGroup('Chat')
-                .where('userId', '!=', null)
-                .orderBy('userId')
-                .orderBy('lastMessageTime', 'desc')
-                .onSnapshot((snapshot) => {
-                    const chatList = document.getElementById('chatList');
-                    const chatCount = document.getElementById('chatCount');
+        async function loadChatList() {
+            const chatList = document.getElementById('chatList');
+            const chatCount = document.getElementById('chatCount');
+            
+            try {
+                // Buscar todos os usuários
+                const usersSnapshot = await db.collection('SLICED').doc('data').collection('Usuários').get();
+                
+                const chats = [];
+                
+                // Para cada usuário, verificar se tem chat
+                for (const userDoc of usersSnapshot.docs) {
+                    const userId = userDoc.id;
+                    const userData = userDoc.data();
                     
-                    if (snapshot.empty) {
-                        chatList.innerHTML = `
-                            <div class="empty-state">
-                                <i class="material-icons">inbox</i>
-                                <h3>Nenhuma conversa</h3>
-                                <p>Aguardando mensagens...</p>
-                            </div>
-                        `;
-                        chatCount.textContent = 'Nenhuma conversa ativa';
-                        return;
-                    }
-
-                    chatList.innerHTML = '';
-                    chatCount.textContent = `${snapshot.size} conversa${snapshot.size !== 1 ? 's' : ''} ativa${snapshot.size !== 1 ? 's' : ''}`;
-
-                    snapshot.forEach((doc) => {
-                        const chat = doc.data();
-                        const userId = chat.userId;
-                        const chatItem = document.createElement('div');
-                        chatItem.className = `chat-item ${currentChatId === userId ? 'active' : ''}`;
-                        chatItem.onclick = () => openChat(userId, chat);
+                    try {
+                        const chatDoc = await db.collection('SLICED').doc(userId)
+                            .collection('Chat').doc('support').get();
                         
-                        const unreadBadge = chat.unreadSupport > 0 
-                            ? `<span class="unread-badge">${chat.unreadSupport}</span>` 
-                            : '';
-
-                        chatItem.innerHTML = `
-                            ${unreadBadge}
-                            <div class="chat-item-header">
-                                <div class="chat-item-name">${chat.userName || 'Usuário'}</div>
-                                <div class="chat-item-time">${formatRelativeTime(chat.lastMessageTime)}</div>
-                            </div>
-                            <div class="chat-item-message">${chat.lastMessage || 'Nova conversa'}</div>
-                            <div class="chat-item-email">${chat.userEmail || ''}</div>
-                        `;
-                        chatList.appendChild(chatItem);
-                    });
+                        if (chatDoc.exists) {
+                            const chatData = chatDoc.data();
+                            chats.push({
+                                id: userId,
+                                userId: userId,
+                                userName: chatData.userName || userData.nomeCompleto || 'Usuário',
+                                userEmail: chatData.userEmail || userData.email || '',
+                                lastMessage: chatData.lastMessage || 'Nova conversa',
+                                lastMessageTime: chatData.lastMessageTime,
+                                unreadSupport: chatData.unreadSupport || 0
+                            });
+                        }
+                    } catch (error) {
+                        // Usuário não tem chat ainda
+                        console.log(`Usuário ${userId} sem chat`);
+                    }
+                }
+                
+                // Ordenar por última mensagem
+                chats.sort((a, b) => {
+                    if (!a.lastMessageTime) return 1;
+                    if (!b.lastMessageTime) return -1;
+                    return b.lastMessageTime.toMillis() - a.lastMessageTime.toMillis();
                 });
+                
+                if (chats.length === 0) {
+                    chatList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="material-icons">inbox</i>
+                            <h3>Nenhuma conversa</h3>
+                            <p>Aguardando mensagens...</p>
+                        </div>
+                    `;
+                    chatCount.textContent = 'Nenhuma conversa ativa';
+                    return;
+                }
+                
+                chatList.innerHTML = '';
+                chatCount.textContent = `${chats.length} conversa${chats.length !== 1 ? 's' : ''} ativa${chats.length !== 1 ? 's' : ''}`;
+                
+                chats.forEach((chat) => {
+                    const chatItem = document.createElement('div');
+                    chatItem.className = `chat-item ${currentChatId === chat.userId ? 'active' : ''}`;
+                    chatItem.onclick = () => openChat(chat.userId, chat);
+                    
+                    const unreadBadge = chat.unreadSupport > 0 
+                        ? `<span class="unread-badge">${chat.unreadSupport}</span>` 
+                        : '';
+
+                    chatItem.innerHTML = `
+                        ${unreadBadge}
+                        <div class="chat-item-header">
+                            <div class="chat-item-name">${chat.userName}</div>
+                            <div class="chat-item-time">${formatRelativeTime(chat.lastMessageTime)}</div>
+                        </div>
+                        <div class="chat-item-message">${chat.lastMessage}</div>
+                        <div class="chat-item-email">${chat.userEmail}</div>
+                    `;
+                    chatList.appendChild(chatItem);
+                });
+                
+                console.log(`✅ ${chats.length} conversas carregadas`);
+            } catch (error) {
+                console.error('Erro ao carregar chats:', error);
+                chatList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="material-icons">error</i>
+                        <h3>Erro ao carregar</h3>
+                        <p>Tente recarregar a página</p>
+                    </div>
+                `;
+            }
         }
 
         // Abrir chat

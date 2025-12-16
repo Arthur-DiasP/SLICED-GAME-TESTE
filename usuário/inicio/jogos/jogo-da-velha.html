@@ -9,6 +9,7 @@
 
     <!-- Link para o CSS Externo -->
     <link rel="stylesheet" href="jogo-da-velha.css">
+    <link rel="stylesheet" href="../../../controle-dados/balance-widget.css">
 
     <!-- Fontes e Ícones -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -17,10 +18,16 @@
 
 <body>
     
+    
     <!-- Cabeçalho Principal -->
     <div class="header">
-        <h1>⚔️ Jogo da Velha <span class="header-badge">ULTIMATE</span></h1>
-        <p>Aposte valores, vença a melhor de 3 ou sobreviva à Morte Súbita!</p>
+        <div class="header-content">
+            <h1>⚔️ Jogo da Velha <span class="header-badge">ULTIMATE</span></h1>
+            <p>Aposte valores, vença a melhor de 3 ou sobreviva à Morte Súbita!</p>
+        </div>
+        
+        <!-- Widget de Saldo -->
+        <div id="balance-widget" class="balance-widget"></div>
     </div>
 
     <div class="container">
@@ -111,6 +118,71 @@
         </div>
 
         <!-- =========================================
+             VIEW 3.5: ANIMAÇÃO DE MATCHMAKING
+             ========================================= -->
+        <div id="matchmakingView" class="view-section" style="display: none;">
+            <div class="matchmaking-container">
+                <!-- Cabeçalho com valor da aposta -->
+                <div class="matchmaking-bet-display">
+                    <div class="bet-label">SALA</div>
+                    <div class="bet-value" id="matchmakingBetValue">R$ 0,00</div>
+                </div>
+
+                <!-- Players -->
+                <div class="matchmaking-players">
+                    <div class="matchmaking-player player-left">
+                        <div class="player-avatar">
+                            <div class="avatar-circle p1">
+                                <span class="avatar-symbol">X</span>
+                            </div>
+                        </div>
+                        <div class="player-name" id="matchmakingPlayer1Name">Jogador 1</div>
+                        <div class="player-entry-fee" id="matchmakingPlayer1Fee">R$ 0,00</div>
+                    </div>
+
+                    <div class="matchmaking-vs">
+                        <div class="vs-text">VS</div>
+                        <div class="vs-line"></div>
+                    </div>
+
+                    <div class="matchmaking-player player-right">
+                        <div class="player-avatar">
+                            <div class="avatar-circle p2">
+                                <span class="avatar-symbol">O</span>
+                            </div>
+                        </div>
+                        <div class="player-name" id="matchmakingPlayer2Name">Jogador 2</div>
+                        <div class="player-entry-fee" id="matchmakingPlayer2Fee">R$ 0,00</div>
+                    </div>
+                </div>
+
+                <!-- Animação de Moedas -->
+                <div class="coins-animation">
+                    <div class="coin coin-left">
+                        <div class="coin-inner">
+                            <span class="coin-value" id="coinLeftValue">R$ 0,00</span>
+                        </div>
+                    </div>
+                    <div class="coin coin-right">
+                        <div class="coin-inner">
+                            <span class="coin-value" id="coinRightValue">R$ 0,00</span>
+                        </div>
+                    </div>
+                    <div class="coin-total" id="coinTotal">
+                        <div class="total-glow"></div>
+                        <span id="coinTotalValue">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <!-- Mensagem de início -->
+                <div class="matchmaking-message">
+                    <p>Partida encontrada!</p>
+                    <p class="message-sub">Preparando tabuleiro...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================================
              VIEW 4: JOGO
              ========================================= -->
         <div id="gameView" class="view-section" style="display: none;">
@@ -181,6 +253,14 @@
                     <p><strong>1. Objetivo:</strong> Alinhar 3 símbolos iguais.</p>
                     <p style="margin-top:10px;"><strong>2. Partida:</strong> Melhor de 3 rodadas.</p>
                     <p style="margin-top:10px;"><strong>3. Morte Súbita:</strong> Em caso de empate total, clique no 'P' na chuva de letras.</p>
+                    <p style="margin-top:10px;"><strong>4. Entrada:</strong> Cada jogador paga metade do valor da sala para entrar.</p>
+                    <p style="margin-top:10px;"><strong>5. Prêmio:</strong> O vencedor recebe <span style="color: #4ade80; font-weight: 700;">80%</span> do valor total da sala. A plataforma fica com <span style="color: #fbbf24; font-weight: 700;">20%</span> como taxa de serviço.</p>
+                    <div style="margin-top: 15px; padding: 12px; background: rgba(74, 222, 128, 0.1); border-left: 3px solid #4ade80; border-radius: 6px;">
+                        <p style="font-size: 0.85rem; margin: 0;"><strong>Exemplo:</strong> Sala de R$ 10,00</p>
+                        <p style="font-size: 0.85rem; margin: 5px 0 0 0;">• Entrada: R$ 5,00 por jogador</p>
+                        <p style="font-size: 0.85rem; margin: 5px 0 0 0;">• Prêmio do vencedor: R$ 8,00 (80%)</p>
+                        <p style="font-size: 0.85rem; margin: 5px 0 0 0;">• Taxa da plataforma: R$ 2,00 (20%)</p>
+                    </div>
                 </div>
                 <button class="btn" style="margin-top: 25px; width: 100%;" onclick="toggleRules()">Entendi</button>
             </div>
