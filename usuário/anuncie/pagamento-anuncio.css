@@ -1,0 +1,451 @@
+/* ========================================= */
+/* VARIÁVEIS E RESET GLOBAL                  */
+/* ========================================= */
+:root {
+    --primary-color: #00ff88;         /* Verde Neon */
+    --primary-color-dark: #00cc6e;    /* Verde Mais Escuro */
+    --dark-bg: #000000;               /* Fundo Preto */
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --text-primary: #ffffff;
+    --font-main: 'Outfit', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-main);
+    background: linear-gradient(135deg, #000000 0%, #0a0a0a 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding-bottom: 30px;
+}
+
+/* ========================================= */
+/* HEADER                                    */
+/* ========================================= */
+.app-header-simple {
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(20px);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.back-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.back-button:hover {
+    background: rgba(0, 255, 136, 0.2);
+    border-color: var(--primary-color);
+    transform: translateX(-3px);
+}
+
+.app-header-simple h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+/* ========================================= */
+/* CONTAINER PRINCIPAL                       */
+/* ========================================= */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+.page-content h2 {
+    color: var(--primary-color);
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.page-content p {
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* ========================================= */
+/* CAIXA DE INFORMAÇÃO DO ANÚNCIO            */
+/* ========================================= */
+.ad-info-box {
+    background: linear-gradient(135deg, rgba(255, 136, 0, 0.15) 0%, rgba(255, 100, 0, 0.1) 100%);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 136, 0, 0.3);
+    border-radius: 20px;
+    padding: 25px;
+    text-align: center;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(255, 136, 0, 0.2);
+}
+
+.ad-info-box h3 {
+    color: #ff8800;
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+    text-shadow: 0 0 20px rgba(255, 136, 0, 0.5);
+}
+
+.ad-info-box p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    margin: 5px 0;
+}
+
+/* ========================================= */
+/* CAIXA DE INFORMAÇÃO DO VALOR              */
+/* ========================================= */
+.pix-info-box {
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 204, 110, 0.1) 100%);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(0, 255, 136, 0.3);
+    border-radius: 20px;
+    padding: 25px;
+    text-align: center;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 255, 136, 0.2);
+}
+
+.pix-info-box p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.pix-info-box h3 {
+    color: var(--primary-color);
+    font-size: 2.5rem;
+    font-weight: 900;
+    text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+}
+
+/* ========================================= */
+/* LOADING (SPINNER)                         */
+/* ========================================= */
+#pix-loading-area {
+    background: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+}
+
+.spinner-large {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ========================================= */
+/* ÁREA DO QR CODE E DETALHES                */
+/* ========================================= */
+#pix-details-area {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 40px;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.qr-code-container {
+    background: white;
+    padding: 20px;
+    border-radius: 20px;
+    display: inline-block;
+    margin: 20px auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.qr-code-container img {
+    display: block;
+    border-radius: 10px;
+    max-width: 100%;
+}
+
+/* Input Copia e Cola */
+.copy-paste-container {
+    margin-top: 30px;
+}
+
+.copy-paste-container label {
+    display: block;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.copy-paste-container textarea {
+    width: 100%;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    color: white;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    resize: none;
+    transition: all 0.3s ease;
+}
+
+.copy-paste-container textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+}
+
+/* Botão Genérico */
+.btn {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    font-family: var(--font-main);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+    color: #000;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 255, 136, 0.5);
+}
+
+/* Vencimento */
+.pix-expiration {
+    padding: 15px;
+    background: rgba(255, 136, 0, 0.1);
+    border: 1px solid rgba(255, 136, 0, 0.3);
+    border-radius: 12px;
+}
+
+.pix-expiration span {
+    color: #ff8800;
+    font-weight: 700;
+}
+
+/* ========================================= */
+/* POP-UP DE PAGAMENTO APROVADO (MODAL)      */
+/* ========================================= */
+.popup-overlay {
+    display: none; /* Oculto por padrão, ativado via JS */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85); /* Fundo escuro com transparência */
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.4s ease;
+}
+
+.popup-overlay.show {
+    display: flex;
+}
+
+.popup-content {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    border: 2px solid var(--primary-color);
+    padding: 40px;
+    border-radius: 25px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 0 50px rgba(0, 255, 136, 0.2);
+    transform: scale(0.8);
+    animation: popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Ícone de Check Animado */
+.icon-circle {
+    width: 90px;
+    height: 90px;
+    background: rgba(0, 255, 136, 0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px;
+    border: 3px solid var(--primary-color);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+}
+
+.icon-circle .material-icons {
+    font-size: 50px;
+    color: var(--primary-color);
+}
+
+.popup-content h3 {
+    color: white;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    font-weight: 800;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.popup-content p {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 30px;
+    font-size: 1.05rem;
+    line-height: 1.5;
+}
+
+#btn-close-popup {
+    background: var(--primary-color);
+    color: #000000;
+    border: none;
+    padding: 16px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    border-radius: 12px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#btn-close-popup:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.5);
+    background: #ffffff;
+}
+
+/* Animações do Popup */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes popUp {
+    to { transform: scale(1); }
+}
+
+/* ========================================= */
+/* RESPONSIVIDADE                            */
+/* ========================================= */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px 15px;
+    }
+
+    .pix-info-box h3 {
+        font-size: 2rem;
+    }
+
+    .qr-code-container {
+        padding: 15px;
+    }
+
+    .qr-code-container img {
+        width: 220px !important;
+        height: 220px !important;
+    }
+
+    #pix-details-area {
+        padding: 25px;
+    }
+}
+
+@media (max-width: 480px) {
+    .app-header-simple {
+        padding: 15px;
+    }
+
+    .app-header-simple h1 {
+        font-size: 1.2rem;
+    }
+
+    .page-content h2 {
+        font-size: 1.4rem;
+    }
+
+    .pix-info-box {
+        padding: 20px;
+    }
+
+    .pix-info-box h3 {
+        font-size: 1.8rem;
+    }
+
+    .ad-info-box h3 {
+        font-size: 1.4rem;
+    }
+
+    .qr-code-container img {
+        width: 180px !important;
+        height: 180px !important;
+    }
+
+    #pix-details-area {
+        padding: 20px;
+    }
+
+    .copy-paste-container textarea {
+        font-size: 0.8rem;
+    }
+    
+    .popup-content {
+        padding: 30px 20px;
+        width: 95%;
+    }
+    
+    .popup-content h3 {
+        font-size: 1.5rem;
+    }
+}

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento do Anúncio - SLICED</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="pagamento-anuncio.css">
+    
+    <!-- Fontes e Ícones -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" href="/imgs/LOGO-SLICED.png" type="image/png">
+</head>
+
+<body class="app-page">
+
+    <!-- Header Simples -->
+    <header class="app-header-simple">
+        <a href="anuncie.html" class="back-button">
+            <i class="material-icons">arrow_back</i>
+        </a>
+        <h1>Pagamento do Anúncio</h1>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="container page-content">
+        
+        <!-- Títulos Dinâmicos -->
+        <h2 id="payment-title">Aguardando Geração do PIX...</h2>
+        <p id="payment-instructions">Seu código e QR Code serão exibidos abaixo.</p>
+
+        <!-- Informações do Anúncio -->
+        <div class="ad-info-box">
+            <h3 id="ad-name-display">Carregando...</h3>
+            <p id="ad-category-display"></p>
+            <p id="ad-budget-display"></p>
+        </div>
+
+        <!-- Caixa de Valor -->
+        <div class="pix-info-box">
+            <p>Valor a Pagar:</p>
+            <h3 id="pix-value-display">R$ 0,00</h3>
+        </div>
+
+        <!-- Área de Carregamento (Spinner) -->
+        <div id="pix-loading-area" style="text-align: center; padding: 20px;">
+            <div class="spinner-large"></div>
+            <p style="margin-top: 15px;">Conectando e Gerando QR Code...</p>
+        </div>
+
+        <!-- Área com QR Code e Copia e Cola (Inicialmente Oculta) -->
+        <div id="pix-details-area" style="display: none; text-align: center;">
+
+            <p style="color: #00ff88; font-weight: 700;">Use o app do seu banco para ler o código:</p>
+            
+            <div class="qr-code-container">
+                <img id="pix-qr-code" src="" alt="QR Code PIX" style="width: 250px; height: 250px; margin: 20px auto;">
+            </div>
+
+            <div class="copy-paste-container">
+                <label for="pix-copia-cola-input">PIX Copia e Cola:</label>
+                <textarea id="pix-copia-cola-input" readonly rows="4"></textarea> 
+                
+                <button id="copy-pix-btn" class="btn btn-primary" style="margin-top: 10px;">
+                    <i class="material-icons">content_copy</i> 
+                    Copiar Código
+                </button>
+                
+                <p id="copy-message" style="margin-top: 10px; color: #00ff88; display: none;">
+                    Copiado para a área de transferência!
+                </p>
+            </div>
+            
+            <p style="margin-top: 30px; color: #ff8800; font-weight: 600;">
+                ⚠️ Não feche esta página. Aguardando a confirmação do pagamento em tempo real.
+            </p>
+            
+            <p class="pix-expiration" style="margin-top: 20px; font-size: 0.9em; color: #777;">
+                Vencimento: <span id="pix-expiration-time">--:--</span>
+            </p>
+        </div>
+        
+    </main>
+
+    <!-- ============================================ -->
+    <!-- POP-UP DE PAGAMENTO APROVADO (MODAL)         -->
+    <!-- ============================================ -->
+    <div id="payment-popup" class="popup-overlay">
+        <div class="popup-content">
+            <div class="icon-circle">
+                <i class="material-icons">check</i>
+            </div>
+            <h3>Pagamento Aprovado!</h3>
+            <p>Seu anúncio foi pago e está sendo processado. Em breve estará ativo!</p>
+            <button id="btn-close-popup">Voltar para Anúncios</button>
+        </div>
+    </div>
+
+    <!-- Script Principal -->
+    <script type="module" src="/usuário/anuncie/pagamento-anuncio.js"></script>
+
+</body>
+</html>

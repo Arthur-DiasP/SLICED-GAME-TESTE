@@ -260,20 +260,21 @@
                     id: Date.now(),
                     categoria: document.getElementById('categoria').value,
                     nome: document.getElementById('nomeAnuncio').value,
+                    descricao: document.getElementById('descricao').value || '',
                     orcamento: slider.value,
                     data: new Date().toLocaleDateString('pt-BR'),
-                    status: 'Em Análise'
+                    status: 'Aguardando Pagamento'
                 };
 
                 const ads = JSON.parse(localStorage.getItem('spfc_ads') || '[]');
                 ads.unshift(newAd);
                 localStorage.setItem('spfc_ads', JSON.stringify(ads));
 
-                e.target.reset();
-                updateMetrics(500);
-                alert('Anúncio enviado para análise com sucesso!');
-                
-                switchTab('meus');
+                // Salvar dados do anúncio no sessionStorage para a página de pagamento
+                sessionStorage.setItem('adPaymentData', JSON.stringify(newAd));
+
+                // Redirecionar para página de pagamento
+                window.location.href = 'pagamento-anuncio.html';
             });
         }
 
@@ -289,9 +290,16 @@
                 return;
             }
 
-            list.innerHTML = ads.map(ad => `
+            list.innerHTML = ads.map(ad => {
+                // Definir classe de status
+                let statusClass = 'status-analise';
+                if (ad.status === 'Aguardando Pagamento') statusClass = 'status-pending';
+                if (ad.status === 'Pago') statusClass = 'status-paid';
+                if (ad.status === 'Ativo') statusClass = 'status-active';
+
+                return `
                 <div class="ad-card">
-                    <div class="ad-status status-analise">${ad.status}</div>
+                    <div class="ad-status ${statusClass}">${ad.status}</div>
                     <h3 class="ad-title">${ad.nome}</h3>
                     <div class="ad-details">
                         <p>Categoria: ${ad.categoria}</p>
@@ -299,11 +307,30 @@
                         <p>Data: ${ad.data}</p>
                     </div>
                     <div class="ad-actions">
-                        ${ad.status === 'Aprovado' ? '<button class="btn-small btn-pay">Pagar Agora</button>' : ''}
+                        ${ad.status === 'Aguardando Pagamento' ? 
+                            `<button class="btn-small btn-pay" onclick="payAd(${ad.id})">Pagar Agora</button>` : 
+                            ''}
+                        ${ad.status === 'Pago' ? 
+                            '<span style="color: #00ff88; font-weight: 600;">✓ Pagamento Confirmado</span>' : 
+                            ''}
                         <button class="btn-small" style="background: rgba(255,255,255,0.1); color: white;">Detalhes</button>
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
+        }
+
+        // Função para pagar anúncio
+        window.payAd = function(adId) {
+            const ads = JSON.parse(localStorage.getItem('spfc_ads') || '[]');
+            const ad = ads.find(a => a.id === adId);
+            
+            if (ad) {
+                // Salvar dados do anúncio no sessionStorage
+                sessionStorage.setItem('adPaymentData', JSON.stringify(ad));
+                // Redirecionar para página de pagamento
+                window.location.href = 'pagamento-anuncio.html';
+            }
         }
 
         // Initialize

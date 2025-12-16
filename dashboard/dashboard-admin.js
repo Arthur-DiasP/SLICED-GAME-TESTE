@@ -11,7 +11,8 @@ import {
     where,
     orderBy,
     onSnapshot,
-    collectionGroup
+    collectionGroup,
+    addDoc
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // Estado global
@@ -23,6 +24,7 @@ let allTransactions = [];
 document.addEventListener('DOMContentLoaded', () => {
     loadDashboardData();
     setupEventListeners();
+    loadPlatformFeeWithdrawals();
 });
 
 // ===== CARREGAR DADOS =====
@@ -129,6 +131,10 @@ async function loadTransactionsAndRevenue() {
 
         document.getElementById('totalRevenue').textContent = `R$ ${totalRevenue.toFixed(2)}`;
         document.getElementById('platformFee').textContent = `R$ ${platformFee.toFixed(2)}`;
+        document.getElementById('currentPlatformFee').textContent = `R$ ${platformFee.toFixed(2)}`;
+        
+        // Carrega e atualiza valores retirados
+        await updatePlatformFeeWithdrawals(platformFee);
         
         console.log(`💰 Total de usuários: ${usuariosSnapshot.size}`);
         console.log(`💰 Faturamento total (soma dos saldos): R$ ${totalRevenue.toFixed(2)}`);
@@ -137,6 +143,7 @@ async function loadTransactionsAndRevenue() {
         console.error('Erro ao calcular faturamento:', error);
         document.getElementById('totalRevenue').textContent = 'R$ 0,00';
         document.getElementById('platformFee').textContent = 'R$ 0,00';
+        document.getElementById('currentPlatformFee').textContent = 'R$ 0,00';
     }
 }
 
@@ -171,10 +178,28 @@ async function loadWithdrawals() {
                 
                 if (isPending) pendingCount++;
                 
+                // Gera ID único para a chave PIX
+                const pixKeyId = 'pixKey_' + doc.id;
+                const pixKey = data.pixKey || 'N/A';
+                
                 withdrawalsHTML.push(`
                     <tr>
                         <td>${data.userName || data.nomeCompleto || 'N/A'}</td>
                         <td style="color: #00ff88; font-weight: 700;">R$ ${(data.valor || data.amount || 0).toFixed(2)}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span id="${pixKeyId}" style="font-size: 0.85rem; font-family: monospace;">${pixKey}</span>
+                                <button 
+                                    class="btn-copy-pix" 
+                                    onclick="copyPixKey('${pixKeyId}')"
+                                    title="Copiar chave PIX"
+                                    style="padding: 6px 10px; background: rgba(0, 255, 136, 0.2); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 6px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 4px;"
+                                >
+                                    <i class="material-icons" style="font-size: 16px; color: #00ff88;">content_copy</i>
+                                    <span style="font-size: 0.75rem; color: #00ff88; font-weight: 600;">Copiar</span>
+                                </button>
+                            </div>
+                        </td>
                         <td>${formatDate(data.dataSolicitacao || data.createdAt)}</td>
                         <td>
                             <span class="status-badge ${isPending ? 'status-pendente' : 'status-concluido'}">
@@ -336,3 +361,122 @@ window.addEventListener('click', (e) => {
         closeEditModal();
     }
 });
+
+// ===== GERENCIAMENTO DA TAXA DA PLATAFORMA =====
+
+// Carregar retiradas da taxa da plataforma
+async function loadPlatformFeeWithdrawals() {
+    try {
+        const withdrawalsRef = collection(db, 'SLICED', 'data', 'PlatformFeeWithdrawals');
+        const snapshot = await getDocs(withdrawalsRef);
+        
+        let totalWithdrawn = 0;
+        
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            totalWithdrawn += Number(data.amount || 0);
+        });
+        
+        return totalWithdrawn;
+    } catch (error) {
+        console.error('Erro ao carregar retiradas da taxa:', error);
+        return 0;
+    }
+}
+
+// Atualizar valores da taxa da plataforma
+async function updatePlatformFeeWithdrawals(currentFee) {
+    const totalWithdrawn = await loadPlatformFeeWithdrawals();
+    const available = currentFee - totalWithdrawn;
+    
+    document.getElementById('totalWithdrawnFromFee').textContent = `R$ ${totalWithdrawn.toFixed(2)}`;
+    document.getElementById('availablePlatformFee').textContent = `R$ ${available.toFixed(2)}`;
+    
+    // Mostra/esconde indicador vermelho no card
+    const withdrawnIndicator = document.getElementById('platformFeeWithdrawn');
+    const withdrawnAmount = document.getElementById('platformFeeWithdrawnAmount');
+    
+    if (totalWithdrawn > 0) {
+        withdrawnIndicator.style.display = 'block';
+        withdrawnAmount.textContent = `R$ ${totalWithdrawn.toFixed(2)}`;
+    } else {
+        withdrawnIndicator.style.display = 'none';
+    }
+}
+
+// Formulário de retirada da taxa
+const platformFeeForm = document.getElementById('platformFeeWithdrawForm');
+if (platformFeeForm) {
+    platformFeeForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const amount = parseFloat(document.getElementById('platformFeeWithdrawAmount').value);
+        
+        if (!amount || amount <= 0) {
+            alert('Digite um valor válido!');
+            return;
+        }
+        
+        // Verifica saldo disponível
+        const currentFeeText = document.getElementById('currentPlatformFee').textContent;
+        const currentFee = parseFloat(currentFeeText.replace('R$ ', '').replace(',', '.'));
+        const totalWithdrawn = await loadPlatformFeeWithdrawals();
+        const available = currentFee - totalWithdrawn;
+        
+        if (amount > available) {
+            alert(`Saldo insuficiente! Disponível: R$ ${available.toFixed(2)}`);
+            return;
+        }
+        
+        if (!confirm(`Confirmar retirada de R$ ${amount.toFixed(2)} da taxa da plataforma?`)) {
+            return;
+        }
+        
+        try {
+            // Registra a retirada
+            const withdrawalsRef = collection(db, 'SLICED', 'data', 'PlatformFeeWithdrawals');
+            await addDoc(withdrawalsRef, {
+                amount: amount,
+                createdAt: new Date(),
+                createdBy: 'admin'
+            });
+            
+            alert('Retirada registrada com sucesso!');
+            document.getElementById('platformFeeWithdrawAmount').value = '';
+            
+            // Atualiza os valores
+            await loadTransactionsAndRevenue();
+        } catch (error) {
+            console.error('Erro ao registrar retirada:', error);
+            alert('Erro ao registrar retirada. Verifique o console.');
+        }
+    });
+}
+
+// Função para copiar chave PIX
+window.copyPixKey = function(elementId) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    
+    const text = element.textContent;
+    
+    navigator.clipboard.writeText(text).then(() => {
+        // Feedback visual
+        const button = element.parentElement.querySelector('.btn-copy-pix');
+        if (button) {
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="material-icons" style="font-size: 16px; color: #4ade80;">check</i><span style="font-size: 0.75rem; color: #4ade80; font-weight: 600;">Copiado!</span>';
+            button.style.background = 'rgba(74, 222, 128, 0.2)';
+            button.style.borderColor = 'rgba(74, 222, 128, 0.3)';
+            
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.style.background = 'rgba(0, 255, 136, 0.2)';
+                button.style.borderColor = 'rgba(0, 255, 136, 0.3)';
+            }, 2000);
+        }
+    }).catch(err => {
+        console.error('Erro ao copiar:', err);
+        alert('Erro ao copiar chave PIX');
+    });
+};
