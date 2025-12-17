@@ -12,8 +12,10 @@ import {
     orderBy,
     onSnapshot,
     collectionGroup,
-    addDoc
+    addDoc,
+    getDoc
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { verificarAutenticacao } from '../controle-dados/auth.js';
 
 // Estado global
 let currentEditingUserId = null;
@@ -22,9 +24,46 @@ let allTransactions = [];
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', () => {
-    loadDashboardData();
-    setupEventListeners();
-    loadPlatformFeeWithdrawals();
+    // Verificar autenticação e permissão de admin
+    verificarAutenticacao(async (user) => {
+        if (!user) {
+            // Usuário não está logado, redirecionar para login
+            alert('Você precisa estar logado para acessar o dashboard.');
+            window.location.href = '../login/login.html';
+            return;
+        }
+
+        // Verificar se o usuário é admin
+        try {
+            const userRef = doc(db, 'SLICED', 'data', 'Usuários', user.uid);
+            const userDoc = await getDoc(userRef);
+            
+            if (!userDoc.exists()) {
+                alert('Usuário não encontrado no banco de dados.');
+                window.location.href = '../login/login.html';
+                return;
+            }
+
+            const userData = userDoc.data();
+            
+            // Verificar se o usuário tem permissão de admin
+            if (!userData.isAdmin) {
+                alert('Acesso negado! Você não tem permissão para acessar o dashboard administrativo.');
+                window.location.href = '../usuário/inicio/inicio.html';
+                return;
+            }
+
+            // Usuário é admin, carregar dados do dashboard
+            console.log('✅ Usuário autenticado como admin:', userData.nomeCompleto);
+            loadDashboardData();
+            setupEventListeners();
+            loadPlatformFeeWithdrawals();
+        } catch (error) {
+            console.error('Erro ao verificar permissões:', error);
+            alert('Erro ao verificar permissões. Tente novamente.');
+            window.location.href = '../login/login.html';
+        }
+    });
 });
 
 // ===== CARREGAR DADOS =====
