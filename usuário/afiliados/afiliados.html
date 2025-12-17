@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
     <link rel="stylesheet" href="../../controle-dados/balance-widget.css">
     <link rel="stylesheet" href="afiliados.css">
 </head>
+
 <body>
     <!-- Partículas de fundo -->
     <div class="particles" id="particles"></div>
@@ -36,16 +38,29 @@
 
     <div class="main-container">
         <div class="affiliates-hero">
-            <h2 class="hero-title">Programa de Afiliados Tricolor</h2>
+            <h2 class="hero-title">Programa de Afiliados</h2>
             <p class="hero-text">
-                Convide amigos para fazer parte do Clube da Fé e ganhe benefícios exclusivos. 
-                A cada novo sócio indicado, você acumula pontos que podem ser trocados por ingressos e produtos oficiais.
+                Convide amigos e influencers para fazer parte da SLICED e ganhe benefícios exclusivos.
+                A cada novo sócio indicado, você acumula dinheiro na sua conta assim podendo sacar.
             </p>
+            <div class="commission-info"
+                style="background: rgba(76, 175, 80, 0.15); border-left: 4px solid #4CAF50; padding: 15px; margin: 20px 0; border-radius: 8px;">
+                <p style="margin: 0; color: #4CAF50; font-weight: 600; font-size: 1.1em;">
+                    💰 Comissão de Afiliado: A cada R$ 10,00 de indicação, você recebe R$ 0,50!
+                </p>
+            </div>
+            <div class="withdrawal-info"
+                style="background: rgba(33, 150, 243, 0.15); border-left: 4px solid #2196F3; padding: 15px; margin: 20px 0; border-radius: 8px;">
+                <p style="margin: 0; color: #2196F3; font-weight: 600; font-size: 1.1em;">
+                    💳 Saque Disponível: Você poderá sacar quando tiver R$ 20,00 no saldo de indicação!
+                </p>
+            </div>
 
             <div class="referral-box">
                 <label class="referral-label">Seu Link Exclusivo</label>
                 <div class="referral-input-group">
-                    <input type="text" class="referral-input" value="spfc.com.br/convite/torcedor123" readonly id="referralLink">
+                    <input type="text" class="referral-input" value="spfc.com.br/convite/sliced123" readonly
+                        id="referralLink">
                     <button class="btn-copy" onclick="copyLink()">Copiar Link</button>
                 </div>
             </div>
@@ -65,7 +80,66 @@
                 <div class="stat-label">Pontos Acumulados</div>
             </div>
         </div>
+
+        <!-- Card de Saldo de Afiliado -->
+        <div class="affiliate-balance-card">
+            <div class="balance-header">
+                <h3><i class="material-icons">account_balance_wallet</i> Saldo de Afiliado</h3>
+            </div>
+            <div class="balance-amount" id="affiliateBalance">R$ 0,00</div>
+            <p class="balance-description">Comissões acumuladas das suas indicações</p>
+            <button class="btn-withdraw-affiliate" id="btnWithdrawAffiliate" disabled>
+                <i class="material-icons">payments</i>
+                Solicitar Saque (mín. R$ 20,00)
+            </button>
+        </div>
     </div>
+
+    <!-- Modal de Saque de Afiliado -->
+    <div id="withdrawAffiliateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="material-icons">remove_circle</i> Solicitar Saque de Afiliado</h3>
+                <button class="modal-close" id="closeWithdrawModal">
+                    <i class="material-icons">close</i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">Seu saldo de afiliado atual: <strong id="modalAffiliateBalance">R$ 0,00</strong></p>
+                
+                <form id="withdrawAffiliateForm">
+                    <div class="form-group">
+                        <label for="withdrawAmount">Valor do Saque (R$)</label>
+                        <input type="number" id="withdrawAmount" min="20" step="0.01" required placeholder="Mínimo: R$ 20,00">
+                        <small style="display: block; margin-top: 8px; color: rgba(255, 255, 255, 0.6); font-size: 0.85rem;">
+                            Valor mínimo: R$ 20,00
+                        </small>
+                    </div>
+
+                    <div class="withdraw-info">
+                        <i class="material-icons">schedule</i>
+                        <p>O saque será processado em até 24 horas úteis.</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="btnConfirmWithdraw">
+                        <i class="material-icons">check_circle</i>
+                        Confirmar Saque
+                    </button>
+                </form>
+
+                <div id="withdrawLoading" class="modal-loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Processando solicitação...</p>
+                </div>
+
+                <div id="withdrawSuccess" class="success-message" style="display: none;">
+                    <i class="material-icons">check_circle</i>
+                    <p>Saque solicitado com sucesso!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Bottom Navbar -->
     <nav class="bottom-navbar">
@@ -99,24 +173,186 @@
         import { iniciarRastreamentoGlobal } from '../../controle-dados/tracker-config.js';
         import { initBalanceWidget } from '../../controle-dados/balance-widget.js';
 
+        // Importar Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, addDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+        // Configuração Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD85kB-ZjHINwOlIAUShW0lCQOBZQH7LLQ",
+            authDomain: "spfc-jogo.firebaseapp.com",
+            projectId: "spfc-jogo",
+            storageBucket: "spfc-jogo.firebasestorage.app",
+            messagingSenderId: "71353090673",
+            appId: "1:71353090673:web:4754e0c6ef96e4e9d2a9f3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let currentUserData = null;
+        let currentAffiliateBalance = 0;
+
         // Inicializar rastreamento
         iniciarRastreamentoGlobal({
             onUserLoaded: async (dados, user) => {
+                currentUserData = { ...dados, uid: user.uid };
+                
                 // Atualizar dados na tela
                 document.getElementById('userName').textContent = dados.nomeCompleto;
                 document.getElementById('userEmail').textContent = dados.email;
-                
+
                 // Inicializar widget de saldo
                 if (user && user.uid) {
                     await initBalanceWidget(user.uid);
                 }
-                
+
                 // Gerar link de afiliado baseado no ID (dados.uid vem do Firestore)
                 const userIdShort = dados.uid.substring(0, 8);
-                document.getElementById('referralLink').value = `spfc.com.br/convite/${userIdShort}`;
+                document.getElementById('referralLink').value = `sliced.com.br/convite/${userIdShort}`;
+
+                // Carregar saldo de afiliado
+                await loadAffiliateBalance(user.uid);
             },
             onLogout: () => {
                 window.location.href = '../../login/login.html';
+            }
+        });
+
+        // Carregar saldo de afiliado do Firebase
+        async function loadAffiliateBalance(uid) {
+            try {
+                const userRef = doc(db, 'SLICED', 'data', 'Usuário', uid);
+                const userDoc = await getDoc(userRef);
+
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    currentAffiliateBalance = userData['afiliado-saldo'] || 0;
+                    
+                    // Atualizar UI
+                    const balanceFormatted = currentAffiliateBalance.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    });
+                    
+                    document.getElementById('affiliateBalance').textContent = balanceFormatted;
+                    document.getElementById('modalAffiliateBalance').textContent = balanceFormatted;
+
+                    // Habilitar/desabilitar botão de saque
+                    const btnWithdraw = document.getElementById('btnWithdrawAffiliate');
+                    if (currentAffiliateBalance >= 20) {
+                        btnWithdraw.disabled = false;
+                    } else {
+                        btnWithdraw.disabled = true;
+                    }
+                } else {
+                    // Se não existir, criar com saldo 0
+                    await setDoc(userRef, {
+                        'afiliado-saldo': 0
+                    }, { merge: true });
+                }
+            } catch (error) {
+                console.error('Erro ao carregar saldo de afiliado:', error);
+            }
+        }
+
+        // Elementos do DOM
+        const modal = document.getElementById('withdrawAffiliateModal');
+        const btnOpenModal = document.getElementById('btnWithdrawAffiliate');
+        const btnCloseModal = document.getElementById('closeWithdrawModal');
+        const withdrawForm = document.getElementById('withdrawAffiliateForm');
+        const withdrawLoading = document.getElementById('withdrawLoading');
+        const withdrawSuccess = document.getElementById('withdrawSuccess');
+
+        // Abrir modal
+        btnOpenModal.addEventListener('click', () => {
+            modal.classList.add('show');
+            document.getElementById('withdrawAmount').value = '';
+            document.getElementById('withdrawAmount').max = currentAffiliateBalance;
+        });
+
+        // Fechar modal
+        btnCloseModal.addEventListener('click', () => {
+            modal.classList.remove('show');
+            withdrawForm.reset();
+            withdrawLoading.style.display = 'none';
+            withdrawSuccess.style.display = 'none';
+            withdrawForm.style.display = 'block';
+        });
+
+        // Fechar modal clicando fora
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                btnCloseModal.click();
+            }
+        });
+
+        // Processar solicitação de saque
+        withdrawForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+
+            // Validações
+            if (amount < 20) {
+                alert('O valor mínimo para saque é R$ 20,00');
+                return;
+            }
+
+            if (amount > currentAffiliateBalance) {
+                alert('Saldo insuficiente');
+                return;
+            }
+
+            if (!currentUserData) {
+                alert('Erro: Usuário não identificado');
+                return;
+            }
+
+            try {
+                // Mostrar loading
+                withdrawForm.style.display = 'none';
+                withdrawLoading.style.display = 'block';
+
+                // Salvar solicitação de saque no Firestore
+                const withdrawRef = collection(db, 'SLICED', 'data', 'Saques-Afiliado');
+                await addDoc(withdrawRef, {
+                    userId: currentUserData.uid,
+                    userName: currentUserData.nomeCompleto,
+                    userEmail: currentUserData.email,
+                    amount: amount,
+                    status: 'pendente',
+                    requestDate: new Date().toISOString(),
+                    processedDate: null
+                });
+
+                // Atualizar saldo do usuário (deduzir o valor solicitado)
+                const userRef = doc(db, 'SLICED', 'data', 'Usuário', currentUserData.uid);
+                const newBalance = currentAffiliateBalance - amount;
+                await updateDoc(userRef, {
+                    'afiliado-saldo': newBalance
+                });
+
+                // Atualizar saldo local
+                currentAffiliateBalance = newBalance;
+
+                // Mostrar sucesso
+                withdrawLoading.style.display = 'none';
+                withdrawSuccess.style.display = 'flex';
+
+                // Recarregar saldo na UI
+                await loadAffiliateBalance(currentUserData.uid);
+
+                // Fechar modal após 3 segundos
+                setTimeout(() => {
+                    btnCloseModal.click();
+                }, 3000);
+
+            } catch (error) {
+                console.error('Erro ao processar saque:', error);
+                alert('Erro ao processar solicitação de saque. Tente novamente.');
+                withdrawLoading.style.display = 'none';
+                withdrawForm.style.display = 'block';
             }
         });
 
@@ -132,17 +368,17 @@
         }
 
         // Copy Link Function
-        window.copyLink = function() {
+        window.copyLink = function () {
             const copyText = document.getElementById("referralLink");
             copyText.select();
-            copyText.setSelectionRange(0, 99999); 
+            copyText.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(copyText.value);
-            
+
             const btn = document.querySelector('.btn-copy');
             const originalText = btn.innerText;
             btn.innerText = 'Copiado!';
             btn.style.background = '#4CAF50';
-            
+
             setTimeout(() => {
                 btn.innerText = originalText;
                 btn.style.background = '';
@@ -150,4 +386,5 @@
         }
     </script>
 </body>
+
 </html>

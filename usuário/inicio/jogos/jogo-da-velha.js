@@ -49,6 +49,7 @@ let gameState = {
     gameActive: false,
     inQueue: false,
     timerInterval: null,
+    prizeCredited: false, // 🆕 Flag para evitar crédito duplicado
 
     // Estado específico de Sala Privada
     privateRoomCode: null,
@@ -76,7 +77,7 @@ function switchView(viewId) {
 // =============================================
 // ANIMAÇÃO DE MATCHMAKING (ESTILO 8 BALL POOL)
 // =============================================
-function showMatchmakingAnimation(matchData) {
+async function showMatchmakingAnimation(matchData) {
     console.log('🎬 [Matchmaking] Iniciando animação...');
     
     // Muda para a view de matchmaking
@@ -116,6 +117,39 @@ function showMatchmakingAnimation(matchData) {
     console.log(`   Player 2: ${matchData.player2.name} (O)`);
     console.log(`   Aposta: ${formattedTotal}`);
     
+    // 🆕 COBRAR A ENTRADA IMEDIATAMENTE quando as moedas aparecem
+    console.log(`💰 [Matchmaking] Cobrando entrada de ${formattedEntry} durante a animação...`);
+    const charged = await chargeEntryFee(betValue);
+    
+    if (!charged) {
+        console.error('❌ [Matchmaking] Falha ao cobrar entrada na animação');
+        alert('Erro ao processar pagamento. Voltando ao lobby.');
+        location.reload();
+        return;
+    }
+    
+    console.log('✅ [Matchmaking] Entrada cobrada durante a animação!');
+    
+    // 🆕 ATUALIZAR o widget de saldo para mostrar a dedução visualmente
+    if (gameState.playerId) {
+        try {
+            // Força atualização do widget de saldo
+            const balanceWidget = document.getElementById('balance-widget');
+            if (balanceWidget) {
+                // Adiciona uma classe para animar a mudança
+                balanceWidget.classList.add('balance-updating');
+                setTimeout(() => {
+                    balanceWidget.classList.remove('balance-updating');
+                }, 1000);
+            }
+            
+            // Recarrega o saldo no widget
+            await initBalanceWidget(gameState.playerId);
+        } catch (error) {
+            console.error('Erro ao atualizar widget de saldo:', error);
+        }
+    }
+    
     // Após 10 segundos, inicia o jogo
     setTimeout(() => {
         console.log('🎮 [Matchmaking] Transição para o jogo...');
@@ -123,6 +157,7 @@ function showMatchmakingAnimation(matchData) {
         setupGame(matchData.matchId, symbol);
     }, 10000); // Aumentado para 10 segundos
 }
+
 
 // =============================================
 // INICIALIZAÇÃO
@@ -411,16 +446,11 @@ async function createPrivateRoom(betValue) {
         const data = snap.data();
 
         if (data.status === 'full' && data.joinerId) {
-            // Amigo entrou! Cobra entrada e cria partida
+            // Amigo entrou! Cria partida (a entrada será cobrada na animação)
             if (gameState.waitingListener) gameState.waitingListener();
 
-            const charged = await chargeEntryFee(betValue);
-            if (!charged) {
-                alert('Erro ao processar pagamento. Sala cancelada.');
-                await deleteDoc(roomRef);
-                location.reload();
-                return;
-            }
+            // 🆕 NOTA: A entrada será cobrada na animação de matchmaking
+            console.log('💡 [Private] A entrada será cobrada durante a animação...');
 
             const opponent = { id: data.joinerId, name: data.joinerName || 'Oponente' };
             await createMatch(opponent, true); // true = modo privado
@@ -464,13 +494,9 @@ window.joinPrivateRoom = async function () {
         return;
     }
 
-    // Cobra a entrada
-    const charged = await chargeEntryFee(data.betValue);
-    if (!charged) {
-        alert('Erro ao processar pagamento.');
-        return;
-    }
-
+    // 🆕 NOTA: A entrada será cobrada na animação de matchmaking
+    console.log('💡 [Private] A entrada será cobrada durante a animação...');
+    
     // Entra na sala
     gameState.selectedBet = data.betValue;
     gameState.isPrivate = true;
@@ -558,25 +584,14 @@ async function joinQueue(betValue) {
             console.log(`✅ [Matchmaking] Oponente encontrado: ${opponent.name} (${opponent.id})`);
             console.log(`🎮 [Matchmaking] Meu ID: ${gameState.playerId}, ID Oponente: ${opponent.id}`);
             
-            // Para a escuta da fila para evitar múltiplas cobranças
+            // Para a escuta da fila
             if (gameState.waitingListener) {
                 gameState.waitingListener();
                 gameState.waitingListener = null;
             }
 
-            // Cobra a entrada de AMBOS os jogadores
-            console.log(`💰 [Matchmaking] Cobrando entrada de R$ ${(betValue / 2).toFixed(2)}...`);
-            const charged = await chargeEntryFee(betValue);
-            if (!charged) {
-                console.error('❌ [Matchmaking] Falha ao cobrar entrada');
-                // Se falhou ao cobrar, remove da fila e volta ao lobby
-                await deleteDoc(myRef);
-                inviteUnsub();
-                alert('Erro ao processar pagamento. Voltando ao lobby.');
-                location.reload();
-                return;
-            }
-            console.log(`✅ [Matchmaking] Entrada cobrada com sucesso!`);
+            // 🆕 NOTA: A entrada será cobrada na animação de matchmaking, não aqui
+            console.log(`💡 [Matchmaking] A entrada será cobrada durante a animação...`);
 
             // Apenas o jogador com menor ID cria a partida
             if (gameState.playerId < opponent.id) {
@@ -682,6 +697,7 @@ async function createMatch(opponent, isPrivateMode = false) {
 function setupGame(matchId, symbol) {
     gameState.playerSymbol = symbol;
     gameState.gameActive = true;
+    gameState.prizeCredited = false; // 🆕 Reseta flag para nova partida
 
     // Oculta o widget de saldo durante a partida
     const balanceWidget = document.getElementById('balance-widget');
@@ -1095,17 +1111,32 @@ async function handleGameOver(winnerId) {
     modal.style.display = 'flex';
 
     if (winnerId === gameState.playerId) {
-        // Credita o prêmio ao vencedor
-        const credited = await creditWinnerPrize(gameState.selectedBet);
-        
-        icon.innerText = "🏆";
-        title.innerText = "VENCEDOR SUPREMO!";
-        title.style.color = "#4ade80";
-        
-        if (credited) {
-            msg.innerText = `Você dominou e ganhou ${formattedWin}!`;
+        // 🆕 PROTEÇÃO CONTRA CRÉDITO DUPLICADO
+        if (!gameState.prizeCredited) {
+            console.log('💰 [Prize] Creditando prêmio pela primeira vez...');
+            gameState.prizeCredited = true; // Marca como creditado ANTES da chamada
+            
+            // Credita o prêmio ao vencedor
+            const credited = await creditWinnerPrize(gameState.selectedBet);
+            
+            icon.innerText = "🏆";
+            title.innerText = "VENCEDOR SUPREMO!";
+            title.style.color = "#4ade80";
+            
+            if (credited) {
+                msg.innerText = `Você dominou e ganhou ${formattedWin}!`;
+                console.log('✅ [Prize] Prêmio creditado com sucesso!');
+            } else {
+                msg.innerText = `Você venceu! (Erro ao processar prêmio - contate o suporte)`;
+                console.error('❌ [Prize] Falha ao creditar prêmio');
+                gameState.prizeCredited = false; // Reverte a flag se falhou
+            }
         } else {
-            msg.innerText = `Você venceu! (Erro ao processar prêmio - contate o suporte)`;
+            console.log('⚠️ [Prize] Prêmio já foi creditado anteriormente, pulando...');
+            icon.innerText = "🏆";
+            title.innerText = "VENCEDOR SUPREMO!";
+            title.style.color = "#4ade80";
+            msg.innerText = `Você dominou e ganhou ${formattedWin}!`;
         }
     } else {
         icon.innerText = "💀";
