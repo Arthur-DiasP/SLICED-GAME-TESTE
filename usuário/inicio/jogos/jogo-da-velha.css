@@ -855,7 +855,9 @@ body::before {
     }
 }
 
-/* Responsivo */
+/* =============================================
+   RESPONSIVO
+   ============================================= */
 @media (max-width: 768px) {
     .header {
         flex-direction: column;
@@ -877,18 +879,84 @@ body::before {
         width: 100%;
     }
     
-    .bet-grid, .private-options-grid { grid-template-columns: 1fr; }
-    .private-option-card { padding: 30px; }
-    .game-header { flex-direction: column; gap: 15px; padding: 15px; }
-    .scoreboard { gap: 15px; padding: 10px 20px; width: 100%; border-radius: 20px; }
-    .board { gap: 8px; }
-    .cell { font-size: 2.5rem; border-radius: 10px; }
-    .matrix-cell { font-size: 0.9rem; }
+    .bet-grid, .private-options-grid { 
+        grid-template-columns: 1fr; 
+    }
+    
+    .private-option-card { 
+        padding: 30px; 
+    }
+    
+    .game-header { 
+        flex-direction: column; 
+        gap: 15px; 
+        padding: 15px; 
+    }
+    
+    .scoreboard { 
+        gap: 15px; 
+        padding: 10px 20px; 
+        width: 100%; 
+        border-radius: 20px; 
+    }
+    
+    .board { 
+        gap: 8px; 
+    }
+    
+    .cell { 
+        font-size: 2.5rem; 
+        border-radius: 10px; 
+    }
+    
+    .matrix-cell { 
+        font-size: 0.9rem; 
+    }
     
     .bottom-navbar {
         width: 95%;
         padding: 10px 15px;
-        gap: 10px; /* Menor gap para telas pequenas com 3 itens */
+        gap: 10px;
         bottom: 15px;
+    }
+    
+    .matchmaking-container {
+        padding: 20px 15px;
+    }
+    
+    .bet-value {
+        font-size: 2rem;
+    }
+    
+    .matchmaking-players {
+        flex-direction: column;
+        gap: 30px;
+    }
+    
+    .matchmaking-vs {
+        transform: rotate(90deg);
+    }
+    
+    .avatar-circle {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .avatar-symbol {
+        font-size: 2.5rem;
+    }
+    
+    .coin {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .coin-total {
+        width: 110px;
+        height: 110px;
+    }
+    
+    .coin-total span {
+        font-size: 1.1rem;
     }
 }

@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="../../controle-dados/balance-widget.css">
+    <link rel="stylesheet" href="sx-modal-styles.css">
     <style>
         /* ================= RESET & VARS ================= */
         * {
@@ -260,10 +261,224 @@
             width: 80px;
             cursor: pointer;
             position: relative;
-            transition: transform 0.2s;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: brightness(1);
         }
 
-        .sx-story-item:active { transform: scale(0.95); }
+        /* 🌟 HOVER - Efeito de Levitação */
+        .sx-story-item:hover {
+            transform: translateY(-8px) scale(1.05);
+            filter: brightness(1.15);
+        }
+
+        .sx-story-item:hover .story-ring-wrap {
+            box-shadow: 
+                0 8px 25px rgba(255, 215, 0, 0.4),
+                0 0 30px rgba(255, 215, 0, 0.3);
+            animation: ringPulse 2s ease-in-out infinite;
+        }
+
+        /* 👆 ACTIVE - Efeito de Pressão */
+        .sx-story-item:active {
+            transform: translateY(-4px) scale(0.98);
+            filter: brightness(1.3);
+        }
+
+        .sx-story-item:active .story-ring-wrap {
+            transform: scale(0.95);
+        }
+
+        /* 🎬 CLIQUE - ANIMAÇÃO ÉPICA */
+        .sx-story-item.sx-clicked {
+            animation: sxMegaPulse 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .sx-story-item.sx-clicked .story-ring-wrap {
+            animation: 
+                sxRingGlowIntense 1s ease,
+                sxRingRotate 2s linear infinite;
+            box-shadow: 
+                0 0 50px rgba(255, 215, 0, 1),
+                0 0 100px rgba(255, 215, 0, 0.8),
+                0 0 150px rgba(255, 165, 0, 0.6),
+                inset 0 0 30px rgba(255, 255, 255, 0.5);
+            background: linear-gradient(
+                45deg,
+                #FFD700 0%,
+                #FFA500 25%,
+                #FF8C00 50%,
+                #FFA500 75%,
+                #FFD700 100%
+            );
+            background-size: 400% 400%;
+        }
+
+        /* Explosão de partículas CSS - MAIOR */
+        .sx-story-item.sx-clicked::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(
+                circle,
+                rgba(255, 215, 0, 0.8) 0%,
+                rgba(255, 165, 0, 0.6) 30%,
+                transparent 70%
+            );
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            animation: sxMegaExplosion 0.9s ease-out;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Check verde GIGANTE ao clicar */
+        .sx-story-item.sx-clicked::after {
+            content: '✓';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 50%, #00ff88 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 900;
+            color: #000;
+            box-shadow: 
+                0 5px 20px rgba(0, 255, 136, 0.8),
+                0 0 30px rgba(0, 255, 136, 0.6);
+            animation: sxCheckMegaBounce 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 10;
+        }
+
+        /* Animações @keyframes TURBINADAS */
+        
+        /* Pulso suave no hover */
+        @keyframes ringPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.03);
+                opacity: 0.9;
+            }
+        }
+
+        /* Mega pulso ao clicar - ESCALA MAIOR */
+        @keyframes sxMegaPulse {
+            0% {
+                transform: scale(1);
+            }
+            30% {
+                transform: scale(1.35);
+            }
+            50% {
+                transform: scale(0.85);
+            }
+            70% {
+                transform: scale(1.15);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Brilho intenso rotativo */
+        @keyframes sxRingGlowIntense {
+            0%, 100% {
+                filter: brightness(1.2) saturate(1.5);
+            }
+            50% {
+                filter: brightness(1.5) saturate(2);
+            }
+        }
+
+        /* ROTAÇÃO DO GRADIENTE - HIPNOTIZANTE */
+        @keyframes sxRingRotate {
+            0% {
+                background-position: 0% 50%;
+                transform: rotate(0deg);
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Explosão MEGA */
+        @keyframes sxMegaExplosion {
+            0% {
+                transform: translate(-50%, -50%) scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.9;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(3) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        /* Check com bounce MAIOR */
+        @keyframes sxCheckMegaBounce {
+            0% {
+                transform: scale(0) rotate(-360deg);
+                opacity: 0;
+            }
+            40% {
+                transform: scale(1.5) rotate(20deg);
+            }
+            60% {
+                transform: scale(0.8) rotate(-10deg);
+            }
+            80% {
+                transform: scale(1.15) rotate(5deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        /* Partículas douradas voando (criadas via JS) */
+        .sx-particle {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #FFD700 0%, #FFA500 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            box-shadow: 
+                0 0 12px rgba(255, 215, 0, 1),
+                0 0 24px rgba(255, 165, 0, 0.6);
+            animation: particleTwinkle 0.5s ease-in-out infinite alternate;
+        }
+
+        /* Cintilação das partículas */
+        @keyframes particleTwinkle {
+            from {
+                box-shadow: 
+                    0 0 12px rgba(255, 215, 0, 1),
+                    0 0 24px rgba(255, 165, 0, 0.6);
+            }
+            to {
+                box-shadow: 
+                    0 0 20px rgba(255, 215, 0, 1),
+                    0 0 40px rgba(255, 165, 0, 0.8);
+            }
+        }
 
         .story-ring-wrap {
             width: 76px;
@@ -809,9 +1024,11 @@
                     const userData = doc.data();
                     if (userData.sxData && userData.sxData.status === 'concluido') {
                         approvedSX.push({
+                            userId: doc.id, // ID do usuário SX
                             userName: userData.sxData.profileName || userData.nomeCompleto,
                             category: userData.sxData.category,
-                            imageUrl: userData.sxData.imageUrl
+                            imageUrl: userData.sxData.imageUrl,
+                            nomeCompleto: userData.nomeCompleto
                         });
                     }
                 });
@@ -838,6 +1055,39 @@
                             </div>
                             <div class="sx-member-name">${sxData.userName}</div>
                         `;
+                        
+                        // 🎬 EVENTO DE CLIQUE COM EFEITOS VISUAIS E SONOROS
+                        storyItem.addEventListener('click', () => {
+                            // 1️⃣ ADICIONA CLASSE DE ANIMAÇÃO
+                            storyItem.classList.add('sx-clicked');
+                            
+                            // 2️⃣ EFEITO SONORO
+                            playSXClickSound();
+                            
+                            // 3️⃣ PARTÍCULAS DOURADAS
+                            createGoldenParticles(storyItem);
+                            
+                            // 4️⃣ VIBRAÇÃO HÁPTICA
+                            if (navigator.vibrate) {
+                                navigator.vibrate([50, 30, 50, 30, 70]);
+                            }
+                            
+                            // 5️⃣ ARMAZENA SÓCIO SX
+                            localStorage.setItem('selectedSX', JSON.stringify({
+                                userId: sxData.userId,
+                                userName: sxData.userName,
+                                nomeCompleto: sxData.nomeCompleto,
+                                imageUrl: sxData.imageUrl,
+                                category: sxData.category,
+                                selectedAt: new Date().toISOString()
+                            }));
+                            
+                            // 6️⃣ REDIRECIONA APÓS ANIMAÇÕES
+                            setTimeout(() => {
+                                window.location.href = 'jogos/jogo-da-velha.html';
+                            }, 800);
+                        });
+                        
                         sxGallery.appendChild(storyItem);
                     });
                 }
@@ -853,6 +1103,96 @@
                 'Atleta': '🏃', 'Cantor': '🎤', 'Youtuber': '🎬'
             };
             return emojis[category] || '⭐';
+        }
+
+        // ==================================================
+        // 🎵 FUNÇÃO DE EFEITO SONORO (Web Audio API)
+        // ==================================================
+        function playSXClickSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Frequências para   criar um som "ding" dourado premium
+                const frequencies = [800, 1000, 1200]; // Tom agradável
+                const now = audioContext.currentTime;
+                
+                frequencies.forEach((freq, index) => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    // Tipo de onda: sine para som suave
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(freq, now);
+                    
+                    // Envelope de amplitude (fade in/out)
+                    gainNode.gain.setValueAtTime(0, now);
+                    gainNode.gain.linearRampToValueAtTime(0.15, now + 0.01); // Fade in rápido
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3); // Fade out suave
+                    
+                    // Inicia e para
+                    oscillator.start(now + index * 0.05); // Delay entre notas
+                    oscillator.stop(now + 0.4);
+                });
+                
+                console.log('🎵 Som SX reproduzido');
+            } catch (error) {
+                console.log('⚠️ Áudio não suportado:', error);
+            }
+        }
+
+        // ==================================================
+        // ✨ FUNÇÃO DE PARTÍCULAS DOURADAS - VERSÃO ÉPICA
+        // ==================================================
+        function createGoldenParticles(element) {
+            const rect = element.getBoundingClientRect();
+            const particleCount = 16; // AUMENTADO de 10 para 16
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'sx-particle';
+                particle.style.left = `${rect.left + rect.width / 2}px`;
+                particle.style.top = `${rect.top + rect.height / 2}px`;
+                
+                document.body.appendChild(particle);
+                
+                // Animação radial com rotação
+                const angle = (360 / particleCount) * i;
+                const distance = 80 + Math.random() * 50; // AUMENTADO de 60-90 para 80-130
+                const duration = 800 + Math.random() * 400; // Mais longo
+                
+                const radians = (angle * Math.PI) / 180;
+                const targetX = rect.left + rect.width / 2 + Math.cos(radians) * distance;
+                const targetY = rect.top + rect.height / 2 + Math.sin(radians) * distance;
+                
+                // Rotação aleatória para cada partícula
+                const rotation = Math.random() * 720 - 360;
+                
+                particle.animate([
+                    {
+                        transform: 'translate(0, 0) scale(1) rotate(0deg)',
+                        opacity: 1
+                    },
+                    {
+                        transform: `translate(${(targetX - (rect.left + rect.width / 2)) / 2}px, ${(targetY - (rect.top + rect.height / 2)) / 2}px) scale(1.5) rotate(${rotation / 2}deg)`,
+                        opacity: 0.9,
+                        offset: 0.5
+                    },
+                    {
+                        transform: `translate(${targetX - (rect.left + rect.width / 2)}px, ${targetY - (rect.top + rect.height / 2)}px) scale(0) rotate(${rotation}deg)`,
+                        opacity: 0
+                    }
+                ], {
+                    duration: duration,
+                    easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                }).onfinish = () => {
+                    particle.remove();
+                };
+            }
+            
+            console.log('✨ 16 partículas épicas criadas');
         }
 
         btnLogout.addEventListener('click', async () => {

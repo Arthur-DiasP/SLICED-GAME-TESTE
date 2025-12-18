@@ -9,6 +9,7 @@
 
     <!-- Link para o CSS Externo -->
     <link rel="stylesheet" href="jogo-da-velha.css">
+    <link rel="stylesheet" href="sx-modal-styles.css">
     <link rel="stylesheet" href="../../../controle-dados/balance-widget.css">
 
     <!-- Fontes e Ícones -->
@@ -32,7 +33,35 @@
 
     <div class="container">
 
-        <!-- (REMOVIDO O BOTÃO DE VOLTAR DAQUI) -->
+        <!-- MODAL DE SELEÇÃO OBRIGATÓRIA DO SÓCIO SX -->
+        <div id="sxSelectionModal" class="sx-modal" style="display: none;">
+            <div class="sx-modal-content">
+                <div class="sx-modal-header">
+                    <div class="sx-modal-icon">⭐</div>
+                    <h2>Escolha um Sócio SX</h2>
+                    <p>Selecione um sócio para continuar. Ele receberá uma comissão de 5% dos 20% da plataforma!</p>
+                </div>
+                
+                <div class="sx-modal-gallery" id="sxModalGallery">
+                    <div class="sx-loading">Carregando sócios...</div>
+                </div>
+                
+                <div class="sx-modal-selected" id="sxModalSelected" style="display: none;">
+                    <div class="selected-sx-card">
+                        <img id="selectedSxImage" class="selected-sx-img" src="" alt="SX">
+                        <div class="selected-sx-info">
+                            <strong id="selectedSxName">Nenhum selecionado</strong>
+                            <span id="selectedSxCategory"></span>
+                        </div>
+                        <div class="selected-sx-badge">✓</div>
+                    </div>
+                </div>
+                
+                <button id="btnConfirmSX" class="btn-confirm-sx" style="display: none;">
+                    CONTINUAR PARA O JOGO
+                </button>
+            </div>
+        </div>
 
         <!-- =========================================
              VIEW 1: LOBBY PÚBLICO

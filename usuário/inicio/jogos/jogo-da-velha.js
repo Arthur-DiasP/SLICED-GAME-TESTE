@@ -185,9 +185,292 @@ async function init() {
 
     gameState.inQueue = false;
 
-    // Inicia no Lobby Público
-    renderBetGrid('betGrid', false); // Renderiza cards públicos com contadores
+    // 🆕 VERIFICAR SE TEM SÓCIO SX SELECIONADO
+    await checkSXSelection();
+}
+
+// =============================================
+// SISTEMA DE SÓCIO SX  
+// =============================================
+
+/**
+ * Verifica se há um sócio SX selecionado
+ * Se não houver, exibe o modal de seleção
+ */
+async function checkSXSelection() {
+    const selectedSX = localStorage.getItem('selectedSX');
+   
+    if (!selectedSX) {
+        // Não tem SX selecionado, mostrar modal
+        await showSXModal();
+    } else {
+        // Tem SX selecionado, valida se ainda é válido (menos de 24h)
+        const sxData = JSON.parse(selectedSX);
+        const selectedAt = new Date(sxData.selectedAt);
+        const now = new Date();
+        const hoursDiff = (now - selectedAt) / (1000 * 60 * 60);
+        
+        if (hoursDiff > 24) {
+            // Seleção expirou, pedir nova seleção
+            console.log('⚠️ Seleção de SX expirou (>24h), pedindo nova escolha...');
+            await showSXModal();
+        } else {
+            // Seleção válida, continuar para o lobby
+            console.log(`✅ Sócio SX: ${sxData.userName} (${sxData.userId})`);
+            gameState.selectedSX = sxData;
+            proceedToLobby();
+        }
+    }
+}
+
+/**
+ * Continua para o lobby do jogo
+ */
+function proceedToLobby() {
+    renderBetGrid('betGrid', false);
     switchView('lobbyView');
+}
+
+/**
+ * Exibe o modal de seleção de Sócio SX
+ */
+async function showSXModal() {
+    const modal = document.getElementById('sxSelectionModal');
+    if (!modal) return;
+    
+    modal.style.display = 'flex';
+    
+    // Carregar sócios SX aprovados
+    await loadSXMembersForModal();
+}
+
+/**
+ * Carrega os sócios SX aprovados no modal
+ */
+async function loadSXMembersForModal() {
+    try {
+        const { getFirestore, collection, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        const { initializeApp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js');
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTX7MMnhHr_QgDpjPuZGuRyG4Uk9GpQAE",
+            authDomain: "sliced-4f1e3.firebaseapp.com",
+            projectId: "sliced-4f1e3",
+            storageBucket: "sliced-4f1e3.firebasestorage.app",
+            messagingSenderId: "800471538497",
+            appId: "1:800471538497:web:c7d7b9eb55c72687365fc0"
+        };
+
+        const app = initializeApp(firebaseConfig, "sx-modal-loader");
+        const dbFirestore = getFirestore(app);
+        const usersCollection = collection(dbFirestore, 'SLICED', 'data', 'Usuários');
+        const usersSnapshot = await getDocs(usersCollection);
+
+        const gallery = document.getElementById('sxModalGallery');
+        const approvedSX = [];
+        
+        usersSnapshot.forEach((doc) => {
+            const userData = doc.data();
+            if (userData.sxData && userData.sxData.status === 'concluido') {
+                approvedSX.push({
+                    userId: doc.id,
+                    userName: userData.sxData.profileName || userData.nomeCompleto,
+                    nomeCompleto: userData.nomeCompleto,
+                    category: userData.sxData.category,
+                    imageUrl: userData.sxData.imageUrl
+                });
+            }
+        });
+        
+        if (approvedSX.length === 0) {
+            gallery.innerHTML = `<div class="sx-loading">Nenhum sócio SX disponível no momento.</div>`;
+        } else {
+            gallery.innerHTML = '';
+            
+            approvedSX.forEach((sxData) => {
+                const storyItem = document.createElement('div');
+                storyItem.className = 'sx-modal-story';
+                
+                const emoji = getCategoryEmoji(sxData.category);
+
+                storyItem.innerHTML = `
+                    <div class="sx-modal-ring">
+                        <div class="sx-modal-ring-inner">
+                            <img src="${sxData.imageUrl}" class="sx-modal-img" onerror="this.src='https://via.placeholder.com/100/111/fff?text=SX'">
+                        </div>
+                        <div class="sx-modal-category-badge">${emoji}</div>
+                    </div>
+                    <div class="sx-modal-name">${sxData.userName}</div>
+                `;
+                
+                // Evento de clique para selecionar
+                storyItem.addEventListener('click', () => {
+                    selectSX(sxData);
+                });
+                
+                gallery.appendChild(storyItem);
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao carregar SX:', error);
+        const gallery = document.getElementById('sxModalGallery');
+        gallery.innerHTML = `<div class="sx-loading" style="color:#ff4444;">Erro ao carregar sócios.</div>`;
+    }
+}
+
+/**
+ * Seleciona um Sócio SX com animações premium
+ */
+function selectSX(sxData) {
+    const selectedSection = document.getElementById('sxModalSelected');
+    const btnConfirm = document.getElementById('btnConfirmSX');
+    const gallery = document.getElementById('sxModalGallery');
+    
+    // Remove classe 'selected' de todos os outros SX
+    const allStories = gallery.querySelectorAll('.sx-modal-story');
+    allStories.forEach(story => {
+        story.classList.remove('selected');
+    });
+    
+    // Encontra o SX clicado e adiciona animação
+    const clickedStory = Array.from(allStories).find(story => {
+        const nameEl = story.querySelector('.sx-modal-name');
+        return nameEl && nameEl.textContent === sxData.userName;
+    });
+    
+    if (clickedStory) {
+        // Adiciona classe selected com todas as animações
+        clickedStory.classList.add('selected');
+        
+        // 🎬 Shake na galeria inteira
+        gallery.style.animation = 'none';
+        setTimeout(() => {
+            gallery.style.animation = 'shakeGallery 0.5s ease';
+        }, 10);
+        
+        // 🎉 Cria partículas douradas voando
+        createGoldenParticles(clickedStory);
+        
+        // 📱 Vibração tátil (se disponível)
+        if (navigator.vibrate) {
+            navigator.vibrate([50, 30, 50]);
+        }
+    }
+    
+    // Atualiza informações do card de selecionado
+    document.getElementById('selectedSxImage').src = sxData.imageUrl;
+    document.getElementById('selectedSxName').textContent = sxData.userName;
+    document.getElementById('selectedSxCategory').textContent = `${getCategoryEmoji(sxData.category)} ${sxData.category}`;
+    
+    // Mostra card e botão com animação
+    selectedSection.style.display = 'block';
+    btnConfirm.style.display = 'block';
+    
+    // Armazena temporariamente
+    gameState.tempSelectedSX = sxData;
+    
+    // Scroll suave para o botão após animações
+    setTimeout(() => {
+        btnConfirm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 400);
+    
+    // Log com emoji
+    console.log(`✨ Sócio SX selecionado: ${sxData.userName} (${sxData.category})`);
+}
+
+/**
+ * Cria partículas douradas animadas ao selecionar SX
+ */
+function createGoldenParticles(element) {
+    const rect = element.getBoundingClientRect();
+    const particleCount = 12;
+    
+    for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.style.cssText = `
+            position: fixed;
+            left: ${rect.left + rect.width / 2}px;
+            top: ${rect.top + rect.height / 2}px;
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        `;
+        
+        document.body.appendChild(particle);
+        
+        // Animação de explosão radial
+        const angle = (360 / particleCount) * i;
+        const distance = 80 + Math.random() * 40;
+        const duration = 800 + Math.random() * 400;
+        
+        const radians = (angle * Math.PI) / 180;
+        const targetX = rect.left + rect.width / 2 + Math.cos(radians) * distance;
+        const targetY = rect.top + rect.height / 2 + Math.sin(radians) * distance;
+        
+        particle.animate([
+            {
+                transform: 'translate(0, 0) scale(1)',
+                opacity: 1
+            },
+            {
+                transform: `translate(${targetX - (rect.left + rect.width / 2)}px, ${targetY - (rect.top + rect.height / 2)}px) scale(0)`,
+                opacity: 0
+            }
+        ], {
+            duration: duration,
+            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+        }).onfinish = () => {
+            particle.remove();
+        };
+    }
+}
+
+
+/**
+ * Confirma a seleção do SX e continua para o jogo
+ */
+window.confirmSXSelection = function() {
+    if (!gameState.tempSelectedSX) return;
+    
+    // Salva no localStorage com timestamp
+    const sxDataToSave = {
+        ...gameState.tempSelectedSX,
+        selectedAt: new Date().toISOString()
+    };
+    
+    localStorage.setItem('selectedSX', JSON.stringify(sxDataToSave));
+    gameState.selectedSX = sxDataToSave;
+    
+    console.log(`✅ Sócio SX selecionado: ${sxDataToSave.userName}`);
+    
+    // Fecha o modal com animação
+    const modal = document.getElementById('sxSelectionModal');
+    modal.style.opacity = '0';
+    setTimeout(() => {
+        modal.style.display = 'none';
+        modal.style.opacity = '1';
+        proceedToLobby();
+    }, 300);
+};
+
+// Adicionar evento ao botão de confirmação
+document.addEventListener('DOMContentLoaded', () => {
+    const btnConfirm = document.getElementById('btnConfirmSX');
+    if (btnConfirm) {
+        btnConfirm.addEventListener('click', window.confirmSXSelection);
+    }
+});
+
+function getCategoryEmoji(category) {
+    const emojis = {
+        'Empresa': '🏢', 'Time': '⚽', 'Influencer': '📸',
+        'Atleta': '🏃', 'Cantor': '🎤', 'Youtuber': '🎬'
+    };
+    return emojis[category] || '⭐';
 }
 
 // =============================================
@@ -255,6 +538,7 @@ async function chargeEntryFee(betValue) {
 
 /**
  * Credita o prêmio ao vencedor (80% do valor total da sala)
+ * E credita comissão ao Sócio SX (5% dos 20% da plataforma = 1% do total)
  * @param {number} betValue - Valor total da sala
  * @returns {Promise<boolean>}
  */
@@ -263,6 +547,7 @@ async function creditWinnerPrize(betValue) {
     const winnerPrize = totalPrize * (1 - PLATFORM_FEE); // 80% do total
     
     try {
+        // Creditar ao vencedor
         const response = await fetch(`${API_BASE}/game/credit`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -279,6 +564,12 @@ async function creditWinnerPrize(betValue) {
         
         if (result.success) {
             console.log(`✅ Creditado R$ ${winnerPrize.toFixed(2)} ao vencedor`);
+            
+            // 🆕 CREDITAR COMISSÃO AO SÓCIO SX (5% dos 20% da plataforma = 1% do total)
+            if (gameState.selectedSX) {
+                await creditSXCommission(betValue);
+            }
+            
             return true;
         } else {
             console.error('❌ Erro ao creditar prêmio:', result.message);
@@ -289,6 +580,90 @@ async function creditWinnerPrize(betValue) {
         return false;
     }
 }
+
+/**
+ * Credita comissão ao Sócio SX
+ * Comissão: 5% do valor total da sala (plataforma fica com 15%)
+ * @param {number} betValue - Valor total da sala
+ */
+async function creditSXCommission(betValue) {
+    if (!gameState.selectedSX) {
+        console.warn('⚠️ Nenhum Sócio SX selecionado');
+        return false;
+    }
+    
+    const sxCommission = betValue * 0.05; // 5% do valor total
+    
+    try {
+        const response = await fetch(`${API_BASE}/game/credit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: gameState.selectedSX.userId,
+                amount: sxCommission,
+                gameType: 'jogo-da-velha-comissao-sx',
+                betValue: betValue,
+                description: `Comissão SX - Jogo da Velha - Sala R$ ${betValue.toFixed(2)}`
+            })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log(`💎 Comissão de R$ ${sxCommission.toFixed(2)} (5%) creditada ao SX: ${gameState.selectedSX.userName}`);
+            
+            // 🆕 REGISTRAR ESTATÍSTICA NO FIREBASE
+            await registerSXStats(betValue, sxCommission);
+            
+            return true;
+        } else {
+            console.error('❌ Erro ao creditar comissão SX:', result.message);
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Erro ao creditar comissão SX:', error);
+        return false;
+    }
+}
+
+/**
+ * Registra estatísticas do Sócio SX no Firebase
+ * @param {number} betValue - Valor da sala
+ * @param {number} commission - Comissão creditada
+ */
+async function registerSXStats(betValue, commission) {
+    try {
+        const { doc, getDoc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+        
+        const sxUserId = gameState.selectedSX.userId;
+        const sxStatsRef = doc(db, 'SLICED', 'data', 'Usuários', sxUserId, 'SX_Stats', 'summary');
+        
+        // Buscar stats atuais
+        const statsDoc = await getDoc(sxStatsRef);
+        const currentStats = statsDoc.exists() ? statsDoc.data() : {
+            totalGamesReferenced: 0,
+            totalCommissionEarned: 0,
+            uniquePlayers: [],
+            lastUpdate: null
+        };
+        
+        // Atualizar stats
+        const updatedStats = {
+            totalGamesReferenced: (currentStats.totalGamesReferenced || 0) + 1,
+            totalCommissionEarned: (currentStats.totalCommissionEarned || 0) + commission,
+            uniquePlayers: [...new Set([...(currentStats.uniquePlayers || []), gameState.playerId])],
+            lastUpdate: serverTimestamp()
+        };
+        
+        await setDoc(sxStatsRef, updatedStats);
+        
+        console.log(`📊 Estatísticas do SX atualizadas: ${updatedStats.totalGamesReferenced} partidas, R$ ${updatedStats.totalCommissionEarned.toFixed(2)} ganhos`);
+        
+    } catch (error) {
+        console.error('❌ Erro ao registrar stats SX:', error);
+    }
+}
+
 
 /**
  * Renderiza os botões de aposta.

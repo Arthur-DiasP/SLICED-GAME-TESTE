@@ -730,6 +730,51 @@
                     </div>
                 </div>
 
+                <!-- 💎 CARTEIRA DIGITAL SÓCIO SX (Full Width) -->
+                <div id="sxWalletCard" class="profile-card full-width" style="display: none; background: linear-gradient(135deg, rgba(255, 215, 0, 0.08) 0%, var(--glass-bg) 100%); border-color: rgba(255, 215, 0, 0.3);">
+                    <div class="card-header" style="border-color: rgba(255, 215, 0, 0.2);">
+                        <i class="material-icons" style="color: #FFD700;">diamond</i>
+                        <h3>💎 Carteira Digital Sócio SX</h3>
+                    </div>
+
+                    <div class="balance-display" style="border-bottom: 1px solid rgba(255, 215, 0, 0.2); padding-bottom: 25px; margin-bottom: 25px;">
+                        <div class="balance-label" style="color: #FFD700;">Comissões Acumuladas</div>
+                        <div class="balance-amount" id="sxCommissionAmount" style="color: #FFD700; text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);">R$ 0,00</div>
+                        <p style="color: rgba(255, 215, 0, 0.7); font-size: 0.85rem; margin-top: 8px;">
+                            Você recebe 5% do valor de cada partida jogada
+                        </p>
+                    </div>
+
+                    <!-- Estatísticas Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 15px; padding: 20px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 900; color: #FFD700; margin-bottom: 5px;" id="sxTotalGames">0</div>
+                            <div style="font-size: 0.8rem; color: rgba(255, 215, 0, 0.7); text-transform: uppercase; letter-spacing: 1px;">Partidas</div>
+                        </div>
+                        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 15px; padding: 20px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 900; color: #FFD700; margin-bottom: 5px;" id="sxUniquePlayers">0</div>
+                            <div style="font-size: 0.8rem; color: rgba(255, 215, 0, 0.7); text-transform: uppercase; letter-spacing: 1px;">Jogadores Únicos</div>
+                        </div>
+                        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 15px; padding: 20px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 900; color: #FFD700; margin-bottom: 5px;" id="sxAvgCommission">R$ 0,00</div>
+                            <div style="font-size: 0.8rem; color: rgba(255, 215, 0, 0.7); text-transform: uppercase; letter-spacing: 1px;">Média/Partida</div>
+                        </div>
+                    </div>
+
+                    <!-- Histórico Recente -->
+                    <div style="background: rgba(0, 0, 0, 0.3); border-radius: 15px; padding: 20px;">
+                        <h4 style="margin-bottom: 15px; color: #FFD700; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                            <i class="material-icons" style="font-size: 20px;">history</i>
+                            Últimas Comissões
+                        </h4>
+                        <div id="sxCommissionHistory" style="max-height: 200px; overflow-y: auto;">
+                            <div style="text-align: center; padding: 30px; color: rgba(255, 215, 0, 0.5);">
+                                Carregando histórico...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Dados Pessoais -->
                 <div class="profile-card">
                     <div class="card-header">
@@ -1003,6 +1048,9 @@
             onUserLoaded: (dados) => {
                 currentUser = { uid: dados.uid, ...dados };
 
+                // 🆕 CARREGAR DADOS DO SÓCIO SX
+                loadSXWalletData(currentUser.uid, dados);
+
                 // Preencher Header
                 document.getElementById('userName').textContent = dados.nomeCompleto;
                 document.getElementById('userEmail').textContent = dados.email;
@@ -1169,6 +1217,90 @@
                     messageInput.value = '';
                 } catch (error) { console.error('Erro no chat:', error); }
             });
+        }
+
+        // =============================================
+        // 💎 CARREGAR DADOS DA CARTEIRA SÓCIO SX
+        // =============================================
+        async function loadSXWalletData(userId, userData) {
+            try {
+                // Verificar se o usuário é um Sócio SX aprovado
+                if (!userData.sxData || userData.sxData.status !== 'concluido') {
+                    // Não é SX aprovado, manter card oculto
+                    document.getElementById('sxWalletCard').style.display = 'none';
+                    return;
+                }
+
+                // É um SX aprovado! Mostrar o card
+                document.getElementById('sxWalletCard').style.display = 'block';
+
+                // Buscar estatísticas do Firebase
+                const statsRef = db.collection('SLICED').doc('data').collection('Usuários')
+                    .doc(userId).collection('SX_Stats').doc('summary');
+                
+                const statsDoc = await statsRef.get();
+
+                if (statsDoc.exists) {
+                    const stats = statsDoc.data();
+                    
+                    // Dados com fallback
+                    const totalGames = stats.totalGamesReferenced || 0;
+                    const totalCommission = stats.totalCommissionEarned || 0;
+                    const uniquePlayers = (stats.uniquePlayers || []).length;
+                    const avgCommission = totalGames > 0 ? totalCommission / totalGames : 0;
+
+                    // Atualizar valores no card
+                    document.getElementById('sxCommissionAmount').textContent = 
+                        `R$ ${totalCommission.toFixed(2).replace('.', ',')}`;
+                    
+                    document.getElementById('sxTotalGames').textContent = totalGames;
+                    document.getElementById('sxUniquePlayers').textContent = uniquePlayers;
+                    document.getElementById('sxAvgCommission').textContent = 
+                        `R$ ${avgCommission.toFixed(2).replace('.', ',')}`;
+
+                    console.log(`💎 Carteira SX carregada: ${totalGames} partidas, R$ ${totalCommission.toFixed(2)}`);
+
+                    // Carregar histórico recente
+                    await loadSXCommissionHistory(userId);
+                } else {
+                    // SX aprovado mas sem estatísticas ainda
+                    document.getElementById('sxCommissionHistory').innerHTML = `
+                        <div style="text-align: center; padding: 30px; color: rgba(255, 215, 0, 0.6);">
+                            <i class="material-icons" style="font-size: 48px; margin-bottom: 10px;">diamond</i>
+                            <p>Nenhuma comissão recebida ainda.</p>
+                            <p style="font-size: 0.85rem; color: rgba(255, 215, 0, 0.4); margin-top: 8px;">
+                                Compartilhe sua imagem SX e comece a ganhar!
+                            </p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ Erro ao carregar carteira SX:', error);
+            }
+        }
+
+        // =============================================
+        // 📜 CARREGAR HISTÓRICO DE COMISSÕES
+        // =============================================
+        async function loadSXCommissionHistory(userId) {
+            try {
+                const historyRef = db.collection('SLICED').doc('data').collection('Usuários')
+                    .doc(userId).collection('SX_Stats').doc('summary');
+                
+                // Por enquanto, vamos mostrar uma mensagem. 
+                // Em produção, você criaria uma subcoleção 'history' com registros individuais
+                document.getElementById('sxCommissionHistory').innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: rgba(255, 215, 0, 0.6);">
+                        <i class="material-icons" style="font-size: 36px; margin-bottom: 10px;">check_circle</i>
+                        <p>Histórico detalhado em breve!</p>
+                        <p style="font-size: 0.8rem; color: rgba(255, 215, 0, 0.4); margin-top: 5px;">
+                            Suas comissões estão sendo acumuladas com sucesso.
+                        </p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('❌ Erro ao carregar histórico SX:', error);
+            }
         }
     </script>
 </body>
