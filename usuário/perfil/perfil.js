@@ -241,23 +241,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const pixKeyData = userDoc.data().pixKey;
+                const timestamp = firebase.firestore.FieldValue.serverTimestamp();
 
-                // Cria solicitação de saque no Firebase
-                const withdrawalRef = await firebase.firestore()
+                // Dados do saque
+                const withdrawalData = {
+                    amount: amount,
+                    valor: amount, // Compatibilidade com dashboard
+                    pixKey: pixKeyData.value,
+                    pixKeyType: pixKeyData.type,
+                    status: 'pending',
+                    createdAt: timestamp,
+                    dataSolicitacao: timestamp, // Compatibilidade com dashboard
+                    userId: usuarioAtual.uid,
+                    userName: usuarioAtual.nome,
+                    userEmail: usuarioAtual.email
+                };
+
+                // Salva na subcoleção do usuário (histórico pessoal)
+                await firebase.firestore()
                     .collection('SLICED')
                     .doc(usuarioAtual.uid)
                     .collection('withdrawals')
-                    .add({
-                        amount: amount,
-                        pixKey: pixKeyData.value,
-                        pixKeyType: pixKeyData.type,
-                        status: 'pending',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        userId: usuarioAtual.uid,
-                        userName: usuarioAtual.nome
-                    });
+                    .add(withdrawalData);
 
-                console.log('✅ Saque solicitado:', withdrawalRef.id);
+                // Salva também na coleção central (para o dashboard administrativo)
+                await firebase.firestore()
+                    .collection('SLICED')
+                    .doc('data')
+                    .collection('Saques')
+                    .add(withdrawalData);
+
+                console.log('✅ Saque solicitado e registrado no dashboard');
 
                 // Mostra mensagem de sucesso
                 alert(`Saque de R$ ${amount.toFixed(2)} solicitado com sucesso!\n\nSua solicitação será processada em até 24 horas úteis.`);
