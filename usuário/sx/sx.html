@@ -3,210 +3,208 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Torne-se um Sócio SX - SLICED</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sócio SX - SLICED</title>
     <link rel="icon" href="/imgs/LOGO-SLICED.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="sx.css">
+    <link rel="stylesheet" href="../../controle-dados/balance-widget.css">
 </head>
 
 <body>
-    <!-- Partículas de fundo -->
-    <div class="particles" id="particles"></div>
+    <!-- Tela de Carregamento -->
+    <div id="loadingSection" class="loading-screen">
+        <div class="spinner-gold"></div>
+        <p style="margin-top: 20px; color: var(--text-muted); font-size: 0.9rem;">Verificando status SX...</p>
+    </div>
 
-    <!-- Container Principal -->
-    <div class="container">
-        <!-- Botão Voltar -->
-        <button class="btn-back" onclick="window.location.href='../inicio/inicio.html'">
-            <i class="material-icons">arrow_back</i>
-            Voltar
-        </button>
-
+    <!-- Conteúdo Principal -->
+    <div id="contentSection" style="display: none;">
+        
         <!-- Header -->
-        <div class="header-sx">
-            <div class="header-icon">
-                <i class="material-icons">stars</i>
+        <header class="header">
+            <div class="header-logo">
+                <img src="/imgs/LOGO-SLICED.png" alt="SLICED">
+                <h1>SLICED</h1>
             </div>
-            <h1>Sócios Exclusivos</h1>
-            <p>Junte-se à elite da plataforma SLICED</p>
-        </div>
+            <div class="header-user">
+                <div class="user-info">
+                    <div class="user-name" id="userName">Usuário</div>
+                    <div class="user-email" id="userEmail" style="font-size: 10px; color: #888;">email@exemplo.com</div>
+                </div>
+                <button class="btn-logout" id="btnLogout">
+                    <i class="material-icons" style="font-size: 18px;">logout</i>
+                </button>
+            </div>
+        </header>
 
-        <!-- Formulário SX -->
-        <div class="form-container">
-            <div class="form-card">
-                <h2>Cadastro SX</h2>
-                <p class="form-subtitle">Preencha as informações abaixo para se tornar um Sócio Exclusivo</p>
+        <div class="container">
+            <!-- Botão Voltar -->
+            <button class="btn-back" onclick="window.location.href='../inicio/inicio.html'">
+                <i class="material-icons">arrow_back</i> Voltar
+            </button>
 
-                <form id="sxForm">
-                    <!-- Seleção de Categoria -->
-                    <div class="form-group">
-                        <label for="category">
-                            <i class="material-icons">category</i>
-                            Você é:
-                        </label>
-                        <select id="category" required>
-                            <option value="">Selecione uma categoria</option>
-                            <option value="Empresa">🏢 Empresa</option>
-                            <option value="Time">⚽ Time</option>
-                            <option value="Influencer">📱 Influencer</option>
-                            <option value="Atleta">🏃 Atleta</option>
-                            <option value="Cantor">🎤 Cantor/a</option>
-                            <option value="Youtuber">🎬 Youtuber</option>
-                        </select>
+            <!-- Hero Section -->
+            <div class="header-sx">
+                <div class="header-icon">
+                    <i class="material-icons">stars</i>
+                </div>
+                <h1>Sócios <span>Exclusivos</span></h1>
+                <p>Junte-se à elite. Destaque-se. Lucre mais.</p>
+            </div>
+
+            <!-- Card Principal (Formulário) -->
+            <div class="form-container">
+                <div class="form-card">
+                    
+                    <!-- Mensagens de Status (Ocultas por padrão) -->
+                    <div id="successMessage" class="status-card success" style="display: none;">
+                        <i class="material-icons">verified</i>
+                        <h3>Você é um Sócio SX!</h3>
+                        <p>Seu perfil já possui o selo de verificado e destaque na plataforma.</p>
                     </div>
 
-                    <!-- Rede Social -->
-                    <div class="form-group">
-                        <label for="socialNetwork">
-                            <i class="material-icons">share</i>
-                            Rede Social Principal:
-                        </label>
-                        <select id="socialNetwork" required>
-                            <option value="">Selecione uma rede</option>
-                            <option value="Instagram">📸 Instagram</option>
-                            <option value="TikTok">🎵 TikTok</option>
-                            <option value="Youtube">📹 Youtube</option>
-                            <option value="Twitch">💜 Twitch</option>
-                            <option value="Twitter">🐦 Twitter/X</option>
-                            <option value="LinkedIn">💼 LinkedIn</option>
-                            <option value="Outro">🌐 Outro</option>
-                        </select>
+                    <div id="pendingMessage" class="status-card pending" style="display: none;">
+                        <div class="spinner-gold-small"></div>
+                        <h3>Solicitação em Análise</h3>
+                        <p>Recebemos seus dados. Nossa equipe está analisando seu perfil.</p>
+                        <div class="status-badge">🟡 Pendente</div>
                     </div>
 
-                    <!-- Nome do Perfil -->
-                    <div class="form-group">
-                        <label for="profileName">
-                            <i class="material-icons">alternate_email</i>
-                            Nome do Perfil (Arroba):
-                        </label>
-                        <input type="text" id="profileName" placeholder="@seu.perfil" required>
-                    </div>
+                    <!-- Formulário de Cadastro -->
+                    <form id="sxForm">
+                        <div class="form-section-title">
+                            <i class="material-icons">person_add</i> Dados do Perfil
+                        </div>
 
-                    <!-- Quantidade de Seguidores -->
-                    <div class="form-group">
-                        <label for="followersCount">
-                            <i class="material-icons">groups</i>
-                            Quantidade de Seguidores:
-                        </label>
-                        <input type="text" id="followersCount" placeholder="Ex: 10k, 1M, 500" required>
-                    </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label><i class="material-icons">category</i> Categoria</label>
+                                <select id="category" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="Empresa">🏢 Empresa</option>
+                                    <option value="Time">⚽ Time</option>
+                                    <option value="Influencer">📱 Influencer</option>
+                                    <option value="Atleta">🏃 Atleta</option>
+                                    <option value="Cantor">🎤 Cantor/a</option>
+                                    <option value="Youtuber">🎬 Youtuber</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="material-icons">public</i> Rede Social</label>
+                                <select id="socialNetwork" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="Instagram">📸 Instagram</option>
+                                    <option value="TikTok">🎵 TikTok</option>
+                                    <option value="Youtube">📹 Youtube</option>
+                                    <option value="Twitch">💜 Twitch</option>
+                                    <option value="LinkedIn">💼 LinkedIn</option>
+                                </select>
+                            </div>
+                        </div>
 
-                    <!-- URL da Imagem -->
-                    <div class="form-group">
-                        <label for="imageUrl">
-                            <i class="material-icons">image</i>
-                            URL da sua imagem (redes sociais)
-                        </label>
-                        <input type="url" id="imageUrl" placeholder="https://exemplo.com/sua-imagem.jpg" required>
-                        <small class="input-hint">Cole o link da imagem que você mais usa em suas redes sociais</small>
-                    </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label><i class="material-icons">alternate_email</i> Perfil (@)</label>
+                                <input type="text" id="profileName" placeholder="@seu.perfil" required>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="material-icons">groups</i> Seguidores</label>
+                                <input type="text" id="followersCount" placeholder="Ex: 10k" required>
+                            </div>
+                        </div>
 
-                    <!-- Preview da Imagem -->
-                    <div id="imagePreview" class="image-preview" style="display: none;">
-                        <p class="preview-label">Preview da imagem:</p>
-                        <img id="previewImg" src="" alt="Preview">
-                        <button type="button" class="btn-remove-preview" onclick="removePreview()">
-                            <i class="material-icons">close</i>
-                        </button>
-                    </div>
+                        <div class="form-group">
+                            <label><i class="material-icons">image</i> Link da Foto</label>
+                            <input type="url" id="imageUrl" placeholder="https://..." required>
+                            <small class="hint">Use o link da sua foto de perfil pública.</small>
+                        </div>
 
-                    <!-- Benefícios -->
-                    <div class="benefits-box">
-                        <h3>
-                            <i class="material-icons">verified</i>
-                            Benefícios SX
-                        </h3>
-                        <ul>
-                            <li>✨ Destaque visual na página inicial</li>
-                            <li>🎯 Alcance milhares de usuários ativos</li>
-                            <li>💎 Badge exclusivo de Sócio SX</li>
-                            <li>🚀 Prioridade em eventos e promoções</li>
-                            <li style="color: #FFD700; font-weight: 800; border-left-color: #FFD700;">
-                                💰 Receba 50% dos ganhos da plataforma com seus seguidores + Traga seus patrocinadores!
-                            </li>
-                        </ul>
-                    </div>
+                        <!-- Preview Imagem -->
+                        <div id="imagePreview" class="image-preview" style="display: none;">
+                            <img id="previewImg" src="" alt="Preview">
+                            <button type="button" class="btn-remove-preview" onclick="removePreview()">
+                                <i class="material-icons">close</i>
+                            </button>
+                        </div>
 
-                    <!-- Botões -->
-                    <div class="form-actions">
+                        <!-- Benefícios -->
+                        <div class="benefits-box">
+                            <h3><i class="material-icons">diamond</i> Vantagens SX</h3>
+                            <ul>
+                                <li>✨ Destaque na Home</li>
+                                <li>💎 Selo de Verificado</li>
+                                <li>💰 <strong>50% de Comissão</strong> em indicações</li>
+                            </ul>
+                        </div>
+
                         <button type="submit" class="btn-submit">
-                            <i class="material-icons">star</i>
-                            Cadastrar como SX
+                            SOLICITAR SX <i class="material-icons">arrow_forward</i>
                         </button>
-                    </div>
-                </form>
+                    </form>
 
-                <!-- Card de Resumo dos Dados Salvos -->
-                <div id="savedDataCard" class="saved-data-card" style="display: none;">
-                    <div class="saved-data-header">
-                        <i class="material-icons">preview</i>
-                        <h3>Resumo da Solicitação</h3>
-                    </div>
-                    <div class="saved-data-content">
-                        <div class="data-item">
-                            <span class="data-label"><i class="material-icons">category</i> Categoria:</span>
-                            <span class="data-value" id="savedCategory"></span>
+                    <!-- Resumo dos Dados (Aparece quando pendente) -->
+                    <div id="savedDataCard" class="saved-data-list" style="display: none;">
+                        <div class="data-row">
+                            <span>Categoria</span>
+                            <strong id="savedCategory">-</strong>
                         </div>
-                        <div class="data-item">
-                            <span class="data-label"><i class="material-icons">share</i> Rede Social:</span>
-                            <span class="data-value" id="savedSocialNetwork"></span>
+                        <div class="data-row">
+                            <span>Perfil</span>
+                            <strong id="savedProfileName">-</strong>
                         </div>
-                        <div class="data-item">
-                            <span class="data-label"><i class="material-icons">alternate_email</i> Perfil:</span>
-                            <span class="data-value" id="savedProfileName"></span>
+                        <div class="data-row">
+                            <span>Seguidores</span>
+                            <strong id="savedFollowers">-</strong>
                         </div>
-                        <div class="data-item">
-                            <span class="data-label"><i class="material-icons">groups</i> Seguidores:</span>
-                            <span class="data-value" id="savedFollowers"></span>
-                        </div>
-                        <div class="data-item">
-                            <span class="data-label"><i class="material-icons">schedule</i> Data da Solicitação:</span>
-                            <span class="data-value" id="savedDate"></span>
-                        </div>
-                        <div class="saved-image-container">
-                            <p class="data-label"><i class="material-icons">image</i> Imagem:</p>
-                            <img id="savedImage" src="" alt="Imagem do Perfil">
+                        <div class="data-row">
+                            <span>Data</span>
+                            <strong id="savedDate">-</strong>
                         </div>
                     </div>
-                </div>
 
-                <!-- Mensagem de Sucesso -->
-                <div id="successMessage" class="success-message" style="display: none;">
-                    <i class="material-icons">check_circle</i>
-                    <h3>Parabéns!</h3>
-                    <p>Você agora é um Sócio Exclusivo SX!</p>
-                    <button class="btn-view-profile" onclick="window.location.href='../inicio/inicio.html'">
-                        Ver meu perfil SX
-                    </button>
-                </div>
-
-                <!-- Card Solicitação Pendente -->
-                <div id="pendingMessage" class="pending-message" style="display: none; text-align: center; padding: 40px 20px;">
-                    <div style="background: rgba(255, 215, 0, 0.1); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-                        <i class="material-icons" style="font-size: 40px; color: #FFD700; animation: spin 2s linear infinite;">hourglass_empty</i>
-                    </div>
-                    <h3 style="color: #FFD700; font-size: 1.5rem; margin-bottom: 10px;">Solicitação em Análise</h3>
-                    <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">Recebemos sua solicitação para se tornar um Sócio SX. Nossa equipe irá analisar seu perfil em breve.</p>
-                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; text-align: left; margin-bottom: 20px;">
-                        <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 5px;">Status:</p>
-                        <p style="font-weight: bold; color: #FFD700;">🟡 Pendente</p>
-                    </div>
-                    <button class="btn-view-profile" onclick="window.location.href='../inicio/inicio.html'" style="width: 100%;">
-                        Voltar ao Início
-                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Notificação Toast -->
+    <!-- Toast -->
     <div id="toast" class="toast">
         <i class="material-icons">check_circle</i>
-        <span id="toastMessage">Dados salvos com sucesso!</span>
+        <span id="toastMessage">Sucesso!</span>
     </div>
+
+    <!-- Bottom Navbar -->
+    <nav class="bottom-navbar">
+        <a href="../inicio/inicio.html" class="nav-item">
+            <i class="material-icons">home</i>
+            <span>Início</span>
+        </a>
+        <a href="../termos/termos.html" class="nav-item">
+            <i class="material-icons">description</i>
+            <span>Termos</span>
+        </a>
+        <a href="../afiliados/afiliados.html" class="nav-item">
+            <i class="material-icons">hub</i>
+            <span>Afiliados</span>
+        </a>
+       <a href="/usuário/vakinha/vakinha.html" class="nav-item">
+            <i class="material-icons">savings</i>
+            <span>Vakinha</span>
+        </a>
+        <a href="../anuncie/anuncie.html" class="nav-item">
+            <i class="material-icons">campaign</i>
+            <span>Anuncie</span>
+        </a>
+        <a href="../perfil/perfil.html" class="nav-item">
+            <i class="material-icons">person</i>
+            <span>Perfil</span>
+        </a>
+    </nav>
 
     <script type="module" src="sx.js"></script>
 </body>
-
 </html>

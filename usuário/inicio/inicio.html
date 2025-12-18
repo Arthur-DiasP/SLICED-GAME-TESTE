@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Início - SLICED</title>
     <link rel="icon" href="/imgs/LOGO-SLICED.png" type="image/png">
     <meta name="description" content="Área do torcedor - SLICED">
@@ -13,972 +13,696 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="../../controle-dados/balance-widget.css">
     <style>
+        /* ================= RESET & VARS ================= */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         :root {
-            --primary-color: #00ff88;
-            --primary-color-escuro: #00cc6e;
-            --dark-bg: #000000;
-            --text-primary: #FFFFFF;
-            --gradient-primary: linear-gradient(135deg, #000000 0%, #1a0000 25%, #00cc6e 50%, #1a0000 75%, #000000 100%);
+            --primary: #00ff88;
+            --primary-dark: #00cc6e;
+            --accent: #FFD700; /* Dourado SX */
+            --bg-dark: #050505;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --instagram-ring: linear-gradient(45deg, #FFD700 0%, #FFA500 50%, #00ff88 100%);
         }
 
         body {
-            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--gradient-primary);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            /* Fundo complexo com gradientes */
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 255, 136, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.08) 0%, transparent 40%);
+            color: var(--text-main);
             min-height: 100vh;
-            color: var(--text-primary);
-            padding-bottom: 100px;
+            padding-bottom: 110px; /* Espaço para navbar */
+            overflow-x: hidden;
         }
 
-        @keyframes gradientShift {
-
-            0%,
-            100% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
+        /* Textura de Ruído (Noise) para aspecto Premium */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
         }
 
-        /* Header */
+        /* ================= HEADER ================= */
         .header {
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(20px);
-            padding: 20px 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--glass-border);
         }
 
         .header-logo {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
         }
 
         .header-logo img {
-            width: 50px;
-            height: 50px;
-            object-fit: contain;
-            filter: drop-shadow(0 0 10px rgba(0, 255, 136, 0.6));
+            width: 40px;
+            height: 40px;
+            filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.4));
         }
 
         .header-logo h1 {
-            font-size: 1.5rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, #ffffff 0%, #00ff88 50%, #ffffff 100%);
-            background-size: 200% 200%;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, var(--primary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: shimmer 3s ease-in-out infinite;
-        }
-
-        @keyframes shimmer {
-
-            0%,
-            100% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
         }
 
         .header-user {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
         }
 
         .user-info {
             text-align: right;
+            line-height: 1.2;
         }
 
         .user-name {
-            font-weight: 700;
-            font-size: 1rem;
-            margin-bottom: 4px;
-        }
-
-        .user-email {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            font-weight: 600;
+            max-width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .btn-logout {
-            padding: 10px 24px;
-            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
-            border: none;
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-weight: 700;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Outfit', sans-serif;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-logout:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            background: rgba(255, 50, 50, 0.2);
+            border-color: rgba(255, 50, 50, 0.5);
         }
 
-        /* Container Principal */
+        /* ================= CONTAINER ================= */
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 60px 40px;
+            padding: 20px;
+            opacity: 0;
+            animation: fadeInPage 0.8s forwards;
         }
 
-        .welcome-section {
-            text-align: center;
-            margin-bottom: 60px;
-            animation: fadeIn 0.8s ease;
+        @keyframes fadeInPage {
+            to { opacity: 1; }
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .welcome-section h2 {
-            font-size: 3rem;
-            font-weight: 900;
-            margin-bottom: 16px;
-            text-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
-        }
-
-        .welcome-section p {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: 300;
-        }
-
-        /* Banner */
+        /* ================= BANNER ================= */
         .banner-container {
-            width: 100%;
-            margin-bottom: 40px;
-            border-radius: 20px;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            animation: fadeIn 1s ease;
+            position: relative;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
         }
 
         .banner-anuncios {
-            background: linear-gradient(90deg, #000000 0%, #00ff88 100%);
-            padding: 60px 40px;
-            text-align: center;
+            background: linear-gradient(120deg, #000 0%, #1a1a1a 100%);
+            padding: 40px 30px;
             position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            min-height: 200px;
         }
 
+        /* Efeito de brilho animado no fundo do banner */
         .banner-anuncios::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
-            opacity: 0.2;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(transparent, var(--primary), transparent 30%);
+            animation: rotate 4s linear infinite;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        @keyframes rotate {
+            100% { transform: rotate(360deg); }
         }
 
         .banner-anuncios h2 {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 900;
-            margin-bottom: 15px;
+            line-height: 1;
+            margin-bottom: 10px;
+            color: #fff;
             text-transform: uppercase;
-            position: relative;
-            z-index: 1;
+        }
+
+        .banner-anuncios h2 span {
+            color: var(--primary);
         }
 
         .banner-anuncios p {
-            font-size: 1.2rem;
-            margin-bottom: 25px;
-            position: relative;
-            z-index: 1;
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            max-width: 80%;
         }
 
         .btn-banner {
             padding: 12px 30px;
-            background: #fff;
-            color: #00ff88;
+            background: var(--primary);
+            color: #000;
+            font-weight: 800;
             border: none;
             border-radius: 50px;
-            font-weight: 800;
-            font-size: 1rem;
             cursor: pointer;
-            transition: transform 0.3s ease;
-            position: relative;
-            z-index: 1;
+            font-size: 0.9rem;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+            transition: transform 0.2s;
         }
 
-        .btn-banner:hover {
-            transform: scale(1.05);
-        }
+        .btn-banner:active { transform: scale(0.95); }
 
-        /* Section Titles */
-        .section-title {
-            margin: 40px 0 20px;
+        /* ================= SX STORIES (INSTAGRAM STYLE) ================= */
+        .section-header {
             display: flex;
             align-items: center;
-            gap: 15px;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 0 5px;
         }
 
         .section-title h3 {
-            font-size: 1.8rem;
+            font-size: 1.3rem;
             font-weight: 700;
-            color: #fff;
-            border-left: 5px solid #00ff88;
-            padding-left: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title h3 i { color: var(--accent); }
+
+        /* Container dos Stories */
+        .sx-stories-container {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            padding: 10px 0 20px 0;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        
+        .sx-stories-container::-webkit-scrollbar { display: none; }
+
+        .sx-gallery {
+            display: inline-flex;
+            gap: 16px;
+            padding: 0 10px;
         }
 
-        /* Grids */
-        .games-grid,
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
-        /* Cards */
-        .game-card,
-        .product-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-            text-align: center;
+        .sx-story-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
+            width: 80px;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.2s;
         }
 
-        .product-card {
+        .sx-story-item:active { transform: scale(0.95); }
+
+        .story-ring-wrap {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            padding: 3px;
+            background: var(--instagram-ring);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .story-ring-inner {
+            background: var(--bg-dark);
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            padding: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sx-member-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: #222;
+        }
+
+        .sx-member-name {
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: #fff;
+            width: 100%;
+            text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .sx-category-badge {
+            position: absolute;
+            bottom: 25px;
+            right: 0;
+            background: #000;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            border: 2px solid var(--bg-dark);
+        }
+
+        .sx-empty-state {
+            width: 100%;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding: 20px;
+            background: var(--glass-bg);
+            border-radius: 12px;
+        }
+
+
+        /* ================= CARD SX PRINCIPAL ================= */
+        .sx-card-wrapper {
+            margin: 20px 0 50px 0;
+            perspective: 1000px;
+        }
+
+        .sx-card {
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sx-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.15);
+            border-color: rgba(255, 215, 0, 0.6);
+        }
+
+        .sx-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at top right, rgba(255, 215, 0, 0.15), transparent 50%);
+            pointer-events: none;
+        }
+
+        .sx-badge-main {
+            display: inline-block;
+            background: var(--accent);
+            color: #000;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .sx-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #FFD700, #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sx-card p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .btn-sx {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            border: none;
+            border-radius: 16px;
+            color: #000;
+            font-weight: 800;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+            transition: 0.3s;
+        }
+        
+        .btn-sx:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.5);
+        }
+
+        /* ================= GAMES GRID ================= */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .game-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            aspect-ratio: 1/1.2;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
         }
 
-        .game-card:hover,
-        .product-card:hover {
-            transform: translateY(-10px);
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-            border-color: #00ff88;
+        .game-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.15);
         }
 
         .game-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #00ff88, #00cc6e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 3rem;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
         }
 
-        .product-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: contain;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.5));
-            transition: transform 0.3s ease;
-        }
-
-        .product-card:hover img {
-            transform: scale(1.1) rotate(-5deg);
-        }
-
-        .game-card h4,
-        .product-card h4 {
-            font-size: 1.4rem;
+        .game-card h4 {
+            font-size: 1.1rem;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .game-card p {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 20px;
-        }
-
-        .product-card .price-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 20px;
-            gap: 5px;
-        }
-
-        .product-card .old-price {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.5);
-            text-decoration: line-through;
-            font-weight: 400;
-        }
-
-        .product-card .current-price {
-            font-size: 1.6rem;
-            font-weight: 900;
-            color: #00ff88;
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
-        }
-
-        .exclusive-badge {
-            position: absolute;
-            top: 25px;
-            right: -35px;
-            background: linear-gradient(135deg, #FFD700 0%, #DAA520 50%, #B8860B 100%);
-            color: #000;
-            padding: 8px 40px;
-            transform: rotate(45deg);
             font-size: 0.75rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            z-index: 10;
-            letter-spacing: 1px;
-            border-top: 1px solid #FFF8DC;
-            border-bottom: 1px solid #8B4500;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            flex-grow: 1;
         }
 
-        .exclusive-badge::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(rgba(255, 255, 255, 0.4), transparent);
-        }
-
-        .btn-game,
-        .btn-buy {
+        .btn-game-mini {
             width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-game {
+            padding: 8px;
+            border: 1px solid var(--primary);
+            color: var(--primary);
             background: transparent;
-            border: 2px solid #fff;
-            color: #fff;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
         }
 
-        .btn-game:hover {
-            background: #fff;
+        .game-card:hover .btn-game-mini {
+            background: var(--primary);
             color: #000;
         }
 
-        .btn-buy {
-            background: #00ff88;
-            color: #fff;
-        }
-
-        .btn-buy:hover {
-            background: #b3002d;
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
-        }
-
-        /* Bottom Navbar */
+        /* ================= BOTTOM NAVBAR (Flutuante) ================= */
         .bottom-navbar {
             position: fixed;
-            bottom: 10px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
+            width: 90%;
+            max-width: 500px;
+            background: rgba(15, 15, 15, 0.9);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 25px;
-            padding: 15px 30px;
+            padding: 12px 25px;
             display: flex;
-            gap: 40px;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
             z-index: 1000;
-            animation: slideUp 0.5s ease;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(100px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
         }
 
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 10px 15px;
-            border-radius: 15px;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.5);
             text-decoration: none;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .nav-item:hover {
-            background: rgba(0, 255, 136, 0.2);
-            color: #00ff88;
-            transform: translateY(-5px);
-        }
-
-        .nav-item.active {
-            color: #00ff88;
-            background: rgba(0, 255, 136, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            width: 50px;
         }
 
         .nav-item .material-icons {
-            font-size: 28px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-item:hover .material-icons {
-            transform: scale(1.2);
+            font-size: 26px;
+            margin-bottom: 4px;
+            transition: 0.3s;
         }
 
         .nav-item span {
-            font-size: 0.75rem;
+            font-size: 10px;
             font-weight: 600;
-            text-transform: uppercase;
             letter-spacing: 0.5px;
+            opacity: 0;
+            transform: translateY(5px);
+            transition: 0.3s;
+            position: absolute;
+            bottom: -15px;
         }
 
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 100px 20px;
+        .nav-item.active {
+            color: var(--primary);
         }
 
-        .spinner-large {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            border-top-color: var(--primary-color);
+        .nav-item.active .material-icons {
+            transform: translateY(-5px);
+            filter: drop-shadow(0 0 8px var(--primary));
+        }
+
+        .nav-item.active span {
+            opacity: 1;
+            transform: translateY(-2px);
+            color: var(--primary);
+        }
+
+        /* ================= LOADING ================= */
+        .loading-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .spinner-neo {
+            width: 50px;
+            height: 50px;
+            border: 3px solid transparent;
+            border-top-color: var(--primary);
+            border-right-color: var(--primary);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-            margin: 0 auto 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ================= CUSTOM BALANCE WIDGET ADJUSTMENTS ================= */
+        /* 
+           Aqui sobrescrevemos o comportamento do widget para atender à solicitação:
+           - Telas Pequenas: Relativo (fluxo normal), acima do banner.
+           - Telas Grandes: Mantém o comportamento original (provavelmente fixo).
+        */
+        @media (max-width: 1023px) {
+            #balance-widget {
+                position: relative !important;
+                top: auto !important;
+                right: auto !important;
+                left: auto !important;
+                bottom: auto !important;
+                width: 100% !important;
+                margin-top: 0 !important;
+                margin-bottom: 30px !important;
+                z-index: 10;
+                transform: none !important;
             }
         }
 
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .header {
-                padding: 16px 20px;
-                flex-direction: column;
-                gap: 16px;
-            }
-
-            .header-user {
-                flex-direction: column;
-                gap: 12px;
-            }
-
-            .user-info {
-                text-align: center;
-            }
-
-            .container {
-                padding: 40px 20px;
-            }
-
-            .welcome-section h2 {
-                font-size: 2rem;
-            }
-
-            .games-grid,
-            .products-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .bottom-navbar {
-                gap: 20px;
-                padding: 12px 20px;
-                width: 95%;
-                max-width: 500px;
-            }
-
-            .nav-item {
-                padding: 8px 10px;
-                gap: 3px;
-            }
-
-            .nav-item .material-icons {
-                font-size: 24px;
-            }
-
-            .nav-item span {
-                font-size: 0.65rem;
-            }
+        /* ================= MOBILE ADJUSTMENTS GERAL ================= */
+        @media (max-width: 600px) {
+            .header-logo h1 { display: none; }
+            .user-email { display: none; }
+            .container { padding: 15px; }
+            .banner-anuncios { padding: 30px 20px; min-height: 180px; }
+            .banner-anuncios h2 { font-size: 1.6rem; }
+            
+            .nav-item span { display: none; }
+            .nav-item.active .material-icons { transform: translateY(0); }
+            .bottom-navbar { padding: 15px 30px; bottom: 15px; border-radius: 20px; }
         }
-        /* =========================================
-   AJUSTES GERAIS PARA CELULAR (Max 600px)
-   Copie e cole no final do seu CSS
-   ========================================= */
-
-@media (max-width: 600px) {
-    
-    /* --- 1. HEADER (Menu Superior) COMPACTO --- */
-    .header {
-        flex-direction: row !important; /* Força ficar tudo na mesma linha */
-        padding: 5px 15px !important;   /* Pouco espaço nas bordas */
-        height: 55px;                   /* Altura fixa bem menor */
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-    }
-
-    /* Logo: Mantém apenas a imagem pequena */
-    .header-logo {
-        gap: 0;
-    }
-    .header-logo img {
-        width: 32px;
-        height: 32px;
-    }
-    .header-logo h1 {
-        display: none !important; /* Esconde o texto 'SLICED' */
-    }
-
-    /* Área do Usuário: Força linha única */
-    .header-user {
-        width: auto !important;
-        flex-direction: row !important;
-        gap: 8px;
-        align-items: center;
-        justify-content: flex-end;
-    }
-
-    /* Informações de Texto do Usuário */
-    .user-info {
-        text-align: right;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    .user-email {
-        display: none !important; /* Esconde o Email */
-    }
-    .user-name {
-        font-size: 0.85rem;
-        margin-bottom: 0;
-        white-space: nowrap;      /* Impede quebra de linha */
-        max-width: 90px;          /* Limita largura para não estourar */
-        overflow: hidden;
-        text-overflow: ellipsis;  /* Coloca '...' se o nome for grande */
-    }
-
-    /* Botão Sair compacto */
-    .btn-logout {
-        padding: 5px 12px;
-        font-size: 0.75rem;
-        border-radius: 6px;
-    }
-
-
-    /* --- 2. NAVBAR (Menu Inferior) AJUSTADA --- */
-    .bottom-navbar {
-        width: 98%;              /* Ocupa quase toda a largura */
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: 5px;             /* Cola no fundo */
-        padding: 6px 2px;        /* Padding mínimo */
-        gap: 2px;                /* Espaço mínimo entre itens */
-        border-radius: 16px;
-        justify-content: space-between;
-    }
-
-    .nav-item {
-        padding: 4px 0;
-        min-width: 0;            /* Permite encolher o quanto precisar */
-        flex: 1;                 /* Divide o espaço igualmente por 6 */
-        border-radius: 8px;
-    }
-
-    /* Ícone menor */
-    .nav-item .material-icons {
-        font-size: 20px !important;
-        margin-bottom: 2px;
-    }
-
-    /* Texto minúsculo para caber */
-    .nav-item span {
-        font-size: 8px !important;
-        letter-spacing: 0;
-        display: block;
-        white-space: nowrap;
-    }
-    
-    /* Ajuste do hover para não pular */
-    .nav-item:hover {
-        transform: translateY(-2px);
-    }
-}
-
-/* ========================================= */
-/* SÓCIOS EXCLUSIVOS (SX) */
-/* ========================================= */
-
-/* Galeria de Sócios SX */
-.sx-gallery {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-    padding: 30px 0;
-    margin-bottom: 40px;
-    scroll-behavior: smooth;
-}
-
-.sx-gallery::-webkit-scrollbar {
-    height: 8px;
-}
-
-.sx-gallery::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-}
-
-.sx-gallery::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
-    border-radius: 10px;
-}
-
-.sx-member {
-    flex-shrink: 0;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-}
-
-.sx-member:hover {
-    transform: translateY(-5px);
-}
-
-.sx-member-image {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid transparent;
-    background: linear-gradient(white, white) padding-box,
-                linear-gradient(135deg, #FFD700 0%, #00ff88 100%) border-box;
-    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
-    transition: all 0.3s ease;
-}
-
-.sx-member:hover .sx-member-image {
-    box-shadow: 0 12px 30px rgba(255, 215, 0, 0.6);
-    transform: scale(1.1);
-}
-
-.sx-member-category {
-    margin-top: 10px;
-    font-size: 0.75rem;
-    color: #FFD700;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.sx-empty-state {
-    width: 100%;
-    text-align: center;
-    padding: 40px 20px;
-    color: rgba(255, 255, 255, 0.5);
-    font-style: italic;
-}
-
-/* Card SX Container */
-.sx-card-container {
-    margin: 40px 0;
-    display: flex;
-    justify-content: center;
-}
-
-/* Card SX Simplificado */
-.sx-card {
-    position: relative;
-    background: rgba(255, 255, 255, 0.05); /* Fundo neutro como outros cards */
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 40px 30px;
-    max-width: 500px;
-    width: 100%;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-.sx-card:hover {
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-}
-
-.sx-badge {
-    position: absolute;
-    top: -15px;
-    right: 30px;
-    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    color: #000;
-    padding: 8px 20px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 900;
-    letter-spacing: 2px;
-    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.5);
-    animation: bounce 2s ease-in-out infinite;
-}
-
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-}
-
-.sx-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 25px;
-    background: linear-gradient(135deg, #FFD700 0%, #00ff88 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
-    animation: rotate-icon 10s linear infinite;
-}
-
-@keyframes rotate-icon {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.sx-icon .material-icons {
-    font-size: 48px;
-    color: #000;
-}
-
-.sx-card h3 {
-    font-size: 2rem;
-    font-weight: 900;
-    margin-bottom: 15px;
-    background: linear-gradient(135deg, #FFD700 0%, #00ff88 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.sx-card > p {
-    color: rgba(255, 255, 255, 0.8);
-    margin-bottom: 30px;
-    font-size: 1rem;
-}
-
-.sx-benefits {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-bottom: 35px;
-}
-
-.benefit-item {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 12px 20px;
-    border-radius: 15px;
-    border-left: 4px solid #FFD700;
-    color: rgba(255, 255, 255, 0.9);
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.benefit-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateX(10px);
-    border-left-color: #00ff88;
-}
-
-.btn-sx {
-    width: 100%;
-    padding: 18px 30px;
-    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    border: none;
-    border-radius: 15px;
-    color: #000;
-    font-weight: 900;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.btn-sx:hover {
-    transform: scale(1.05);
-    box-shadow: 0 12px 35px rgba(255, 215, 0, 0.6);
-    background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%);
-}
-
-.btn-sx .material-icons {
-    font-size: 24px;
-    transition: transform 0.3s ease;
-}
-
-.btn-sx:hover .material-icons {
-    transform: translateX(5px);
-}
-
     </style>
 </head>
 
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-logo">
-            <img src="/imgs/LOGO-SLICED.png" alt="SLICED Logo">
-            <h1>SLICED</h1>
-        </div>
-        <div class="header-user">
-            <div class="user-info">
-                <div class="user-name" id="userName">Carregando...</div>
-                <div class="user-email" id="userEmail"></div>
+    <!-- Tela de Carregamento -->
+    <div id="loadingSection" class="loading-screen">
+        <div class="spinner-neo"></div>
+        <p style="margin-top: 20px; color: var(--text-muted); font-size: 0.9rem;">Autenticando...</p>
+    </div>
+
+    <!-- Conteúdo Principal (Escondido inicialmente) -->
+    <div id="contentSection" style="display: none;">
+        
+        <!-- Header -->
+        <header class="header">
+            <div class="header-logo">
+                <img src="/imgs/LOGO-SLICED.png" alt="SLICED">
+                <h1>SLICED</h1>
             </div>
-            <button class="btn-logout" id="btnLogout">Sair</button>
-        </div>
-    </header>
-
-    <!-- Widget de Saldo -->
-    <div id="balance-widget" class="balance-widget"></div>
-
-    <!-- Container Principal -->
-    <div class="container">
-        <div id="loadingSection" class="loading">
-            <div class="spinner-large"></div>
-            <p>Carregando seus dados...</p>
-        </div>
-
-        <div id="contentSection" style="display: none;">
-            <div class="welcome-section">
-                <h2>Bem-vindo, <span id="welcomeName">Torcedor</span>!</h2>
-                <p>Você está na área exclusiva do jogador</p>
+            <div class="header-user">
+                <div class="user-info">
+                    <div class="user-name" id="userName">Usuário</div>
+                    <div class="user-email" id="userEmail" style="font-size: 10px; color: #888;">email@exemplo.com</div>
+                </div>
+                <button class="btn-logout" id="btnLogout">
+                    <i class="material-icons" style="font-size: 18px;">logout</i>
+                </button>
             </div>
+        </header>
 
-            <!-- Banner Anúncios -->
+        <div class="container">
+            
+            <!-- WIDGET DE SALDO -->
+            <!-- Movido para dentro do container e antes do banner -->
+            <div id="balance-widget" class="balance-widget"></div>
+
+            <!-- Banner Anúncios Cyberpunk -->
             <div class="banner-container">
                 <div class="banner-anuncios">
-                    <h2>ANUNCIE AQUI!</h2>
-                    <p>Divulgue seu produto, projeto ou empresa. Pelo menor preço e tendo muitos cliques</p>
-                    <button class="btn-banner">Saiba Mais</button>
+                    <h2>ANUNCIE <span>AQUI!</span></h2>
+                    <p>Milhares de cliques. Preço baixo. Resultado real.</p>
+                    <button class="btn-banner">SAIBA MAIS</button>
                 </div>
             </div>
 
-            <!-- SX - Sócios Exclusivos -->
-            <div class="section-title" style="margin-top: 60px;">
-                <h3>⭐ SX - Sócios Exclusivos</h3>
-            </div>
-
-            <!-- Galeria de Sócios SX -->
-            <div id="sxGallery" class="sx-gallery">
-                <div class="sx-empty-state">
-                    <p>Nenhum sócio exclusivo cadastrado ainda. Seja o primeiro!</p>
+            <!-- SX Section (Instagram Style) -->
+            <div class="section-header">
+                <div class="section-title">
+                    <h3><i class="material-icons">stars</i> Sócios SX</h3>
                 </div>
             </div>
 
-            <!-- Card SX com Destaque -->
-            <div class="sx-card-container">
+            <!-- Galeria de Stories Horizontal -->
+            <div class="sx-stories-container">
+                <div id="sxGallery" class="sx-gallery">
+                    <!-- O Javascript vai preencher isso aqui -->
+                    <div class="sx-empty-state">Carregando stories...</div>
+                </div>
+            </div>
+
+            <!-- Card Destaque SX -->
+            <div class="sx-card-wrapper">
                 <div class="sx-card" onclick="window.location.href='../sx/sx.html'">
-                    <div class="sx-badge">EXCLUSIVO</div>
-                    <div class="sx-icon">
-                        <i class="material-icons">stars</i>
-                    </div>
-                    <h3>Torne-se um Sócio SX</h3>
-                    <p>Empresas, Times, Influencers, Atletas, Cantores e Youtubers</p>
-                    <div class="sx-benefits">
-                        <div class="benefit-item">✨ Destaque na plataforma</div>
-                        <div class="benefit-item">🎯 Alcance milhares de pessoas</div>
-                        <div class="benefit-item">💎 Status exclusivo</div>
-                    </div>
+                    <span class="sx-badge-main">EXCLUSIVO</span>
+                    <h3>Seja um Sócio SX</h3>
+                    <p>Destaque seu perfil com a borda dourada, ganhe visibilidade e acesso a recursos premium.</p>
                     <button class="btn-sx">
-                        <i class="material-icons">arrow_forward</i>
-                        Cadastrar Agora
+                        CADASTRAR AGORA <i class="material-icons">arrow_forward</i>
                     </button>
                 </div>
             </div>
 
             <!-- Área de Jogos -->
-            <div class="section-title">
-                <h3>🎮 Área de Jogos</h3>
-            </div>
-            <div class="games-grid">
-                <div class="game-card" style="display: none;">
-                    <div class="game-icon">❓</div>
-                    <h4>Quiz Tricolor</h4>
-                    <p>Teste seus conhecimentos sobre a história do SLICED</p>
-                    <button class="btn-game" onclick="window.location.href='jogos/quiz/abertura.html'">
-                        Jogar Agora
-                    </button>
+            <div class="section-header">
+                <div class="section-title">
+                    <h3><i class="material-icons">sports_esports</i> Jogos</h3>
                 </div>
-                <div class="game-card">
+            </div>
+            
+            <div class="games-grid">
+                <div class="game-card" onclick="window.location.href='jogos/jogo-da-velha.html'">
                     <div class="game-icon">❌⭕</div>
                     <h4>Jogo da Velha</h4>
-                    <p>Desafie seus amigos em uma partida clássica</p>
-                    <button class="btn-game" onclick="window.location.href='jogos/jogo-da-velha.html'">
-                        Jogar Agora
-                    </button>
+                    <p>O clássico duelo.</p>
+                    <button class="btn-game-mini">JOGAR</button>
+                </div>
+                <!-- Card extra para preencher grid visualmente -->
+                <div class="game-card" style="opacity: 0.5; pointer-events: none;">
+                    <div class="game-icon">🔒</div>
+                    <h4>Em Breve</h4>
+                    <p>Novos jogos.</p>
                 </div>
             </div>
-
 
         </div>
     </div>
 
-    <!-- Bottom Navbar -->
+    <!-- Bottom Navbar Modern -->
     <nav class="bottom-navbar">
         <a href="inicio.html" class="nav-item active">
             <i class="material-icons">home</i>
@@ -989,14 +713,14 @@
             <span>Termos</span>
         </a>
         <a href="../afiliados/afiliados.html" class="nav-item">
-            <i class="material-icons">group_add</i>
+            <i class="material-icons">hub</i> <!-- Icone mudado para Hub/Afiliados -->
             <span>Afiliados</span>
         </a>
        <a href="/usuário/vakinha/vakinha.html" class="nav-item">
-            <i class="material-icons">favorite</i>
+            <i class="material-icons">savings</i> <!-- Icone mudado para Savings -->
             <span>Vakinha</span>
         </a>
-        <a href="../anuncie/anuncie.html" class="nav-item">
+         <a href="../anuncie/anuncie.html" class="nav-item">
             <i class="material-icons">campaign</i>
             <span>Anuncie</span>
         </a>
@@ -1006,6 +730,7 @@
         </a>
     </nav>
 
+    <!-- SCRIPTS MANTIDOS (Lógica Intacta) -->
     <script type="module">
         import { verificarAutenticacao, obterDadosUsuario, fazerLogout } from '../../controle-dados/auth.js';
         import { inicializarSistemaOnline } from '../../controle-dados/online-tracker.js';
@@ -1014,85 +739,66 @@
         const loadingSection = document.getElementById('loadingSection');
         const contentSection = document.getElementById('contentSection');
         const btnLogout = document.getElementById('btnLogout');
-
-        // Variável para armazenar função de parar rastreamento
         let pararRastreamento = null;
 
-        // Verificar autenticação
         verificarAutenticacao(async (user) => {
             if (!user) {
-                // Usuário não está logado, redirecionar para login
                 window.location.href = '../../login/login.html';
                 return;
             }
 
-            // Usuário está logado, carregar dados
             try {
                 const resultado = await obterDadosUsuario(user.uid);
 
                 if (resultado.success) {
                     const dados = resultado.dados;
-
-                    // Atualizar header
                     document.getElementById('userName').textContent = dados.nomeCompleto;
                     document.getElementById('userEmail').textContent = dados.email;
 
-                    // Atualizar seção de boas-vindas
-                    const primeiroNome = dados.nomeCompleto.split(' ')[0];
-                    document.getElementById('welcomeName').textContent = primeiroNome;
-
-                    // Conteúdo carregado
-                    console.log('Dados do usuário carregados com sucesso');
-
-                    // ===== REGISTRAR USUÁRIO COMO ONLINE =====
-                    console.log('👤 Registrando usuário como online...');
+                    // Init Online Tracker
                     pararRastreamento = await inicializarSistemaOnline(user.uid, {
                         nomeCompleto: dados.nomeCompleto,
                         email: dados.email
                     });
-                    console.log('✅ Usuário registrado como online no dashboard!');
-                    // =========================================
 
-                    // Inicializar widget de saldo
+                    // Init Balance
                     await initBalanceWidget(user.uid);
 
-                    // 🆕 Carregar Sócios SX
+                    // Load SX
                     await loadSXMembers();
 
-                    // Mostrar conteúdo
-                    loadingSection.style.display = 'none';
-                    contentSection.style.display = 'block';
+                    // Show content com fade
+                    loadingSection.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingSection.style.display = 'none';
+                        contentSection.style.display = 'block';
+                    }, 500);
+                    
                 } else {
-                    console.error('Erro ao carregar dados:', resultado.error);
-                    alert('Erro ao carregar seus dados. Tente novamente.');
+                    console.error('Erro dados:', resultado.error);
                 }
             } catch (error) {
-                console.error('Erro ao carregar dados do usuário:', error);
-                alert('Erro ao carregar seus dados. Tente novamente.');
+                console.error('Erro geral:', error);
             }
         });
 
-        // 🆕 FUNÇÃO PARA CARREGAR SÓCIOS SX
+        // ====== LÓGICA ATUALIZADA DO SX (VISUAL INSTAGRAM) ======
         async function loadSXMembers() {
             try {
-                // Importar Firebase Firestore
                 const { getFirestore, collection, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
                 const { initializeApp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js');
 
-                // Inicializar Firebase se necessário
                 const firebaseConfig = {
-                    apiKey: "AIzaSyD85kB-ZjHINwOlIAUShW0lCQOBZQH7LLQ",
-                    authDomain: "spfc-jogo.firebaseapp.com",
-                    projectId: "spfc-jogo",
-                    storageBucket: "spfc-jogo.firebasestorage.app",
-                    messagingSenderId: "71353090673",
-                    appId: "1:71353090673:web:4754e0c6ef96e4e9d2a9f3"
+                    apiKey: "AIzaSyCTX7MMnhHr_QgDpjPuZGuRyG4Uk9GpQAE",
+                    authDomain: "sliced-4f1e3.firebaseapp.com",
+                    projectId: "sliced-4f1e3",
+                    storageBucket: "sliced-4f1e3.firebasestorage.app",
+                    messagingSenderId: "800471538497",
+                    appId: "1:800471538497:web:c7d7b9eb55c72687365fc0"
                 };
 
                 const app = initializeApp(firebaseConfig, "sx-loader");
                 const db = getFirestore(app);
-
-                // Buscar usuários com SX aprovado (status 'concluido')
                 const usersCollection = collection(db, 'SLICED', 'data', 'Usuários');
                 const usersSnapshot = await getDocs(usersCollection);
 
@@ -1103,7 +809,7 @@
                     const userData = doc.data();
                     if (userData.sxData && userData.sxData.status === 'concluido') {
                         approvedSX.push({
-                            userName: userData.sxData.userName || userData.nomeCompleto,
+                            userName: userData.sxData.profileName || userData.nomeCompleto,
                             category: userData.sxData.category,
                             imageUrl: userData.sxData.imageUrl
                         });
@@ -1111,78 +817,51 @@
                 });
                 
                 if (approvedSX.length === 0) {
-                    // Nenhum sócio cadastrado
-                    sxGallery.innerHTML = `
-                        <div class="sx-empty-state">
-                            <p>Nenhum sócio exclusivo cadastrado ainda. Seja o primeiro!</p>
-                        </div>
-                    `;
+                    sxGallery.innerHTML = `<div class="sx-empty-state">Nenhum story SX no momento.</div>`;
                 } else {
-                    // Limpar galeria
                     sxGallery.innerHTML = '';
                     
-                    // Adicionar cada sócio
+                    // Renderizar estilo Instagram Stories
                     approvedSX.forEach((sxData) => {
-                        const memberDiv = document.createElement('div');
-                        memberDiv.className = 'sx-member';
-                        memberDiv.innerHTML = `
-                            <img 
-                                src="${sxData.imageUrl}" 
-                                alt="${sxData.userName}" 
-                                class="sx-member-image"
-                                onerror="this.src='https://via.placeholder.com/100/FFD700/000000?text=SX'"
-                            >
-                            <div class="sx-member-category">${getCategoryEmoji(sxData.category)} ${sxData.category}</div>
+                        const storyItem = document.createElement('div');
+                        storyItem.className = 'sx-story-item';
+                        
+                        // Emoji baseado na categoria
+                        const emoji = getCategoryEmoji(sxData.category);
+
+                        storyItem.innerHTML = `
+                            <div class="story-ring-wrap">
+                                <div class="story-ring-inner">
+                                    <img src="${sxData.imageUrl}" class="sx-member-image" onerror="this.src='https://via.placeholder.com/100/111/fff?text=SX'">
+                                </div>
+                                <div class="sx-category-badge">${emoji}</div>
+                            </div>
+                            <div class="sx-member-name">${sxData.userName}</div>
                         `;
-                        sxGallery.appendChild(memberDiv);
+                        sxGallery.appendChild(storyItem);
                     });
-                    
-                    console.log(`✅ ${approvedSX.length} sócios SX carregados na galeria`);
                 }
             } catch (error) {
-                console.error('❌ Erro ao carregar sócios SX:', error);
-                // Em caso de erro, mostrar estado vazio
-                const sxGallery = document.getElementById('sxGallery');
-                sxGallery.innerHTML = `
-                    <div class="sx-empty-state">
-                        <p>Erro ao carregar sócios. Tente recarregar a página.</p>
-                    </div>
-                `;
+                console.error('Erro SX:', error);
+                document.getElementById('sxGallery').innerHTML = `<div class="sx-empty-state">Erro ao carregar.</div>`;
             }
         }
 
-        // Função auxiliar para obter emoji da categoria
         function getCategoryEmoji(category) {
             const emojis = {
-                'Empresa': '🏢',
-                'Time': '⚽',
-                'Influencer': '📱',
-                'Atleta': '🏃',
-                'Cantor': '🎤',
-                'Youtuber': '🎬'
+                'Empresa': '🏢', 'Time': '⚽', 'Influencer': '📸',
+                'Atleta': '🏃', 'Cantor': '🎤', 'Youtuber': '🎬'
             };
             return emojis[category] || '⭐';
         }
 
-
-        // Logout
         btnLogout.addEventListener('click', async () => {
-            if (confirm('Deseja realmente sair?')) {
-                // Parar rastreamento online antes de fazer logout
-                if (pararRastreamento) {
-                    pararRastreamento();
-                    console.log('🔴 Usuário removido da lista de online');
-                }
-
+            if (confirm('Sair da conta?')) {
+                if (pararRastreamento) pararRastreamento();
                 const resultado = await fazerLogout();
-                if (resultado.success) {
-                    window.location.href = '../../login/login.html';
-                } else {
-                    alert('Erro ao fazer logout. Tente novamente.');
-                }
+                if (resultado.success) window.location.href = '../../login/login.html';
             }
         });
     </script>
 </body>
-
 </html>

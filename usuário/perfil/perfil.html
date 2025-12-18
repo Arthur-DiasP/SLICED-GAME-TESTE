@@ -3,1244 +3,733 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Meu Perfil - SLICED</title>
     <link rel="icon" href="/imgs/LOGO-SLICED.png" type="image/png">
-    <meta name="description" content="Perfil do torcedor - São Paulo Futebol Clube">
+    <meta name="description" content="Gerencie sua conta SLICED">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="../../controle-dados/balance-widget.css">
+    
     <style>
+        /* ================= RESET & VARS ================= */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         :root {
-            --primary-color: #00ff88;
-            --primary-color-escuro: #00cc6e;
-            --dark-bg: #000000;
-            --text-primary: #FFFFFF;
-            --gradient-primary: linear-gradient(135deg, #000000 0%, #1a0000 25%, #00cc6e 50%, #1a0000 75%, #000000 100%);
+            --primary: #00ff88;
+            --primary-dark: #00cc6e;
+            --accent: #FFD700;
+            --bg-dark: #050505;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --danger: #ff4d4d;
+            --warning: #ffc107;
+            --success: #00ff88;
         }
 
         body {
-            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--gradient-primary);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 255, 136, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.08) 0%, transparent 40%);
+            color: var(--text-main);
             min-height: 100vh;
-            color: var(--text-primary);
-            padding-bottom: 100px;
+            padding-bottom: 110px;
+            overflow-x: hidden;
         }
 
-        @keyframes gradientShift {
-
-            0%,
-            100% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
+        /* Textura de Ruído */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
         }
 
-        /* Header */
+        /* ================= HEADER ================= */
         .header {
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(20px);
-            padding: 20px 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--glass-border);
         }
 
         .header-logo {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
         }
 
         .header-logo img {
-            width: 50px;
-            height: 50px;
-            object-fit: contain;
-            filter: drop-shadow(0 0 10px rgba(0, 255, 136, 0.6));
+            width: 40px;
+            height: 40px;
+            filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.4));
         }
 
         .header-logo h1 {
-            font-size: 1.5rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, #ffffff 0%, #00ff88 50%, #ffffff 100%);
-            background-size: 200% 200%;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, var(--primary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: shimmer 3s ease-in-out infinite;
-        }
-
-        @keyframes shimmer {
-
-            0%,
-            100% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
         }
 
         .header-user {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
         }
 
         .user-info {
             text-align: right;
+            line-height: 1.2;
         }
 
         .user-name {
-            font-weight: 700;
-            font-size: 1rem;
-            margin-bottom: 4px;
-        }
-
-        .user-email {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            font-weight: 600;
+            max-width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .btn-logout {
-            padding: 10px 24px;
-            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
-            border: none;
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-weight: 700;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Outfit', sans-serif;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-logout:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            background: rgba(255, 50, 50, 0.2);
+            border-color: rgba(255, 50, 50, 0.5);
         }
 
-        /* Container Principal */
+        /* ================= CONTAINER ================= */
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 60px 40px;
+            padding: 20px;
+            opacity: 0;
+            animation: fadeInPage 0.8s forwards;
         }
 
-        .page-title {
-            text-align: center;
-            margin-bottom: 50px;
-            animation: fadeIn 0.8s ease;
+        @keyframes fadeInPage {
+            to { opacity: 1; }
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .page-header {
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 20px;
         }
 
-        .page-title h2 {
-            font-size: 3rem;
+        .page-header h2 {
+            font-size: 2rem;
             font-weight: 900;
-            margin-bottom: 10px;
-            text-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .page-header p {
+            color: var(--text-muted);
+            margin-top: 5px;
         }
 
-        .page-title p {
-            font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        /* Profile Grid */
+        /* ================= PROFILE GRID & CARDS ================= */
         .profile-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
         }
 
-        /* Card Sections */
         .profile-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
             border-radius: 20px;
-            padding: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            animation: fadeIn 1s ease;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         .profile-card.full-width {
             grid-column: 1 / -1;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.05) 0%, var(--glass-bg) 100%);
+            border-color: rgba(0, 255, 136, 0.2);
         }
 
         .card-header {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 25px;
+            gap: 10px;
+            margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 2px solid rgba(0, 255, 136, 0.3);
+            border-bottom: 1px solid var(--glass-border);
         }
 
-        .card-header .material-icons {
-            font-size: 32px;
-            color: #00ff88;
+        .card-header i {
+            font-size: 24px;
+            color: var(--primary);
         }
 
         .card-header h3 {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 700;
         }
 
-        /* Form Groups */
+        /* ================= FORMS ================= */
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .form-group label {
             display: block;
             margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
             font-weight: 600;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.9);
         }
 
-        .form-group input,
-        .form-group select {
+        .form-group input, .form-group select {
             width: 100%;
-            padding: 14px 18px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
             border-radius: 12px;
-            color: var(--text-primary);
+            color: #fff;
             font-family: 'Outfit', sans-serif;
-            font-size: 1rem;
-            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            transition: 0.3s;
         }
 
-        .form-group input:focus,
-        .form-group select:focus {
+        .form-group input:focus, .form-group select:focus {
             outline: none;
-            border-color: #00ff88;
-            background: rgba(255, 255, 255, 0.12);
-            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
         }
 
-        .form-group input:disabled {
+        .form-group input:disabled, .form-group input:read-only {
             opacity: 0.6;
             cursor: not-allowed;
-        }
-
-        .form-group input:read-only {
-            background: rgba(255, 255, 255, 0.05);
-            cursor: not-allowed;
-            opacity: 0.8;
-            border-color: rgba(255, 255, 255, 0.08);
-        }
-
-        .form-group input:read-only:focus {
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: none;
-        }
-
-        .form-group select {
-            cursor: pointer;
-        }
-
-        .form-group select option {
-            background: #1a0000;
-            color: white;
+            border-style: dashed;
         }
 
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 15px;
         }
 
-        /* Buttons */
         .btn-group {
             display: flex;
-            gap: 15px;
-            margin-top: 30px;
+            gap: 10px;
+            margin-top: 20px;
         }
 
         .btn {
             flex: 1;
-            padding: 14px 28px;
+            padding: 12px;
             border: none;
             border-radius: 12px;
             font-weight: 700;
-            font-size: 1rem;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Outfit', sans-serif;
+            transition: 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            font-size: 0.9rem;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
-            color: white;
+            background: var(--primary);
+            color: #000;
         }
-
+        
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.4);
+            background: var(--primary-dark);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
         }
 
-        /* Success Message */
-        .success-message {
-            display: none;
-            background: rgba(34, 197, 94, 0.2);
-            border: 1px solid rgba(34, 197, 94, 0.5);
-            border-radius: 12px;
-            padding: 15px 20px;
-            margin-bottom: 20px;
-            color: #4ade80;
-            font-weight: 600;
-            animation: slideDown 0.3s ease;
-        }
-
-        .success-message.show {
-            display: block;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Bottom Navbar */
-        .bottom-navbar {
-            position: fixed;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 25px;
-            padding: 15px 30px;
-            display: flex;
-            gap: 40px;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            animation: slideUp 0.5s ease;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(100px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 10px 15px;
-            border-radius: 15px;
-            text-decoration: none;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .nav-item:hover {
-            background: rgba(0, 255, 136, 0.2);
-            color: #00ff88;
-            transform: translateY(-5px);
-        }
-
-        .nav-item.active {
-            color: #00ff88;
-            background: rgba(0, 255, 136, 0.1);
-        }
-
-        .nav-item .material-icons {
-            font-size: 28px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-item:hover .material-icons {
-            transform: scale(1.2);
-        }
-
-        .nav-item span {
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 100px 20px;
-        }
-
-        .spinner-large {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            border-top-color: var(--primary-color);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Responsividade */
-        @media (max-width: 968px) {
-            .profile-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* AJUSTES GERAIS PARA CELULAR (Max 600px) */
-        @media (max-width: 600px) {
-
-            /* 1. HEADER (Menu Superior) COMPACTO */
-            .header {
-                flex-direction: row !important;
-                padding: 5px 15px !important;
-                height: 55px;
-                align-items: center;
-                justify-content: space-between;
-                gap: 10px;
-            }
-
-            .header-logo {
-                gap: 0;
-            }
-
-            .header-logo img {
-                width: 32px;
-                height: 32px;
-            }
-
-            .header-logo h1 {
-                display: none !important;
-            }
-
-            .header-user {
-                width: auto !important;
-                flex-direction: row !important;
-                gap: 8px;
-                align-items: center;
-                justify-content: flex-end;
-            }
-
-            .user-info {
-                text-align: right;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-            }
-
-            .user-email {
-                display: none !important;
-            }
-
-            .user-name {
-                font-size: 0.85rem;
-                margin-bottom: 0;
-                white-space: nowrap;
-                max-width: 90px;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            .btn-logout {
-                padding: 5px 12px;
-                font-size: 0.75rem;
-                border-radius: 6px;
-            }
-
-            /* 2. NAVBAR (Menu Inferior) AJUSTADA */
-            .bottom-navbar {
-                width: 98%;
-                left: 50%;
-                transform: translateX(-50%);
-                bottom: 5px;
-                padding: 6px 2px;
-                gap: 2px;
-                border-radius: 16px;
-                justify-content: space-between;
-            }
-
-            .nav-item {
-                padding: 4px 0;
-                min-width: 0;
-                flex: 1;
-                border-radius: 8px;
-            }
-
-            .nav-item .material-icons {
-                font-size: 20px !important;
-                margin-bottom: 2px;
-            }
-
-            .nav-item span {
-                font-size: 8px !important;
-                letter-spacing: 0;
-                display: block;
-                white-space: nowrap;
-            }
-
-            .nav-item:hover {
-                transform: translateY(-2px);
-            }
-        }
-
-        /* ===== ESTILOS FINANCEIROS ===== */
-
-        /* Card de Saldo */
+        /* ================= BALANCE SECTION ================= */
         .balance-display {
             text-align: center;
-            padding: 40px 20px;
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 204, 110, 0.05) 100%);
-            border-radius: 15px;
-            margin-bottom: 25px;
+            padding: 30px;
             position: relative;
         }
 
         .balance-label {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 10px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
         }
 
         .balance-amount {
             font-size: 3rem;
             font-weight: 900;
-            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+            margin-bottom: 20px;
         }
 
         .btn-refresh-balance {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(0, 255, 136, 0.2);
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            width: 40px;
-            height: 40px;
+            top: 10px; right: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            width: 36px; height: 36px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--primary);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: 0.3s;
         }
-
+        
         .btn-refresh-balance:hover {
-            background: rgba(0, 255, 136, 0.3);
             transform: rotate(180deg);
-        }
-
-        .btn-refresh-balance .material-icons {
-            color: #00ff88;
-            font-size: 22px;
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .finance-actions {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-        }
-
-        .btn-deposit,
-        .btn-withdraw {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(0, 255, 136, 0.3);
-            color: white;
-        }
-
-        .btn-deposit:hover {
-            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
-            border-color: #00ff88;
+            margin-top: 20px;
         }
 
         .btn-withdraw {
-            border-color: rgba(255, 136, 0, 0.3);
+            background: rgba(255, 87, 87, 0.1);
+            border: 1px solid rgba(255, 87, 87, 0.3);
+            color: #ff5757;
         }
 
         .btn-withdraw:hover {
-            background: linear-gradient(135deg, #ff8800 0%, #cc6e00 100%);
-            border-color: #ff8800;
+            background: rgba(255, 87, 87, 0.2);
+            box-shadow: 0 0 15px rgba(255, 87, 87, 0.2);
         }
 
-        /* Modais */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: rgba(0, 0, 0, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: slideInUp 0.3s ease;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 25px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-header h3 {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .modal-header .material-icons {
-            color: #00ff88;
-        }
-
-        .modal-close {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: rotate(90deg);
-        }
-
-        .modal-close .material-icons {
-            color: white;
-            font-size: 20px;
-        }
-
-        .modal-body {
-            padding: 25px;
-        }
-
-        .modal-description {
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        /* Opções de Valor */
-        .amount-options {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .amount-btn {
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(0, 255, 136, 0.3);
-            border-radius: 12px;
-            color: white;
-            font-size: 1.2rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Outfit', sans-serif;
-        }
-
-        .amount-btn:hover {
-            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
-            border-color: #00ff88;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.4);
-        }
-
-        /* Seção PIX */
-        .pix-section {
-            text-align: center;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .pix-section h4 {
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .qr-code-container {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            display: inline-block;
-            margin-bottom: 20px;
-        }
-
-        .qr-code-container img {
-            width: 250px;
-            height: 250px;
-            display: block;
-        }
-
-        .pix-code-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .pix-code-container input {
-            flex: 1;
-            padding: 14px 18px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            color: white;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
-        }
-
-        .btn-copy-pix {
-            padding: 14px 20px;
-            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            font-family: 'Outfit', sans-serif;
-        }
-
-        .btn-copy-pix:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.4);
-        }
-
-        .pix-instructions {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
-            padding: 15px;
-            background: rgba(0, 255, 136, 0.1);
-            border-radius: 10px;
-        }
-
-        .pix-instructions .material-icons {
-            color: #00ff88;
-            font-size: 20px;
-        }
-
-        /* Formulário de Saque */
-        .withdraw-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 15px;
-            background: rgba(255, 136, 0, 0.1);
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .withdraw-info .material-icons {
-            color: #ff8800;
-            font-size: 24px;
-        }
-
-        .withdraw-info p {
-            margin: 0;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
-        }
-
-        /* Loading */
-        .modal-loading {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            border-top-color: #00ff88;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @media (max-width: 600px) {
-            .balance-amount {
-                font-size: 2.2rem;
-            }
-
-            .amount-options {
-                grid-template-columns: 1fr;
-            }
-
-            .qr-code-container img {
-                width: 200px;
-                height: 200px;
-            }
-
-            .finance-actions {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* ============================================ */
-        /* SEÇÃO DE DEPÓSITO PIX */
-        /* ============================================ */
-
+        /* ================= DEPOSIT BLOCK (MODAL TRIGGER) ================= */
         .deposit-block {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 204, 110, 0.05) 100%);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 255, 136, 0.2);
+            margin-top: 30px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, transparent 100%);
+            border: 1px solid rgba(0, 255, 136, 0.3);
             border-radius: 20px;
             padding: 30px;
-            margin: 30px 0;
-            box-shadow: 0 8px 32px rgba(0, 255, 136, 0.1);
-            transition: all 0.3s ease;
         }
 
-        .deposit-block:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px rgba(0, 255, 136, 0.2);
-            border-color: rgba(0, 255, 136, 0.4);
-        }
-
-        .deposit-block h4 {
-            color: #00ff88;
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .deposit-block h4::before {
-            content: '💳';
-            font-size: 1.8rem;
-        }
-
-        .deposit-block p {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.95rem;
-            margin-bottom: 25px;
-            line-height: 1.5;
-        }
-
-        /* Opções de Depósito */
         .deposit-options {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px 0;
         }
 
         .deposit-option-btn {
-            padding: 18px 24px;
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 204, 110, 0.1) 100%);
-            border: 2px solid rgba(0, 255, 136, 0.3);
-            border-radius: 15px;
-            color: #00ff88;
-            font-size: 1.1rem;
-            font-weight: 700;
-            font-family: 'Outfit', sans-serif;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 15px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .deposit-option-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(0, 255, 136, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .deposit-option-btn:hover::before {
-            width: 300px;
-            height: 300px;
+            transition: 0.2s;
+            font-weight: 600;
         }
 
         .deposit-option-btn:hover {
-            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
-            color: #000;
-            border-color: #00ff88;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
         }
 
-        .deposit-option-btn:active {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
-        }
-
-        /* Input de Valor Personalizado */
         .custom-deposit-input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
             display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .custom-deposit-input label {
-            color: rgba(255, 255, 255, 0.9);
-            font-weight: 600;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .custom-deposit-input label::before {
-            content: '✏️';
-            font-size: 1.2rem;
-        }
-
-        .custom-deposit-input input {
-            width: 100%;
-            padding: 14px 18px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 600;
-            font-family: 'Outfit', sans-serif;
-            transition: all 0.3s ease;
-        }
-
-        .custom-deposit-input input:focus {
-            outline: none;
-            border-color: #00ff88;
-            background: rgba(255, 255, 255, 0.12);
-            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
-        }
-
-        .custom-deposit-input input::placeholder {
-            color: rgba(255, 255, 255, 0.4);
+            gap: 10px;
         }
 
         #deposit-custom-btn {
-            width: 100%;
-            padding: 14px 28px;
-            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
-            border: none;
-            border-radius: 12px;
-            color: #000;
-            font-weight: 700;
-            font-size: 1rem;
-            font-family: 'Outfit', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            white-space: nowrap;
         }
 
-        #deposit-custom-btn::before {
-            content: '💰';
-            font-size: 1.2rem;
-        }
-
-        #deposit-custom-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.5);
-        }
-
-        #deposit-custom-btn:active:not(:disabled) {
-            transform: translateY(0);
-        }
-
-        #deposit-custom-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.4);
-        }
-
-        /* Animação de entrada */
-        @keyframes slideInFromBottom {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .deposit-block {
-            animation: slideInFromBottom 0.6s ease-out;
-        }
-
-        /* Responsividade para Depósito */
-        @media (max-width: 768px) {
-            .deposit-options {
-                grid-template-columns: 1fr;
-            }
-
-            .deposit-block {
-                padding: 20px;
-                margin: 20px 0;
-            }
-
-            .deposit-option-btn {
-                padding: 16px 20px;
-                font-size: 1rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .deposit-block h4 {
-                font-size: 1.3rem;
-            }
-
-            .deposit-block p {
-                font-size: 0.9rem;
-            }
-
-            .custom-deposit-input {
-                padding: 15px;
-            }
-        }
-
-        /* ============================================ */
-        /* HISTÓRICO DE SAQUES */
-        /* ============================================ */
-
+        /* ================= HISTORY LIST ================= */
         .withdraw-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 18px;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .withdraw-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(0, 255, 136, 0.3);
-            transform: translateX(5px);
-        }
-
-        .withdraw-item-header {
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
         }
 
-        .withdraw-amount {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #00ff88;
-        }
+        .withdraw-item:last-child { border-bottom: none; }
 
         .withdraw-status {
-            padding: 6px 14px;
+            font-size: 0.7rem;
+            padding: 4px 10px;
             border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+        .withdraw-status.pending { background: rgba(255, 193, 7, 0.2); color: var(--warning); }
+        .withdraw-status.approved { background: rgba(0, 255, 136, 0.2); color: var(--success); }
+        .withdraw-status.rejected { background: rgba(255, 77, 77, 0.2); color: var(--danger); }
+
+        /* ================= CHAT ================= */
+        .chat-float-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.4);
+            z-index: 999;
+            transition: 0.3s;
+            animation: pulse 2s infinite;
+        }
+        
+        .chat-float-button i { font-size: 30px; color: #000; }
+
+        .chat-popup {
+            display: none;
+            position: fixed;
+            bottom: 30px; right: 30px;
+            width: 380px; height: 500px;
+            background: #111;
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            z-index: 2000;
+            overflow: hidden;
         }
 
-        .withdraw-status.pending {
-            background: rgba(255, 193, 7, 0.2);
-            color: #ffc107;
-            border: 1px solid rgba(255, 193, 7, 0.3);
+        .chat-header {
+            background: var(--primary);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+        
+        .chat-header h3 { color: #000; font-size: 1rem; margin: 0; }
+        .chat-close-btn { background: none; border: none; cursor: pointer; color: #000; }
 
-        .withdraw-status.approved {
-            background: rgba(76, 175, 80, 0.2);
-            color: #4caf50;
-            border: 1px solid rgba(76, 175, 80, 0.3);
-        }
-
-        .withdraw-status.rejected {
-            background: rgba(244, 67, 54, 0.2);
-            color: #f44336;
-            border: 1px solid rgba(244, 67, 54, 0.3);
-        }
-
-        .withdraw-status.processing {
-            background: rgba(33, 150, 243, 0.2);
-            color: #2196f3;
-            border: 1px solid rgba(33, 150, 243, 0.3);
-        }
-
-        .withdraw-item-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .withdraw-detail {
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.02);
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 10px;
         }
 
-        .withdraw-detail-label {
+        .chat-message {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: #fff;
+        }
+
+        .chat-message.support {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ccc;
+        }
+
+        .chat-input-form {
+            padding: 15px;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-form input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 20px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .chat-input-form button {
+            background: var(--primary);
+            border: none;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(0, 255, 136, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        }
+
+        /* ================= BOTTOM NAVBAR ================= */
+        .bottom-navbar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 500px;
+            background: rgba(15, 15, 15, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 25px;
+            padding: 12px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             color: rgba(255, 255, 255, 0.5);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            width: 50px;
         }
 
-        .withdraw-detail-value {
-            color: rgba(255, 255, 255, 0.9);
+        .nav-item .material-icons {
+            font-size: 26px;
+            margin-bottom: 4px;
+            transition: 0.3s;
+        }
+
+        .nav-item span {
+            font-size: 10px;
             font-weight: 600;
+            letter-spacing: 0.5px;
+            opacity: 0;
+            transform: translateY(5px);
+            transition: 0.3s;
+            position: absolute;
+            bottom: -15px;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item.active .material-icons {
+            transform: translateY(-5px);
+            filter: drop-shadow(0 0 8px var(--primary));
+        }
+
+        .nav-item.active span {
+            opacity: 1;
+            transform: translateY(-2px);
+            color: var(--primary);
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .spinner-neo {
+            width: 50px;
+            height: 50px;
+            border: 3px solid transparent;
+            border-top-color: var(--primary);
+            border-right-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Modal Styles Standardized */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show { display: flex; }
+        
+        .modal-content {
+            background: #111;
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .profile-grid { grid-template-columns: 1fr; }
+            .deposit-options { grid-template-columns: repeat(2, 1fr); }
+            .chat-popup { width: 90%; right: 5%; bottom: 100px; height: 60vh; }
+            .chat-float-button { bottom: 100px; }
         }
 
         @media (max-width: 600px) {
-            .withdraw-item-details {
-                grid-template-columns: 1fr;
-            }
-
-            .withdraw-amount {
-                font-size: 1.1rem;
-            }
+            .header-logo h1, .user-email { display: none; }
+            .container { padding: 15px; }
+            .nav-item span { display: none; }
+            .nav-item.active .material-icons { transform: translateY(0); }
+            .bottom-navbar { padding: 15px 30px; bottom: 15px; border-radius: 20px; }
         }
+
     </style>
 </head>
 
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-logo">
-            <img src="/imgs/LOGO-SLICED.png" alt="SLICED Logo">
-            <h1>SLICED</h1>
-        </div>
-        <div class="header-user">
-            <div class="user-info">
-                <div class="user-name" id="userName">Carregando...</div>
-                <div class="user-email" id="userEmail"></div>
+    <!-- Tela de Carregamento -->
+    <div id="loadingSection" class="loading-screen">
+        <div class="spinner-neo"></div>
+        <p style="margin-top: 20px; color: var(--text-muted); font-size: 0.9rem;">Carregando perfil...</p>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div id="contentSection" style="display: none;">
+        
+        <!-- Header -->
+        <header class="header">
+            <div class="header-logo">
+                <img src="/imgs/LOGO-SLICED.png" alt="SLICED">
+                <h1>SLICED</h1>
             </div>
-            <button class="btn-logout" id="btnLogout">Sair</button>
-        </div>
-    </header>
+            <div class="header-user">
+                <div class="user-info">
+                    <div class="user-name" id="userName">Usuário</div>
+                    <div class="user-email" id="userEmail" style="font-size: 10px; color: #888;">email@exemplo.com</div>
+                </div>
+                <button class="btn-logout" id="btnLogout">
+                    <i class="material-icons" style="font-size: 18px;">logout</i>
+                </button>
+            </div>
+        </header>
 
-    <!-- Container Principal -->
-    <div class="container">
-        <div id="loadingSection" class="loading">
-            <div class="spinner-large"></div>
-            <p>Carregando seus dados...</p>
-        </div>
+        <div class="container">
+            <!-- Widget de Saldo Global (pode estar oculto ou não, mantido pela consistência) -->
+            <div id="balance-widget" class="balance-widget" style="display: none;"></div>
 
-        <div id="contentSection" style="display: none;">
-            <div class="page-title">
-                <h2>Meu Perfil</h2>
-                <p>Gerencie suas informações pessoais</p>
+            <div class="page-header">
+                <h2><i class="material-icons">manage_accounts</i> Meu Perfil</h2>
+                <p>Gerencie seus dados e saldo.</p>
             </div>
 
-            <div id="successMessage" class="success-message"></div>
+            <div id="successMessage" class="success-message" style="display:none; color: var(--success); text-align: center; margin-bottom: 20px; padding: 10px; background: rgba(0,255,136,0.1); border-radius: 10px;"></div>
 
             <div class="profile-grid">
+                
+                <!-- Card de Saldo (Full Width) -->
+                <div class="profile-card full-width">
+                    <div class="card-header">
+                        <i class="material-icons">account_balance_wallet</i>
+                        <h3>Carteira Digital</h3>
+                    </div>
+
+                    <div class="balance-display">
+                        <div class="balance-label">Saldo Disponível</div>
+                        <div class="balance-amount" id="balanceAmount">R$ 0,00</div>
+                        <button class="btn-refresh-balance" id="btnRefreshBalance" title="Atualizar">
+                            <i class="material-icons">refresh</i>
+                        </button>
+                    </div>
+
+                    <div class="finance-actions">
+                        <button class="btn btn-withdraw" id="btnWithdraw">
+                            <i class="material-icons">arrow_upward</i>
+                            Solicitar Saque
+                        </button>
+                    </div>
+
+                    <!-- Bloco de Depósito (Estilo Card) -->
+                    <div class="deposit-block">
+                        <h4>Fazer Depósito (PIX)</h4>
+                        <p>Adicione saldo instantaneamente para usar na plataforma.</p>
+
+                        <div class="deposit-options">
+                            <button type="button" class="deposit-option-btn" data-value="0.50">R$ 0,50</button>
+                            <button type="button" class="deposit-option-btn" data-value="10.00">R$ 10,00</button>
+                            <button type="button" class="deposit-option-btn" data-value="25.00">R$ 25,00</button>
+                            <button type="button" class="deposit-option-btn" data-value="50.00">R$ 50,00</button>
+                        </div>
+
+                        <div class="custom-deposit-input">
+                            <input type="number" id="custom-deposit-amount" min="100" step="0.01" placeholder="Outro valor (mín R$ 100)">
+                            <button id="deposit-custom-btn" class="btn btn-primary" disabled>Depositar</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Dados Pessoais -->
                 <div class="profile-card">
                     <div class="card-header">
@@ -1266,8 +755,7 @@
                         </div>
                         <div class="btn-group">
                             <button type="submit" class="btn btn-primary">
-                                <i class="material-icons">save</i>
-                                Salvar Alterações
+                                <i class="material-icons">save</i> Salvar
                             </button>
                         </div>
                     </form>
@@ -1276,7 +764,7 @@
                 <!-- Endereço -->
                 <div class="profile-card">
                     <div class="card-header">
-                        <i class="material-icons">location_on</i>
+                        <i class="material-icons">place</i>
                         <h3>Endereço</h3>
                     </div>
                     <form id="formEndereco">
@@ -1290,7 +778,7 @@
                                 <input type="text" id="cidade" required>
                             </div>
                             <div class="form-group">
-                                <label for="estado">Estado</label>
+                                <label for="estado">UF</label>
                                 <input type="text" id="estado" maxlength="2" required>
                             </div>
                         </div>
@@ -1308,44 +796,19 @@
                                 <input type="text" id="numero" required>
                             </div>
                             <div class="form-group">
-                                <label for="complemento">Complemento</label>
+                                <label for="complemento">Comp.</label>
                                 <input type="text" id="complemento">
                             </div>
                         </div>
                         <div class="btn-group">
                             <button type="submit" class="btn btn-primary">
-                                <i class="material-icons">save</i>
-                                Salvar Endereço
+                                <i class="material-icons">save</i> Salvar
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- Card de Saldo -->
-                <div class="profile-card full-width">
-                    <div class="card-header">
-                        <i class="material-icons">account_balance_wallet</i>
-                        <h3>Saldo</h3>
-                    </div>
-
-                    <div class="balance-display">
-                        <div class="balance-label">Saldo Disponível</div>
-                        <div class="balance-amount" id="balanceAmount">R$ 0,00</div>
-                        <button class="btn-refresh-balance" id="btnRefreshBalance" title="Atualizar saldo">
-                            <i class="material-icons">refresh</i>
-                        </button>
-                    </div>
-
-                    <div class="finance-actions">
-
-                        <button class="btn btn-withdraw" id="btnWithdraw">
-                            <i class="material-icons">remove_circle</i>
-                            Solicitar Saque
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Card de Chave PIX -->
+                <!-- Chave PIX -->
                 <div class="profile-card">
                     <div class="card-header">
                         <i class="material-icons">pix</i>
@@ -1355,29 +818,27 @@
                     <div id="pixKeyDisplay" style="display: none;">
                         <div style="background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                <span style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">Tipo:</span>
-                                <span id="pixKeyTypeDisplay" style="color: #00ff88; font-weight: 700;"></span>
+                                <span style="color: var(--text-muted); font-size: 0.8rem;">TIPO</span>
+                                <span id="pixKeyTypeDisplay" style="color: var(--primary); font-weight: 700;"></span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">Chave:</span>
-                                <span id="pixKeyValueDisplay" style="color: white; font-weight: 600; font-family: 'Courier New', monospace;"></span>
+                            <div style="display: flex; flex-direction: column;">
+                                <span style="color: var(--text-muted); font-size: 0.8rem;">CHAVE</span>
+                                <span id="pixKeyValueDisplay" style="color: white; font-weight: 600; font-family: monospace; word-break: break-all;"></span>
                             </div>
                         </div>
                         <div class="btn-group">
-                            <button type="button" class="btn btn-primary" id="btnEditPixKey" style="flex: 1;">
-                                <i class="material-icons">edit</i>
-                                Editar
+                            <button type="button" class="btn btn-primary" id="btnEditPixKey">
+                                <i class="material-icons">edit</i> Editar
                             </button>
-                            <button type="button" class="btn" id="btnRemovePixKey" style="flex: 1; background: rgba(255, 0, 0, 0.2); border: 2px solid rgba(255, 0, 0, 0.3); color: white;">
+                            <button type="button" class="btn" id="btnRemovePixKey" style="background: rgba(255, 77, 77, 0.2); color: #ff4d4d;">
                                 <i class="material-icons">delete</i>
-                                Remover
                             </button>
                         </div>
                     </div>
 
                     <form id="formPixKey" style="display: none;">
                         <div class="form-group">
-                            <label for="pixKeyTypeSelect">Tipo de Chave PIX</label>
+                            <label for="pixKeyTypeSelect">Tipo</label>
                             <select id="pixKeyTypeSelect" required>
                                 <option value="">Selecione...</option>
                                 <option value="cpf">CPF</option>
@@ -1386,69 +847,36 @@
                                 <option value="aleatoria">Chave Aleatória</option>
                             </select>
                         </div>
-
                         <div class="form-group">
-                            <label for="pixKeyInput">Chave PIX</label>
+                            <label for="pixKeyInput">Chave</label>
                             <input type="text" id="pixKeyInput" required placeholder="Digite sua chave PIX">
-                            <small id="pixKeyHint" style="display: block; margin-top: 8px; color: rgba(255, 255, 255, 0.6); font-size: 0.85rem;"></small>
+                            <small id="pixKeyHint" style="display: block; margin-top: 8px; color: var(--text-muted); font-size: 0.8rem;"></small>
                         </div>
-
                         <div class="btn-group">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="material-icons">save</i>
-                                Salvar Chave PIX
-                            </button>
-                            <button type="button" class="btn" id="btnCancelPixKey" style="background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.2); color: white; display: none;">
-                                <i class="material-icons">close</i>
-                                Cancelar
-                            </button>
+                            <button type="submit" class="btn btn-primary">Salvar</button>
+                            <button type="button" class="btn" id="btnCancelPixKey">Cancelar</button>
                         </div>
                     </form>
                 </div>
 
-                <!-- Card de Histórico de Saques -->
+                <!-- Histórico -->
                 <div class="profile-card">
                     <div class="card-header">
                         <i class="material-icons">history</i>
                         <h3>Histórico de Saques</h3>
                     </div>
-
                     <div id="withdrawHistoryContainer">
-                        <div id="withdrawHistoryLoading" style="text-align: center; padding: 40px 20px;">
-                            <div class="spinner" style="width: 40px; height: 40px; margin: 0 auto 15px;"></div>
-                            <p style="color: rgba(255, 255, 255, 0.6);">Carregando histórico...</p>
+                        <div id="withdrawHistoryLoading" style="text-align: center; padding: 20px;">
+                            <div class="spinner-neo" style="width: 30px; height: 30px; margin: 0 auto;"></div>
                         </div>
-
-                        <div id="withdrawHistoryEmpty" style="display: none; text-align: center; padding: 40px 20px;">
-                            <i class="material-icons" style="font-size: 48px; color: rgba(255, 255, 255, 0.3); margin-bottom: 15px;">receipt_long</i>
-                            <p style="color: rgba(255, 255, 255, 0.6);">Nenhum saque solicitado ainda</p>
+                        <div id="withdrawHistoryEmpty" style="display: none; text-align: center; color: var(--text-muted); padding: 20px;">
+                            <i class="material-icons">info</i><br>Nenhum saque.
                         </div>
-
-                        <div id="withdrawHistoryList" style="display: none;">
-                            <!-- Lista de saques será preenchida dinamicamente -->
-                        </div>
+                        <div id="withdrawHistoryList" style="display: none;"></div>
                     </div>
                 </div>
+
             </div>
-        </div>
-    </div>
-
-    <!-- Modal de Depósito -->
-    <div class="card-feature deposit-block">
-        <h4>Fazer Depósito (PIX)</h4>
-        <p>Selecione o valor ou use o campo personalizado. O PIX será gerado na próxima tela.</p>
-
-        <div class="deposit-options">
-            <button type="button" class="deposit-option-btn" data-value="0.50">R$ 0,50</button>
-            <button type="button" class="deposit-option-btn" data-value="10.00">R$ 10,00</button>
-            <button type="button" class="deposit-option-btn" data-value="25.00">R$ 25,00</button>
-            <button type="button" class="deposit-option-btn" data-value="50.00">R$ 50,00</button>
-        </div>
-
-        <div class="custom-deposit-input">
-            <label for="custom-deposit-amount">Outro Valor (Mínimo R$ 100,00):</label>
-            <input type="number" id="custom-deposit-amount" min="100" step="0.01" placeholder="Ex: 100.00">
-            <button id="deposit-custom-btn" class="btn btn-primary" disabled>Fazer Depósito</button>
         </div>
     </div>
 
@@ -1456,66 +884,55 @@
     <div id="withdrawModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="material-icons">remove_circle</i> Solicitar Saque</h3>
-                <button class="modal-close" id="closeWithdrawModal">
-                    <i class="material-icons">close</i>
-                </button>
+                <h3><i class="material-icons">arrow_upward</i> Sacar</h3>
+                <button class="modal-close" id="closeWithdrawModal"><i class="material-icons">close</i></button>
             </div>
-
             <div class="modal-body">
-                <!-- Alerta de chave PIX não cadastrada -->
-                <div id="pixKeyWarning" style="display: none; background: rgba(255, 193, 7, 0.2); border: 1px solid rgba(255, 193, 7, 0.5); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <i class="material-icons" style="color: #ffc107; font-size: 24px;">warning</i>
-                        <div>
-                            <p style="margin: 0; color: #ffc107; font-weight: 600;">Chave PIX não cadastrada</p>
-                            <p style="margin: 5px 0 0 0; color: rgba(255, 255, 255, 0.8); font-size: 0.9rem;">
-                                Você precisa cadastrar uma chave PIX antes de solicitar um saque.
-                            </p>
-                        </div>
-                    </div>
+                <!-- Avisos -->
+                <div id="pixKeyWarning" style="display: none; background: rgba(255, 193, 7, 0.15); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                    <p style="color: #ffc107; margin: 0; font-size: 0.9rem;">⚠️ Cadastre uma chave PIX antes.</p>
                 </div>
-
-                <!-- Informação da chave PIX cadastrada -->
-                <div id="pixKeyInfo" style="display: none; background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span style="color: rgba(255, 255, 255, 0.7); font-size: 0.85rem;">Chave PIX Cadastrada:</span>
-                        <span id="pixKeyInfoType" style="color: #00ff88; font-weight: 700; font-size: 0.85rem;"></span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span id="pixKeyInfoValue" style="color: white; font-weight: 600; font-family: 'Courier New', monospace;"></span>
-                        <i class="material-icons" style="color: #00ff88; font-size: 20px;">check_circle</i>
-                    </div>
+                
+                <div id="pixKeyInfo" style="display: none; background: rgba(0, 255, 136, 0.1); padding: 10px; border-radius: 10px; margin-bottom: 15px;">
+                    <p style="margin:0; font-size:0.8rem; color:var(--primary);">Enviando para: <span id="pixKeyInfoValue" style="color:white; font-weight:bold;"></span></p>
                 </div>
-
-                <p class="modal-description">Informe o valor do saque:</p>
 
                 <form id="withdrawForm">
                     <div class="form-group">
-                        <label for="withdrawAmount">Valor do Saque (R$)</label>
-                        <input type="number" id="withdrawAmount" min="20" step="0.01" required placeholder="Mínimo: R$ 20,00">
-                        <small style="display: block; margin-top: 8px; color: rgba(255, 255, 255, 0.6); font-size: 0.85rem;">
-                            Valor mínimo: R$ 20,00
-                        </small>
+                        <label>Valor (Mín. R$ 20,00)</label>
+                        <input type="number" id="withdrawAmount" min="20" step="0.01" required>
                     </div>
-
-                    <div class="withdraw-info">
-                        <i class="material-icons">schedule</i>
-                        <p>O saque será processado em até 24 horas úteis.</p>
+                    <div class="withdraw-info" style="font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 5px; margin-bottom: 15px;">
+                        <i class="material-icons" style="font-size: 16px;">schedule</i>
+                        <span>Processamento em até 24h úteis.</span>
                     </div>
-
-                    <button type="submit" class="btn btn-primary" id="btnConfirmWithdraw">
-                        <i class="material-icons">check_circle</i>
-                        Confirmar Saque
-                    </button>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">CONFIRMAR SAQUE</button>
                 </form>
-
                 <div id="withdrawLoading" class="modal-loading" style="display: none;">
-                    <div class="spinner"></div>
-                    <p>Processando solicitação...</p>
+                    <div class="spinner-neo"></div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Chat Flutuante -->
+    <div id="chatButton" class="chat-float-button">
+        <i class="material-icons">support_agent</i>
+    </div>
+
+    <!-- Popup de Chat -->
+    <div id="chatPopup" class="chat-popup">
+        <div class="chat-header">
+            <h3>Suporte SLICED</h3>
+            <button id="closeChat" class="chat-close-btn"><i class="material-icons">close</i></button>
+        </div>
+        <div id="chatMessages" class="chat-messages">
+            <!-- Mensagens -->
+        </div>
+        <form id="chatForm" class="chat-input-form">
+            <input type="text" id="messageInput" placeholder="Digite..." required autocomplete="off">
+            <button type="submit"><i class="material-icons">send</i></button>
+        </form>
     </div>
 
     <!-- Bottom Navbar -->
@@ -1529,30 +946,27 @@
             <span>Termos</span>
         </a>
         <a href="../afiliados/afiliados.html" class="nav-item">
-            <i class="material-icons">group_add</i>
+            <i class="material-icons">hub</i>
             <span>Afiliados</span>
         </a>
         <a href="/usuário/vakinha/vakinha.html" class="nav-item">
-            <i class="material-icons">favorite</i>
+            <i class="material-icons">savings</i>
             <span>Vakinha</span>
         </a>
-        <a href="/usuário/anuncie/anuncie.html" class="nav-item">
+        <a href="../anuncie/anuncie.html" class="nav-item">
             <i class="material-icons">campaign</i>
             <span>Anuncie</span>
         </a>
-        <a href="perfil.html" class="nav-item active">
+        <a href="#" class="nav-item active">
             <i class="material-icons">person</i>
             <span>Perfil</span>
         </a>
     </nav>
 
+    <!-- Scripts do Perfil -->
     <script type="module" src="/usuário/perfil/perfil.js"></script>
 
-    <!-- Firebase Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-
+    <!-- Firebase Scripts (Necessário para o Chat) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -1569,7 +983,6 @@
             measurementId: "G-GDYH409PE2"
         };
 
-        // Inicializar apenas se ainda não foi inicializado
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -1583,29 +996,24 @@
         const loadingSection = document.getElementById('loadingSection');
         const contentSection = document.getElementById('contentSection');
         const successMessage = document.getElementById('successMessage');
-
-        // Variável para armazenar o objeto usuário para updates
         let currentUser = null; 
 
-        // Inicializar rastreamento global (Online Status e Preenchimento de Dados)
+        // Inicializar rastreamento global
         iniciarRastreamentoGlobal({
             onUserLoaded: (dados) => {
-                // Armazenar referência para uso nos formulários de update
                 currentUser = { uid: dados.uid, ...dados };
 
-                // Atualizar header
-                const elUserName = document.getElementById('userName');
-                const elUserEmail = document.getElementById('userEmail');
-                if(elUserName) elUserName.textContent = dados.nomeCompleto;
-                if(elUserEmail) elUserEmail.textContent = dados.email;
+                // Preencher Header
+                document.getElementById('userName').textContent = dados.nomeCompleto;
+                document.getElementById('userEmail').textContent = dados.email;
 
-                // Preencher formulário de dados pessoais
+                // Preencher Dados Pessoais
                 if(document.getElementById('nomeCompleto')) document.getElementById('nomeCompleto').value = dados.nomeCompleto || '';
                 if(document.getElementById('email')) document.getElementById('email').value = dados.email || '';
                 if(document.getElementById('cpf')) document.getElementById('cpf').value = dados.cpf || '';
                 if(document.getElementById('telefone')) document.getElementById('telefone').value = dados.telefone || '';
 
-                // Preencher formulário de endereço
+                // Preencher Endereço
                 if(document.getElementById('cep')) document.getElementById('cep').value = dados.cep || '';
                 if(document.getElementById('cidade')) document.getElementById('cidade').value = dados.cidade || '';
                 if(document.getElementById('estado')) document.getElementById('estado').value = dados.estado || '';
@@ -1617,9 +1025,6 @@
                 // Mostrar conteúdo
                 loadingSection.style.display = 'none';
                 contentSection.style.display = 'block';
-
-                // 🛑 REMOVIDO: loadBalance() 
-                // O arquivo perfil.js externo agora cuida 100% do saldo.
             },
             onLogout: () => {
                 window.location.href = '../../login/login.html';
@@ -1627,31 +1032,10 @@
         });
 
         // Máscaras de formatação
-        function formatCPF(value) {
-            return value
-                .replace(/\D/g, '')
-                .replace(/(\d{3})(\d)/, '$1.$2')
-                .replace(/(\d{3})(\d)/, '$1.$2')
-                .replace(/(\d{3})(\d{1,2})/, '$1-$2')
-                .replace(/(-\d{2})\d+?$/, '$1');
-        }
+        function formatCPF(value) { return value.replace(/\D/g, '').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})/, '$1-$2').replace(/(-\d{2})\d+?$/, '$1'); }
+        function formatPhone(value) { return value.replace(/\D/g, '').replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2').replace(/(-\d{4})\d+?$/, '$1'); }
+        function formatCEP(value) { return value.replace(/\D/g, '').replace(/(\d{5})(\d)/, '$1-$2').replace(/(-\d{3})\d+?$/, '$1'); }
 
-        function formatPhone(value) {
-            return value
-                .replace(/\D/g, '')
-                .replace(/(\d{2})(\d)/, '($1) $2')
-                .replace(/(\d{5})(\d)/, '$1-$2')
-                .replace(/(-\d{4})\d+?$/, '$1');
-        }
-
-        function formatCEP(value) {
-            return value
-                .replace(/\D/g, '')
-                .replace(/(\d{5})(\d)/, '$1-$2')
-                .replace(/(-\d{3})\d+?$/, '$1');
-        }
-
-        // Aplicar máscaras (Verificando se elementos existem para evitar erros)
         const inputCpf = document.getElementById('cpf');
         const inputTel = document.getElementById('telefone');
         const inputCep = document.getElementById('cep');
@@ -1660,53 +1044,41 @@
         if(inputTel) inputTel.addEventListener('input', (e) => e.target.value = formatPhone(e.target.value));
         if(inputCep) inputCep.addEventListener('input', (e) => e.target.value = formatCEP(e.target.value));
 
-        // Show success message
         function showSuccess(message) {
             if(!successMessage) return;
             successMessage.textContent = message;
-            successMessage.classList.add('show');
-            setTimeout(() => {
-                successMessage.classList.remove('show');
-            }, 3000);
+            successMessage.style.display = 'block';
+            setTimeout(() => { successMessage.style.display = 'none'; }, 3000);
         }
 
-        // --- FORM SUBMISSIONS (Usam currentUser definido no onLoad) ---
-
-        // Salvar dados pessoais
+        // Updates
         const formDados = document.getElementById('formDadosPessoais');
         if(formDados) {
             formDados.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 if (!currentUser) return;
-
                 try {
                     const dadosAtualizados = {
                         nomeCompleto: document.getElementById('nomeCompleto').value,
                         cpf: document.getElementById('cpf').value,
                         telefone: document.getElementById('telefone').value
                     };
-
                     const resultado = await atualizarDadosUsuario(currentUser.uid, dadosAtualizados);
-
                     if (resultado.success) {
-                        showSuccess('✓ Dados pessoais atualizados com sucesso!');
+                        showSuccess('✓ Dados atualizados!');
                         document.getElementById('userName').textContent = dadosAtualizados.nomeCompleto;
                     } else {
-                        alert('Erro ao atualizar dados: ' + (resultado.error || 'Erro desconhecido'));
+                        alert('Erro ao atualizar: ' + resultado.error);
                     }
-                } catch (error) {
-                    console.error('Erro:', error);
-                }
+                } catch (error) { console.error(error); }
             });
         }
 
-        // Salvar endereço
         const formEnd = document.getElementById('formEndereco');
         if(formEnd) {
             formEnd.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 if (!currentUser) return;
-
                 try {
                     const dadosAtualizados = {
                         cep: document.getElementById('cep').value,
@@ -1717,25 +1089,14 @@
                         numero: document.getElementById('numero').value,
                         complemento: document.getElementById('complemento').value
                     };
-
                     const resultado = await atualizarDadosUsuario(currentUser.uid, dadosAtualizados);
-
-                    if (resultado.success) {
-                        showSuccess('✓ Endereço atualizado com sucesso!');
-                    } else {
-                        alert('Erro ao atualizar endereço: ' + (resultado.error || 'Erro desconhecido'));
-                    }
-                } catch (error) {
-                    console.error('Erro:', error);
-                }
+                    if (resultado.success) showSuccess('✓ Endereço atualizado!');
+                    else alert('Erro ao atualizar: ' + resultado.error);
+                } catch (error) { console.error(error); }
             });
         }
 
-        // ============================================
-        // SISTEMA DE CHAT COM SUPORTE (FIREBASE FIRESTORE)
-        // ============================================
-        // Mantido igual pois funciona independente do server2.js
-        
+        // ================= CHAT LOGIC =================
         const chatButton = document.getElementById('chatButton');
         const chatPopup = document.getElementById('chatPopup');
         const closeChat = document.getElementById('closeChat');
@@ -1760,19 +1121,9 @@
             });
         }
 
-        function formatTime(timestamp) {
-            if (!timestamp) return '';
-            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-            const hours = date.getHours().toString().padStart(2, '0');
-            const minutes = date.getMinutes().toString().padStart(2, '0');
-            return `${hours}:${minutes}`;
-        }
-
         async function loadChatMessages() {
-            if (!currentUser || typeof firebase === 'undefined') return;
-
-            const chatRef = db.collection('SLICED').doc(currentUser.uid)
-                .collection('Chat').doc('support');
+            if (!currentUser) return;
+            const chatRef = db.collection('SLICED').doc(currentUser.uid).collection('Chat').doc('support');
 
             chatListener = chatRef.collection('messages')
                 .orderBy('timestamp', 'asc')
@@ -1780,23 +1131,16 @@
                     chatMessages.innerHTML = '';
                     snapshot.forEach((doc) => {
                         const msg = doc.data();
-                        addMessageToChat(msg.text, msg.sender, msg.timestamp);
+                        addMessageToChat(msg.text, msg.sender);
                     });
                     chatMessages.scrollTop = chatMessages.scrollHeight;
                 });
         }
 
-        function addMessageToChat(text, sender, timestamp) {
+        function addMessageToChat(text, sender) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `chat-message ${sender}`;
-            const timeStr = formatTime(timestamp);
-
-            messageDiv.innerHTML = `
-                <div class="message-content">
-                    <p>${text}</p>
-                    <span class="message-time">${timeStr}</span>
-                </div>
-            `;
+            messageDiv.innerHTML = `<div class="message-content"><p>${text}</p></div>`;
             chatMessages.appendChild(messageDiv);
         }
 
@@ -1804,12 +1148,10 @@
             chatForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const message = messageInput.value.trim();
-                if (!message || !currentUser || typeof firebase === 'undefined') return;
+                if (!message || !currentUser) return;
 
                 try {
-                    const chatRef = db.collection('SLICED').doc(currentUser.uid)
-                        .collection('Chat').doc('support');
-
+                    const chatRef = db.collection('SLICED').doc(currentUser.uid).collection('Chat').doc('support');
                     await chatRef.set({
                         userId: currentUser.uid,
                         userName: currentUser.nomeCompleto || 'Usuário',
@@ -1824,457 +1166,10 @@
                         sender: 'user',
                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
-
                     messageInput.value = '';
-                } catch (error) {
-                    console.error('Erro ao enviar mensagem:', error);
-                }
+                } catch (error) { console.error('Erro no chat:', error); }
             });
         }
     </script>
-
-    <!-- Chat Flutuante -->
-    <div id="chatButton" class="chat-float-button">
-        <i class="material-icons">chat</i>
-    </div>
-
-    <!-- Popup de Chat -->
-    <div id="chatPopup" class="chat-popup">
-        <div class="chat-header">
-            <div class="chat-header-info">
-                <i class="material-icons">support_agent</i>
-                <div>
-                    <h3>Suporte SLICED</h3>
-                    <p>Estamos aqui para ajudar!</p>
-                </div>
-            </div>
-            <button id="closeChat" class="chat-close-btn">
-                <i class="material-icons">close</i>
-            </button>
-        </div>
-        
-        <!-- Notificação de 24 horas -->
-        <div class="chat-notification">
-            <i class="material-icons">schedule</i>
-            <div class="notification-text">
-                <strong>⏰ Mensagens temporárias</strong>
-                <p>Todas as mensagens duram até 24 horas e depois serão excluídas permanentemente.</p>
-            </div>
-        </div>
-        
-        <div id="chatMessages" class="chat-messages"></div>
-        <form id="chatForm" class="chat-input-form">
-            <input type="text" id="messageInput" placeholder="Digite sua mensagem..." required autocomplete="off">
-            <button type="submit">
-                <i class="material-icons">send</i>
-            </button>
-        </form>
-    </div>
-
-    <style>
-        /* Chat Flutuante */
-        .chat-float-button {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.4);
-            transition: all 0.3s ease;
-            z-index: 999;
-            animation: pulse 2s infinite;
-        }
-
-        .chat-float-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 30px rgba(0, 255, 136, 0.6);
-        }
-
-        .chat-float-button .material-icons {
-            color: white;
-            font-size: 30px;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                box-shadow: 0 4px 20px rgba(0, 255, 136, 0.4);
-            }
-
-            50% {
-                box-shadow: 0 4px 30px rgba(0, 255, 136, 0.8);
-            }
-        }
-
-        /* Popup de Chat */
-        .chat-popup {
-            display: none;
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 400px;
-            height: 600px;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            flex-direction: column;
-            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            animation: slideInUp 0.3s ease;
-        }
-
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
-            border-radius: 20px 20px 0 0;
-        }
-
-        .chat-header-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .chat-header-info .material-icons {
-            font-size: 32px;
-            color: white;
-        }
-
-        .chat-header-info h3 {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: white;
-        }
-
-        .chat-header-info p {
-            margin: 0;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .chat-close-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .chat-close-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: rotate(90deg);
-        }
-
-        .chat-close-btn .material-icons {
-            color: white;
-            font-size: 20px;
-        }
-
-        /* Notificação de 24 horas */
-        .chat-notification {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 15px 20px;
-            background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 152, 0, 0.1) 100%);
-            border-bottom: 1px solid rgba(255, 193, 7, 0.3);
-            border-left: 4px solid #ffc107;
-            margin: 0;
-            animation: slideInNotification 0.5s ease;
-        }
-
-        @keyframes slideInNotification {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .chat-notification .material-icons {
-            color: #ffc107;
-            font-size: 24px;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        .notification-text {
-            flex: 1;
-        }
-
-        .notification-text strong {
-            display: block;
-            color: #ffc107;
-            font-size: 0.9rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .notification-text p {
-            margin: 0;
-            color: rgba(255, 255, 255, 0.85);
-            font-size: 0.8rem;
-            line-height: 1.4;
-        }
-
-        .chat-messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .chat-messages::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .chat-messages::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: rgba(0, 255, 136, 0.5);
-            border-radius: 3px;
-        }
-
-        .chat-message {
-            display: flex;
-            margin-bottom: 8px;
-        }
-
-        .chat-message.user {
-            justify-content: flex-end;
-        }
-
-        .chat-message.support {
-            justify-content: flex-start;
-        }
-
-        .message-content {
-            max-width: 75%;
-            padding: 12px 16px;
-            border-radius: 15px;
-            position: relative;
-        }
-
-        .chat-message.user .message-content {
-            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-
-        .chat-message.support .message-content {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-bottom-left-radius: 4px;
-        }
-
-        .message-content p {
-            margin: 0 0 4px 0;
-            font-size: 0.95rem;
-            line-height: 1.4;
-            word-wrap: break-word;
-        }
-
-        .message-time {
-            font-size: 0.7rem;
-            opacity: 0.7;
-            display: block;
-            text-align: right;
-            margin-top: 4px;
-        }
-
-        .chat-input-form {
-            display: flex;
-            padding: 20px;
-            gap: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .chat-input-form input {
-            flex: 1;
-            padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 25px;
-            color: white;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.95rem;
-        }
-
-        .chat-input-form input:focus {
-            outline: none;
-            border-color: #00ff88;
-            background: rgba(255, 255, 255, 0.12);
-        }
-
-        .chat-input-form button {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
-            border: none;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .chat-input-form button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.5);
-        }
-
-        .chat-input-form button .material-icons {
-            color: white;
-            font-size: 22px;
-        }
-
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .chat-popup {
-                width: calc(100% - 20px);
-                height: calc(100vh - 200px);
-                bottom: 110px;
-                /* Acima da navbar */
-                right: 10px;
-                left: 10px;
-                margin: 0 auto;
-            }
-
-            .chat-float-button {
-                bottom: 110px;
-                /* Acima da navbar */
-                right: 20px;
-                width: 55px;
-                height: 55px;
-            }
-
-            .chat-header-info h3 {
-                font-size: 1rem;
-            }
-
-            .chat-header-info p {
-                font-size: 0.75rem;
-            }
-
-            .chat-notification {
-                padding: 12px 15px;
-            }
-
-            .chat-notification .material-icons {
-                font-size: 20px;
-            }
-
-            .notification-text strong {
-                font-size: 0.85rem;
-            }
-
-            .notification-text p {
-                font-size: 0.75rem;
-            }
-
-            .message-content {
-                max-width: 85%;
-            }
-
-            .chat-messages {
-                padding: 15px;
-            }
-
-            .chat-input-form {
-                padding: 15px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .chat-popup {
-                height: calc(100vh - 180px);
-                bottom: 100px;
-            }
-
-            .chat-float-button {
-                bottom: 100px;
-                right: 15px;
-                width: 50px;
-                height: 50px;
-            }
-
-            .chat-float-button .material-icons {
-                font-size: 26px;
-            }
-
-            .chat-notification {
-                padding: 10px 12px;
-            }
-
-            .chat-notification .material-icons {
-                font-size: 18px;
-            }
-
-            .notification-text strong {
-                font-size: 0.8rem;
-            }
-
-            .notification-text p {
-                font-size: 0.7rem;
-            }
-
-            .message-content {
-                max-width: 90%;
-                padding: 10px 14px;
-            }
-
-            .chat-input-form input {
-                font-size: 0.9rem;
-                padding: 10px 14px;
-            }
-
-            .chat-input-form button {
-                width: 40px;
-                height: 40px;
-            }
-
-            .chat-input-form button .material-icons {
-                font-size: 20px;
-            }
-        }
-    </style>
 </body>
-
 </html>

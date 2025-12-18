@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vakinha Solidária - SLICED</title>
     <link rel="icon" href="/imgs/LOGO-SLICED.png" type="image/png">
     <meta name="description" content="Apoie a manutenção da plataforma SLICED">
@@ -10,95 +11,84 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    
+    <link rel="stylesheet" href="../../controle-dados/balance-widget.css">
     <style>
+        /* ================= RESET & VARS ================= */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         :root {
-            --primary-color: #00ff88;
-            --primary-color-escuro: #00cc6e;
-            --dark-bg: #000000;
-            --text-primary: #FFFFFF;
-            --gradient-primary: linear-gradient(135deg, #000000 0%, #1a0000 25%, #00cc6e 50%, #1a0000 75%, #000000 100%);
+            --primary: #00ff88;
+            --primary-dark: #00cc6e;
+            --accent: #FFD700;
+            --bg-dark: #050505;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --warning-bg: rgba(255, 165, 0, 0.1);
+            --warning-border: rgba(255, 165, 0, 0.3);
+            --warning-text: #FFC107;
         }
 
         body {
-            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--gradient-primary);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 255, 136, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.08) 0%, transparent 40%);
+            color: var(--text-main);
             min-height: 100vh;
-            color: var(--text-primary);
-            padding-bottom: 100px;
+            padding-bottom: 110px;
             overflow-x: hidden;
         }
 
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        /* Partículas */
-        .particles {
+        /* Textura de Ruído */
+        body::before {
+            content: "";
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
             pointer-events: none;
+            z-index: 9999;
         }
 
-        .particle {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: rgba(0, 255, 136, 0.3);
-            border-radius: 50%;
-            animation: floatUp linear infinite;
-            bottom: -10px;
-        }
-
-        @keyframes floatUp {
-            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
-        }
-
-        /* Header */
+        /* ================= HEADER ================= */
         .header {
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(20px);
-            padding: 20px 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-            z-index: 10;
+            border-bottom: 1px solid var(--glass-border);
         }
 
         .header-logo {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
         }
 
         .header-logo img {
-            width: 50px;
-            height: 50px;
-            object-fit: contain;
-            filter: drop-shadow(0 0 10px rgba(0, 255, 136, 0.6));
+            width: 40px;
+            height: 40px;
+            filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.4));
         }
 
         .header-logo h1 {
-            font-size: 1.5rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, #ffffff 0%, #00ff88 50%, #ffffff 100%);
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, var(--primary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -106,100 +96,154 @@
         .header-user {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
         }
 
         .user-info {
             text-align: right;
+            line-height: 1.2;
         }
 
         .user-name {
-            font-weight: 700;
-            font-size: 1rem;
-        }
-
-        .user-email {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            font-weight: 600;
+            max-width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .btn-logout {
-            padding: 8px 20px;
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-logout:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 50, 50, 0.2);
+            border-color: rgba(255, 50, 50, 0.5);
         }
 
-        /* Main Container */
-        .main-container {
+        /* ================= CONTAINER ================= */
+        .container {
             max-width: 800px;
-            margin: 40px auto;
-            padding: 0 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            margin: 0 auto;
+            padding: 20px;
+            opacity: 0;
+            animation: fadeInPage 0.8s forwards;
         }
 
+        @keyframes fadeInPage {
+            to { opacity: 1; }
+        }
+
+        /* ================= VAKINHA CARD ================= */
         .vakinha-card {
-            background: rgba(20, 20, 20, 0.6);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(0, 255, 136, 0.3);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
             border-radius: 24px;
-            padding: 40px;
-            width: 100%;
+            padding: 40px 30px;
             text-align: center;
-            box-shadow: 0 0 40px rgba(0, 255, 136, 0.1);
             position: relative;
             overflow: hidden;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.4);
+            margin-top: 20px;
         }
 
+        /* Glow effect on top */
         .vakinha-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            top: 0; left: 0; width: 100%; height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            box-shadow: 0 0 20px var(--primary);
         }
 
         .icon-header {
-            font-size: 64px;
-            color: #00ff88;
+            font-size: 4rem;
+            color: var(--primary);
             margin-bottom: 20px;
-            text-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+            filter: drop-shadow(0 0 15px rgba(0, 255, 136, 0.3));
+            animation: pulse 3s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
         }
 
         .card-title {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 900;
             margin-bottom: 15px;
-            color: white;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .card-description {
-            font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            color: var(--text-muted);
             line-height: 1.6;
             margin-bottom: 30px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
         }
 
+        .card-description strong {
+            color: #fff;
+            font-weight: 700;
+        }
+
+        /* GOALS GRID */
+        .goals-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .goal-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 15px 10px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .goal-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .goal-item i {
+            color: var(--primary);
+            font-size: 28px;
+        }
+
+        .goal-item span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* PIX SECTION */
         .pix-container {
             background: rgba(0, 0, 0, 0.3);
-            border: 2px dashed rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
             padding: 25px;
-            margin: 30px 0;
+            margin-bottom: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -207,64 +251,59 @@
         }
 
         .pix-label {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #00ff88;
+            color: var(--primary);
             font-weight: 700;
         }
 
         .pix-key-display {
             font-family: 'Courier New', monospace;
-            font-size: 1.2rem;
-            color: white;
+            font-size: 1.1rem;
+            color: #fff;
             background: rgba(255, 255, 255, 0.05);
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 12px 20px;
+            border-radius: 10px;
             word-break: break-all;
             width: 100%;
+            border: 1px solid var(--glass-border);
         }
 
         .btn-copy-pix {
-            background: #00ff88;
-            color: black;
+            background: var(--primary);
+            color: #000;
             border: none;
-            padding: 12px 30px;
+            padding: 14px 35px;
             font-size: 1rem;
-            font-weight: 700;
+            font-weight: 800;
             border-radius: 50px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+            gap: 10px;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
         }
 
-        .btn-copy-pix:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.6);
-            background: #00cc6e;
-        }
+        .btn-copy-pix:active { transform: scale(0.95); }
 
-        .btn-copy-pix:active {
-            transform: scale(0.98);
-        }
-
+        /* DISCLAIMER */
         .disclaimer-box {
-            margin-top: 20px;
+            background: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            border-radius: 12px;
             padding: 15px;
-            background: rgba(255, 165, 0, 0.1);
-            border-left: 3px solid #ffa500;
-            border-radius: 8px;
             text-align: left;
-            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
 
         .disclaimer-title {
-            color: #ffa500;
+            color: var(--warning-text);
             font-weight: 700;
-            margin-bottom: 5px;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -272,51 +311,28 @@
 
         .disclaimer-text {
             color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            line-height: 1.4;
         }
 
-        .goals-list {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 30px;
-        }
-
-        .goal-item {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .goal-item i {
-            color: #00ff88;
-            font-size: 24px;
-        }
-
-        .goal-item span {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        /* Bottom Navbar */
+        /* ================= BOTTOM NAVBAR ================= */
         .bottom-navbar {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
+            width: 90%;
+            max-width: 500px;
+            background: rgba(15, 15, 15, 0.9);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 25px;
-            padding: 15px 30px;
+            padding: 12px 25px;
             display: flex;
-            gap: 30px;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
             z-index: 1000;
         }
 
@@ -324,229 +340,180 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 8px 12px;
-            border-radius: 12px;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.5);
             text-decoration: none;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .nav-item:hover, .nav-item.active {
-            background: rgba(0, 255, 136, 0.15);
-            color: #00ff88;
-            transform: translateY(-5px);
+            transition: all 0.3s ease;
+            position: relative;
+            width: 50px;
         }
 
         .nav-item .material-icons {
             font-size: 26px;
+            margin-bottom: 4px;
+            transition: 0.3s;
         }
 
         .nav-item span {
-            font-size: 0.7rem;
+            font-size: 10px;
             font-weight: 600;
-            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0;
+            transform: translateY(5px);
+            transition: 0.3s;
+            position: absolute;
+            bottom: -15px;
         }
 
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                padding: 15px;
-            }
-            .header-user {
-                width: 100%;
-                justify-content: space-between;
-            }
-            .user-info {
-                text-align: left;
-            }
-            .card-title {
-                font-size: 1.8rem;
-            }
-            .goals-list {
-                grid-template-columns: 1fr;
-            }
-            .pix-key-display {
-                font-size: 0.9rem;
-            }
-            .bottom-navbar {
-                width: 90%;
-                gap: 15px;
-                padding: 10px 15px;
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item.active .material-icons {
+            transform: translateY(-5px);
+            filter: drop-shadow(0 0 8px var(--primary));
+        }
+
+        .nav-item.active span {
+            opacity: 1;
+            transform: translateY(-2px);
+            color: var(--primary);
+        }
+
+        /* ================= LOADING & WIDGET LOGIC ================= */
+        .loading-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .spinner-neo {
+            width: 50px;
+            height: 50px;
+            border: 3px solid transparent;
+            border-top-color: var(--primary);
+            border-right-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Comportamento do Widget de Saldo (Mobile Relativo) */
+        @media (max-width: 1023px) {
+            #balance-widget {
+                position: relative !important;
+                top: auto !important;
+                right: auto !important;
+                left: auto !important;
+                bottom: auto !important;
+                width: 100% !important;
+                margin-top: 0 !important;
+                margin-bottom: 20px !important;
+                z-index: 10;
+                transform: none !important;
             }
         }
 
-        /* =========================================
-   AJUSTES GERAIS PARA CELULAR (Max 600px)
-   Copie e cole no final do seu CSS
-   ========================================= */
-
-@media (max-width: 600px) {
-    
-    /* --- 1. HEADER (Menu Superior) COMPACTO --- */
-    .header {
-        flex-direction: row !important; /* Força ficar tudo na mesma linha */
-        padding: 5px 15px !important;   /* Pouco espaço nas bordas */
-        height: 55px;                   /* Altura fixa bem menor */
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-    }
-
-    /* Logo: Mantém apenas a imagem pequena */
-    .header-logo {
-        gap: 0;
-    }
-    .header-logo img {
-        width: 32px;
-        height: 32px;
-    }
-    .header-logo h1 {
-        display: none !important; /* Esconde o texto 'SLICED' */
-    }
-
-    /* Área do Usuário: Força linha única */
-    .header-user {
-        width: auto !important;
-        flex-direction: row !important;
-        gap: 8px;
-        align-items: center;
-        justify-content: flex-end;
-    }
-
-    /* Informações de Texto do Usuário */
-    .user-info {
-        text-align: right;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    .user-email {
-        display: none !important; /* Esconde o Email */
-    }
-    .user-name {
-        font-size: 0.85rem;
-        margin-bottom: 0;
-        white-space: nowrap;      /* Impede quebra de linha */
-        max-width: 90px;          /* Limita largura para não estourar */
-        overflow: hidden;
-        text-overflow: ellipsis;  /* Coloca '...' se o nome for grande */
-    }
-
-    /* Botão Sair compacto */
-    .btn-logout {
-        padding: 5px 12px;
-        font-size: 0.75rem;
-        border-radius: 6px;
-    }
-
-
-    /* --- 2. NAVBAR (Menu Inferior) AJUSTADA --- */
-    .bottom-navbar {
-        width: 98%;              /* Ocupa quase toda a largura */
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: 5px;             /* Cola no fundo */
-        padding: 6px 2px;        /* Padding mínimo */
-        gap: 2px;                /* Espaço mínimo entre itens */
-        border-radius: 16px;
-        justify-content: space-between;
-    }
-
-    .nav-item {
-        padding: 4px 0;
-        min-width: 0;            /* Permite encolher o quanto precisar */
-        flex: 1;                 /* Divide o espaço igualmente por 6 */
-        border-radius: 8px;
-    }
-
-    /* Ícone menor */
-    .nav-item .material-icons {
-        font-size: 20px !important;
-        margin-bottom: 2px;
-    }
-
-    /* Texto minúsculo para caber */
-    .nav-item span {
-        font-size: 8px !important;
-        letter-spacing: 0;
-        display: block;
-        white-space: nowrap;
-    }
-    
-    /* Ajuste do hover para não pular */
-    .nav-item:hover {
-        transform: translateY(-2px);
-    }
-}
+        /* ================= MOBILE ADJUSTMENTS ================= */
+        @media (max-width: 600px) {
+            .header-logo h1 { display: none; }
+            .user-email { display: none; }
+            .container { padding: 15px; }
+            .vakinha-card { padding: 30px 20px; }
+            .card-title { font-size: 1.8rem; }
+            .goals-list { grid-template-columns: 1fr; }
+            
+            .nav-item span { display: none; }
+            .nav-item.active .material-icons { transform: translateY(0); }
+            .bottom-navbar { padding: 15px 30px; bottom: 15px; border-radius: 20px; }
+        }
     </style>
 </head>
+
 <body>
-    <!-- Partículas de fundo -->
-    <div class="particles" id="particles"></div>
+    <!-- Tela de Carregamento -->
+    <div id="loadingSection" class="loading-screen">
+        <div class="spinner-neo"></div>
+        <p style="margin-top: 20px; color: var(--text-muted); font-size: 0.9rem;">Carregando...</p>
+    </div>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="header-logo">
-            <img src="/imgs/LOGO-SLICED.png" alt="SLICED Logo">
-            <h1>SLICED</h1>
-        </div>
-        <div class="header-user">
-            <div class="user-info">
-                <div class="user-name" id="userName">Carregando...</div>
-                <div class="user-email" id="userEmail"></div>
+    <!-- Conteúdo Principal -->
+    <div id="contentSection" style="display: none;">
+        
+        <!-- Header -->
+        <header class="header">
+            <div class="header-logo">
+                <img src="/imgs/LOGO-SLICED.png" alt="SLICED">
+                <h1>SLICED</h1>
             </div>
-            <button class="btn-logout" id="btnLogout">Sair</button>
-        </div>
-    </header>
-
-    <div class="main-container">
-        <div class="vakinha-card">
-            <i class="material-icons icon-header">volunteer_activism</i>
-            <h2 class="card-title">Vakinha Solidária</h2>
-            
-            <p class="card-description">
-                Ajude o <strong>SLICED</strong> a continuar no ar! Sua contribuição é fundamental para cobrirmos os custos de 
-                manutenção da plataforma, servidores de banco de dados, mão de obra da equipe técnica e investimentos em marketing para crescer nossa comunidade.
-            </p>
-
-            <div class="goals-list">
-                <div class="goal-item">
-                    <i class="material-icons">storage</i>
-                    <span>Servidores & Banco de Dados</span>
+            <div class="header-user">
+                <div class="user-info">
+                    <div class="user-name" id="userName">Usuário</div>
+                    <div class="user-email" id="userEmail" style="font-size: 10px; color: #888;">email@exemplo.com</div>
                 </div>
-                <div class="goal-item">
-                    <i class="material-icons">engineering</i>
-                    <span>Manutenção Técnica</span>
-                </div>
-                <div class="goal-item">
-                    <i class="material-icons">campaign</i>
-                    <span>Marketing & Expansão</span>
-                </div>
-            </div>
-
-            <div class="pix-container">
-                <span class="pix-label">Chave PIX (E-mail ou Aleatória)</span>
-                <!-- SUBSTITUA ABAIXO PELA SUA CHAVE REAL -->
-                <div class="pix-key-display" id="pixKeyText">a2e2049a-811a-4948-ba69-6e661432f029</div>
-                
-                <button class="btn-copy-pix" onclick="copyPixKey()">
-                    <i class="material-icons">content_copy</i>
-                    Copiar Chave PIX
+                <button class="btn-logout" id="btnLogout">
+                    <i class="material-icons" style="font-size: 18px;">logout</i>
                 </button>
             </div>
+        </header>
 
-            <div class="disclaimer-box">
-                <div class="disclaimer-title">
-                    <i class="material-icons">info</i>
-                    Informação de Segurança
-                </div>
-                <p class="disclaimer-text">
-                    Ao realizar a transferência, certifique-se de que o destinatário apareça como <strong>grupodiasz</strong>. 
-                    Todos os valores arrecadados são reinvestidos integralmente no ecossistema SLICED.
+        <div class="container">
+            
+            <!-- Widget de Saldo -->
+            <div id="balance-widget" class="balance-widget"></div>
+
+            <!-- Card Vakinha -->
+            <div class="vakinha-card">
+                <i class="material-icons icon-header">volunteer_activism</i>
+                <h2 class="card-title">Vakinha Solidária</h2>
+                
+                <p class="card-description">
+                    Ajude o <strong>SLICED</strong> a continuar no ar! Sua contribuição é fundamental para cobrirmos os custos de 
+                    manutenção da plataforma, servidores e investimentos em marketing.
                 </p>
+
+                <div class="goals-list">
+                    <div class="goal-item">
+                        <i class="material-icons">storage</i>
+                        <span>Servidores</span>
+                    </div>
+                    <div class="goal-item">
+                        <i class="material-icons">engineering</i>
+                        <span>Manutenção</span>
+                    </div>
+                    <div class="goal-item">
+                        <i class="material-icons">campaign</i>
+                        <span>Marketing</span>
+                    </div>
+                </div>
+
+                <div class="pix-container">
+                    <span class="pix-label">CHAVE PIX (ALEATÓRIA)</span>
+                    <div class="pix-key-display" id="pixKeyText">a2e2049a-811a-4948-ba69-6e661432f029</div>
+                    
+                    <button class="btn-copy-pix" onclick="copyPixKey()">
+                        <i class="material-icons">content_copy</i>
+                        COPIAR CHAVE PIX
+                    </button>
+                </div>
+
+                <div class="disclaimer-box">
+                    <div class="disclaimer-title">
+                        <i class="material-icons">security</i>
+                        Segurança
+                    </div>
+                    <p class="disclaimer-text">
+                        Certifique-se de que o destinatário apareça como <strong>grupodiasz</strong>. 
+                        Todos os valores são reinvestidos no ecossistema SLICED.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
@@ -562,14 +529,14 @@
             <span>Termos</span>
         </a>
         <a href="../afiliados/afiliados.html" class="nav-item">
-            <i class="material-icons">group_add</i>
+            <i class="material-icons">hub</i>
             <span>Afiliados</span>
         </a>
         <a href="#" class="nav-item active">
-            <i class="material-icons">favorite</i>
+            <i class="material-icons">savings</i>
             <span>Vakinha</span>
         </a>
-        <a href="../anuncie/anuncie.html" class="nav-item">
+         <a href="../anuncie/anuncie.html" class="nav-item">
             <i class="material-icons">campaign</i>
             <span>Anuncie</span>
         </a>
@@ -580,31 +547,57 @@
     </nav>
 
     <script type="module">
-        import { iniciarRastreamentoGlobal } from '../../controle-dados/tracker-config.js';
+        import { verificarAutenticacao, obterDadosUsuario, fazerLogout } from '../../controle-dados/auth.js';
+        import { initBalanceWidget } from '../../controle-dados/balance-widget.js';
 
-        // Inicializar rastreamento (Authentication Check)
-        iniciarRastreamentoGlobal({
-            onUserLoaded: (dados) => {
-                document.getElementById('userName').textContent = dados.nomeCompleto;
-                document.getElementById('userEmail').textContent = dados.email;
-            },
-            onLogout: () => {
+        const loadingSection = document.getElementById('loadingSection');
+        const contentSection = document.getElementById('contentSection');
+        const btnLogout = document.getElementById('btnLogout');
+
+        // Verificar autenticação
+        verificarAutenticacao(async (user) => {
+            if (!user) {
                 window.location.href = '../../login/login.html';
+                return;
+            }
+
+            try {
+                const resultado = await obterDadosUsuario(user.uid);
+
+                if (resultado.success) {
+                    const dados = resultado.dados;
+                    document.getElementById('userName').textContent = dados.nomeCompleto;
+                    document.getElementById('userEmail').textContent = dados.email;
+
+                    // Inicializar widget de saldo
+                    await initBalanceWidget(user.uid);
+
+                    // Remover loading e mostrar conteúdo
+                    loadingSection.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingSection.style.display = 'none';
+                        contentSection.style.display = 'block';
+                    }, 500);
+
+                } else {
+                    console.error('Erro ao carregar dados:', resultado.error);
+                }
+            } catch (error) {
+                console.error('Erro geral:', error);
             }
         });
 
-        // Efeito de Partículas
-        const particlesContainer = document.getElementById('particles');
-        for (let i = 0; i < 40; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 8 + 's';
-            particle.style.animationDuration = (Math.random() * 5 + 5) + 's';
-            particlesContainer.appendChild(particle);
-        }
+        // Logout
+        btnLogout.addEventListener('click', async () => {
+            if (confirm('Deseja realmente sair?')) {
+                const resultado = await fazerLogout();
+                if (resultado.success) {
+                    window.location.href = '../../login/login.html';
+                }
+            }
+        });
 
-        // Função para Copiar PIX
+        // Função Global de Cópia do PIX
         window.copyPixKey = function() {
             const pixText = document.getElementById('pixKeyText').innerText;
             
@@ -612,18 +605,17 @@
                 const btn = document.querySelector('.btn-copy-pix');
                 const originalHTML = btn.innerHTML;
                 
-                btn.innerHTML = '<i class="material-icons">check_circle</i> Chave Copiada!';
-                btn.style.background = '#ffffff';
-                btn.style.color = '#000000';
+                btn.innerHTML = '<i class="material-icons">check_circle</i> COPIADO!';
+                btn.style.background = '#fff';
+                btn.style.color = '#000';
                 
                 setTimeout(() => {
                     btn.innerHTML = originalHTML;
-                    btn.style.background = '#00ff88';
-                    btn.style.color = '#000000';
-                }, 2500);
+                    btn.style.background = '';
+                    btn.style.color = '';
+                }, 2000);
             }).catch(err => {
-                console.error('Erro ao copiar: ', err);
-                alert('Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.');
+                alert('Erro ao copiar. Tente selecionar manualmente.');
             });
         }
     </script>
