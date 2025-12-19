@@ -87,7 +87,7 @@ wss.on('connection', (ws) => {
 });
 
 // ==================================================================
-// 4. LÓGICA DE SALDO BLINDADA (CORREÇÃO DOS R$ 6,00)
+// 4. LÓGICA DE SALDO BLINDADA (CORREÇÃO DOS R$ 6,00 + AFILIADOS)
 // ==================================================================
 async function processarPagamento(uid, valor, paymentId) {
     if (!db) return false;
@@ -128,6 +128,41 @@ async function processarPagamento(uid, valor, paymentId) {
             });
 
             console.log(`✅ [DB] Saldo Atualizado: ${saldoAtual} + ${valorAdicionar} = ${novoSaldo}`);
+
+            // 5. SISTEMA DE AFILIADOS
+            // Se o usuário foi indicado por alguém e o valor >= R$10, creditar comissão
+            if (dados.indicadoPor && valorAdicionar >= 10) {
+                const indicadorUid = dados.indicadoPor;
+                const comissao = 0.50; // R$ 0,50 por indicação
+                
+                // Buscar o indicador
+                const indicadorRef = db.collection('SLICED').doc('data').collection('Usuários').doc(indicadorUid);
+                const indicadorDoc = await t.get(indicadorRef);
+                
+                if (indicadorDoc.exists) {
+                    const indicadorDados = indicadorDoc.data();
+                    const saldoAfiliadoAtual = Number(indicadorDados['afiliado-saldo']) || 0;
+                    const novoSaldoAfiliado = saldoAfiliadoAtual + comissao;
+                    
+                    // Atualizar saldo de afiliado do indicador
+                    t.set(indicadorRef, {
+                        'afiliado-saldo': novoSaldoAfiliado
+                    }, { merge: true });
+                    
+                    // Registrar a comissão na subcoleção do indicador
+                    const comissaoRef = indicadorRef.collection('Comissoes-Afiliado').doc();
+                    t.set(comissaoRef, {
+                        usuarioIndicado: uid,
+                        nomeIndicado: dados.nomeCompleto,
+                        valorDeposito: valorAdicionar,
+                        comissao: comissao,
+                        data: admin.firestore.FieldValue.serverTimestamp(),
+                        paymentId: String(paymentId)
+                    });
+                    
+                    console.log(`💰 [AFILIADO] R$ ${comissao.toFixed(2)} creditado para ${indicadorUid} (indicou ${uid})`);
+                }
+            }
         });
     } catch (e) {
         console.error('❌ [DB] Erro Transação:', e.message);

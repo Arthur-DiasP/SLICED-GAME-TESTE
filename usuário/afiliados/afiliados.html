@@ -699,7 +699,7 @@
 
         // Importar Firebase
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-        import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, addDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyD85kB-ZjHINwOlIAUShW0lCQOBZQH7LLQ",
@@ -732,9 +732,10 @@
 
                 // Link Generator
                 const userIdShort = dados.uid.substring(0, 8);
-                document.getElementById('referralLink').value = `sliced.com.br/convite/${userIdShort}`;
+                document.getElementById('referralLink').value = `https://sliced.online/login/login.html?ref=${userIdShort}`;
 
                 await loadAffiliateBalance(user.uid);
+                await loadAffiliateStats(user.uid);
 
                 // Show Content
                 loadingSection.style.opacity = '0';
@@ -750,7 +751,7 @@
 
         async function loadAffiliateBalance(uid) {
             try {
-                const userRef = doc(db, 'SLICED', 'data', 'Usuário', uid);
+                const userRef = doc(db, 'SLICED', 'data', 'Usuários', uid);
                 const userDoc = await getDoc(userRef);
 
                 if (userDoc.exists()) {
@@ -776,6 +777,43 @@
                 }
             } catch (error) {
                 console.error('Erro ao carregar saldo:', error);
+            }
+        }
+
+        async function loadAffiliateStats(uid) {
+            try {
+                const userRef = doc(db, 'SLICED', 'data', 'Usuários', uid);
+                const comissoesCollection = collection(userRef, 'Comissoes-Afiliado');
+                const comissoesSnapshot = await getDocs(comissoesCollection);
+                
+                let totalIndicacoes = 0;
+                let ganhosTotais = 0;
+                let pontosAfiliado = 0;
+
+                comissoesSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    totalIndicacoes++;
+                    ganhosTotais += data.comissao || 0;
+                    pontosAfiliado += 10; // 10 pontos por indicação
+                });
+
+                // Atualizar UI
+                const statCards = document.querySelectorAll('.stat-card');
+                if (statCards[0]) {
+                    statCards[0].querySelector('.stat-value').textContent = totalIndicacoes;
+                }
+                if (statCards[1]) {
+                    const ganhoFormatado = ganhosTotais.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    });
+                    statCards[1].querySelector('.stat-value').textContent = ganhoFormatado;
+                }
+                if (statCards[2]) {
+                    statCards[2].querySelector('.stat-value').textContent = pontosAfiliado;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
             }
         }
 
@@ -827,7 +865,7 @@
                     processedDate: null
                 });
 
-                const userRef = doc(db, 'SLICED', 'data', 'Usuário', currentUserData.uid);
+                const userRef = doc(db, 'SLICED', 'data', 'Usuários', currentUserData.uid);
                 const newBalance = currentAffiliateBalance - amount;
                 await updateDoc(userRef, { 'afiliado-saldo': newBalance });
 

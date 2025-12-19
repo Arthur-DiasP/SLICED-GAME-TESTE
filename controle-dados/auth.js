@@ -58,7 +58,7 @@ async function cpfExiste(cpf) {
 // Função para cadastrar novo usuário
 export async function cadastrarUsuario(dadosUsuario) {
     try {
-        const { email, senha, nomeCompleto, cpf, dataNascimento, telefone } = dadosUsuario;
+        const { email, senha, nomeCompleto, cpf, dataNascimento, telefone, referralCode } = dadosUsuario;
 
         // Verificar se e-mail já existe
         if (await emailExiste(email)) {
@@ -80,8 +80,8 @@ export async function cadastrarUsuario(dadosUsuario) {
         // Hash da senha
         const senhaHash = await hashSenha(senha);
 
-        // Criar documento do usuário no Firestore (subcoleção Usuários)
-        await setDoc(doc(db, 'SLICED', 'data', 'Usuários', uid), {
+        // Dados base do usuário
+        const dadosNovoUsuario = {
             uid: uid,
             nomeCompleto: nomeCompleto,
             email: email,
@@ -92,7 +92,16 @@ export async function cadastrarUsuario(dadosUsuario) {
             dataCriacao: serverTimestamp(),
             ultimoAcesso: serverTimestamp(),
             ativo: true
-        });
+        };
+
+        // Se houver código de referência, adicionar
+        if (referralCode) {
+            dadosNovoUsuario.indicadoPor = referralCode;
+            dadosNovoUsuario.indicadoEm = serverTimestamp();
+        }
+
+        // Criar documento do usuário no Firestore (subcoleção Usuários)
+        await setDoc(doc(db, 'SLICED', 'data', 'Usuários', uid), dadosNovoUsuario);
 
         // Criar sessão automaticamente após cadastro
         const dadosSessao = {

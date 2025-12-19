@@ -204,6 +204,20 @@
         const cpfInput = document.getElementById('cadastro-cpf');
         const telefoneInput = document.getElementById('cadastro-telefone');
 
+        // Capturar código de referência da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const referralCode = urlParams.get('ref');
+        
+        // Se houver código de referência, mostrar mensagem e ir para aba de cadastro
+        if (referralCode) {
+            showMessage(`✨ Você foi indicado! Complete o cadastro para ganhar bônus.`, 'success');
+            // Mudar para aba de cadastro
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabButtons[1].classList.add('active');
+            loginForm.classList.remove('active');
+            cadastroForm.classList.add('active');
+        }
+
         // Verificar se usuário já está logado
         verificarAutenticacao((user) => {
             if (user) {
@@ -405,7 +419,8 @@
                     cpf,
                     dataNascimento,
                     telefone,
-                    senha
+                    senha,
+                    referralCode: referralCode || null
                 };
 
                 const resultado = await cadastrarUsuario(dadosUsuario);
