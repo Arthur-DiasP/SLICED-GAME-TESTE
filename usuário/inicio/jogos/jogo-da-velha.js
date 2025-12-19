@@ -287,9 +287,37 @@ async function loadSXMembersForModal() {
         } else {
             gallery.innerHTML = '';
             
+            // 🆕 Buscar sócio previamente selecionado do localStorage
+            const savedSX = localStorage.getItem('selectedSX');
+            let previouslySelectedUserId = null;
+            
+            if (savedSX) {
+                try {
+                    const sxData = JSON.parse(savedSX);
+                    previouslySelectedUserId = sxData.userId;
+                } catch (e) {
+                    console.error('Erro ao ler SX salvo:', e);
+                }
+            }
+            
             approvedSX.forEach((sxData) => {
                 const storyItem = document.createElement('div');
                 storyItem.className = 'sx-modal-story';
+                
+                // 🆕 Se este é o SX previamente selecionado, adicionar classe 'selected'
+                const isPreviouslySelected = previouslySelectedUserId === sxData.userId;
+                if (isPreviouslySelected) {
+                    storyItem.classList.add('selected');
+                    // Também atualiza o card de selecionado automaticamente
+                    setTimeout(() => {
+                        document.getElementById('selectedSxImage').src = sxData.imageUrl;
+                        document.getElementById('selectedSxName').textContent = sxData.userName;
+                        document.getElementById('selectedSxCategory').textContent = `${getCategoryEmoji(sxData.category)} ${sxData.category}`;
+                        document.getElementById('sxModalSelected').style.display = 'block';
+                        document.getElementById('btnConfirmSX').style.display = 'block';
+                        gameState.tempSelectedSX = sxData;
+                    }, 100);
+                }
                 
                 const emoji = getCategoryEmoji(sxData.category);
 
@@ -781,6 +809,13 @@ window.backToPrivateStep1 = function () {
 
 // 4. Escolheu o valor -> Gera código e cria no Firebase
 async function createPrivateRoom(betValue) {
+    // 🆕 VERIFICAÇÃO OBRIGATÓRIA: Deve ter sócio SX selecionado
+    if (!gameState.selectedSX) {
+        alert('⚠️ Você precisa selecionar um Sócio SX antes de criar uma sala!');
+        await showSXModal();
+        return;
+    }
+    
     const entryFee = betValue / 2;
     
     // Verifica se tem saldo suficiente
@@ -835,6 +870,13 @@ async function createPrivateRoom(betValue) {
 
 // 5. Entrar em uma sala existente
 window.joinPrivateRoom = async function () {
+    // 🆕 VERIFICAÇÃO OBRIGATÓRIA: Deve ter sócio SX selecionado
+    if (!gameState.selectedSX) {
+        alert('⚠️ Você precisa selecionar um Sócio SX antes de entrar em uma sala!');
+        await showSXModal();
+        return;
+    }
+    
     const codeInput = document.getElementById('roomCodeInput');
     const code = codeInput.value.toUpperCase().trim();
 
@@ -918,6 +960,13 @@ window.copyRoomCode = function () {
 // MODO PÚBLICO: MATCHMAKING
 // =============================================
 async function joinQueue(betValue) {
+    // 🆕 VERIFICAÇÃO OBRIGATÓRIA: Deve ter sócio SX selecionado
+    if (!gameState.selectedSX) {
+        alert('⚠️ Você precisa selecionar um Sócio SX antes de procurar uma partida!');
+        await showSXModal();
+        return;
+    }
+    
     const entryFee = betValue / 2;
     
     // Verifica se tem saldo suficiente
