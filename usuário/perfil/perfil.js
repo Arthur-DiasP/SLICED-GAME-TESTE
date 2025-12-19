@@ -227,6 +227,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // ⭐ NOVA VALIDAÇÃO: Verificar se já solicitou saque nas últimas 24 horas
+            try {
+                const agora = new Date();
+                const umDiaAtras = new Date(agora.getTime() - (24 * 60 * 60 * 1000));
+                
+                const saquesRecentes = await firebase.firestore()
+                    .collection('SLICED')
+                    .doc(usuarioAtual.uid)
+                    .collection('withdrawals')
+                    .where('createdAt', '>=', umDiaAtras)
+                    .where('status', '==', 'pending')
+                    .get();
+                
+                if (!saquesRecentes.empty) {
+                    const ultimoSaque = saquesRecentes.docs[0].data();
+                    const dataUltimoSaque = ultimoSaque.createdAt?.toDate();
+                    
+                    if (dataUltimoSaque) {
+                        const horasRestantes = Math.ceil((dataUltimoSaque.getTime() + (24 * 60 * 60 * 1000) - agora.getTime()) / (60 * 60 * 1000));
+                        
+                        alert(`⏰ Você só pode solicitar 1 saque por dia.\n\nVocê já tem um saque pendente.\nTente novamente em ${horasRestantes} hora(s).`);
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao verificar saques recentes:', error);
+                // Continua mesmo se houver erro na verificação
+            }
+
             // Busca chave PIX cadastrada
             try {
                 const userDoc = await firebase.firestore()
@@ -242,9 +271,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const pixKeyData = userDoc.data().pixKey;
                 const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+                
+                // Gera ID único de correlação para sincronizar as duas coleções
+ const correlationId = `withdrawal_${usuarioAtual.uid}_${Date.now()}`;
 
                 // Dados do saque
                 const withdrawalData = {
+                    correlationId: correlationId, // ID de correlação para sincronização
                     amount: amount,
                     valor: amount, // Compatibilidade com dashboard
                     pixKey: pixKeyData.value,
@@ -272,6 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     .add(withdrawalData);
 
                 console.log('✅ Saque solicitado e registrado no dashboard');
+                console.log('🔗 Correlation ID:', correlationId);
 
                 // Mostra mensagem de sucesso
                 alert(`Saque de R$ ${amount.toFixed(2)} solicitado com sucesso!\n\nSua solicitação será processada em até 24 horas úteis.`);
@@ -548,8 +582,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ============================================
-    // HISTÓRICO DE SAQUES
+    // HISTÓRICO DE SAQUES (COM ATUALIZAÇÃO AUTOMÁTICA)
     // ============================================
+
+    let withdrawHistoryUnsubscribe = null; // Para gerenciar o listener
 
     async function loadWithdrawHistory() {
         if (!usuarioAtual) return;
@@ -559,30 +595,43 @@ document.addEventListener('DOMContentLoaded', () => {
         const listEl = document.getElementById('withdrawHistoryList');
 
         try {
-            const snapshot = await firebase.firestore()
+            // Remove listener anterior se existir
+            if (withdrawHistoryUnsubscribe) {
+                withdrawHistoryUnsubscribe();
+            }
+
+            // ⭐ LISTENER EM TEMPO REAL - Atualiza automaticamente quando há mudanças
+            withdrawHistoryUnsubscribe = firebase.firestore()
                 .collection('SLICED')
                 .doc(usuarioAtual.uid)
                 .collection('withdrawals')
                 .orderBy('createdAt', 'desc')
                 .limit(20)
-                .get();
+                .onSnapshot((snapshot) => {
+                    loadingEl.style.display = 'none';
 
-            loadingEl.style.display = 'none';
+                    if (snapshot.empty) {
+                        emptyEl.style.display = 'block';
+                        listEl.style.display = 'none';
+                    } else {
+                        emptyEl.style.display = 'none';
+                        listEl.style.display = 'block';
+                        listEl.innerHTML = '';
 
-            if (snapshot.empty) {
-                emptyEl.style.display = 'block';
-                listEl.style.display = 'none';
-            } else {
-                emptyEl.style.display = 'none';
-                listEl.style.display = 'block';
-                listEl.innerHTML = '';
+                        snapshot.forEach(doc => {
+                            const data = doc.data();
+                            const item = createWithdrawItem(data);
+                            listEl.appendChild(item);
+                        });
 
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const item = createWithdrawItem(data);
-                    listEl.appendChild(item);
+                        console.log('🔄 Histórico de saques atualizado automaticamente');
+                    }
+                }, (error) => {
+                    console.error('Erro ao monitorar histórico de saques:', error);
+                    loadingEl.style.display = 'none';
+                    emptyEl.style.display = 'block';
                 });
-            }
+
         } catch (error) {
             console.error('Erro ao carregar histórico de saques:', error);
             loadingEl.style.display = 'none';
@@ -597,6 +646,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const statusLabels = {
             'pending': 'Pendente',
             'processing': 'Processando',
+            'concluido': 'Concluído',  // ⭐ ADICIONADO
             'approved': 'Aprovado',
             'rejected': 'Rejeitado'
         };
